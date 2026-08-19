@@ -230,6 +230,8 @@ export type UserWhereInput = {
   contributions?: Prisma.ContributionListRelationFilter
   reviews?: Prisma.ContributionListRelationFilter
   reports?: Prisma.ReportListRelationFilter
+  quizzes?: Prisma.QuizAttemptListRelationFilter
+  badges?: Prisma.UserBadgeListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -251,6 +253,8 @@ export type UserOrderByWithRelationInput = {
   contributions?: Prisma.ContributionOrderByRelationAggregateInput
   reviews?: Prisma.ContributionOrderByRelationAggregateInput
   reports?: Prisma.ReportOrderByRelationAggregateInput
+  quizzes?: Prisma.QuizAttemptOrderByRelationAggregateInput
+  badges?: Prisma.UserBadgeOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -275,6 +279,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   contributions?: Prisma.ContributionListRelationFilter
   reviews?: Prisma.ContributionListRelationFilter
   reports?: Prisma.ReportListRelationFilter
+  quizzes?: Prisma.QuizAttemptListRelationFilter
+  badges?: Prisma.UserBadgeListRelationFilter
 }, "id" | "email" | "username">
 
 export type UserOrderByWithAggregationInput = {
@@ -328,6 +334,8 @@ export type UserCreateInput = {
   contributions?: Prisma.ContributionCreateNestedManyWithoutUserInput
   reviews?: Prisma.ContributionCreateNestedManyWithoutReviewedByInput
   reports?: Prisma.ReportCreateNestedManyWithoutUserInput
+  quizzes?: Prisma.QuizAttemptCreateNestedManyWithoutUserInput
+  badges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -349,6 +357,8 @@ export type UserUncheckedCreateInput = {
   contributions?: Prisma.ContributionUncheckedCreateNestedManyWithoutUserInput
   reviews?: Prisma.ContributionUncheckedCreateNestedManyWithoutReviewedByInput
   reports?: Prisma.ReportUncheckedCreateNestedManyWithoutUserInput
+  quizzes?: Prisma.QuizAttemptUncheckedCreateNestedManyWithoutUserInput
+  badges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -370,6 +380,8 @@ export type UserUpdateInput = {
   contributions?: Prisma.ContributionUpdateManyWithoutUserNestedInput
   reviews?: Prisma.ContributionUpdateManyWithoutReviewedByNestedInput
   reports?: Prisma.ReportUpdateManyWithoutUserNestedInput
+  quizzes?: Prisma.QuizAttemptUpdateManyWithoutUserNestedInput
+  badges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -391,6 +403,8 @@ export type UserUncheckedUpdateInput = {
   contributions?: Prisma.ContributionUncheckedUpdateManyWithoutUserNestedInput
   reviews?: Prisma.ContributionUncheckedUpdateManyWithoutReviewedByNestedInput
   reports?: Prisma.ReportUncheckedUpdateManyWithoutUserNestedInput
+  quizzes?: Prisma.QuizAttemptUncheckedUpdateManyWithoutUserNestedInput
+  badges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -615,6 +629,34 @@ export type UserUpdateOneRequiredWithoutReportsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutReportsInput, Prisma.UserUpdateWithoutReportsInput>, Prisma.UserUncheckedUpdateWithoutReportsInput>
 }
 
+export type UserCreateNestedOneWithoutQuizzesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutQuizzesInput, Prisma.UserUncheckedCreateWithoutQuizzesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutQuizzesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutQuizzesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutQuizzesInput, Prisma.UserUncheckedCreateWithoutQuizzesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutQuizzesInput
+  upsert?: Prisma.UserUpsertWithoutQuizzesInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutQuizzesInput, Prisma.UserUpdateWithoutQuizzesInput>, Prisma.UserUncheckedUpdateWithoutQuizzesInput>
+}
+
+export type UserCreateNestedOneWithoutBadgesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutBadgesInput, Prisma.UserUncheckedCreateWithoutBadgesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutBadgesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutBadgesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutBadgesInput, Prisma.UserUncheckedCreateWithoutBadgesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutBadgesInput
+  upsert?: Prisma.UserUpsertWithoutBadgesInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutBadgesInput, Prisma.UserUpdateWithoutBadgesInput>, Prisma.UserUncheckedUpdateWithoutBadgesInput>
+}
+
 export type UserCreateWithoutContributionsInput = {
   id?: string
   email: string
@@ -633,6 +675,8 @@ export type UserCreateWithoutContributionsInput = {
   collections?: Prisma.CollectionCreateNestedManyWithoutUserInput
   reviews?: Prisma.ContributionCreateNestedManyWithoutReviewedByInput
   reports?: Prisma.ReportCreateNestedManyWithoutUserInput
+  quizzes?: Prisma.QuizAttemptCreateNestedManyWithoutUserInput
+  badges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutContributionsInput = {
@@ -653,6 +697,8 @@ export type UserUncheckedCreateWithoutContributionsInput = {
   collections?: Prisma.CollectionUncheckedCreateNestedManyWithoutUserInput
   reviews?: Prisma.ContributionUncheckedCreateNestedManyWithoutReviewedByInput
   reports?: Prisma.ReportUncheckedCreateNestedManyWithoutUserInput
+  quizzes?: Prisma.QuizAttemptUncheckedCreateNestedManyWithoutUserInput
+  badges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutContributionsInput = {
@@ -678,6 +724,8 @@ export type UserCreateWithoutReviewsInput = {
   collections?: Prisma.CollectionCreateNestedManyWithoutUserInput
   contributions?: Prisma.ContributionCreateNestedManyWithoutUserInput
   reports?: Prisma.ReportCreateNestedManyWithoutUserInput
+  quizzes?: Prisma.QuizAttemptCreateNestedManyWithoutUserInput
+  badges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutReviewsInput = {
@@ -698,6 +746,8 @@ export type UserUncheckedCreateWithoutReviewsInput = {
   collections?: Prisma.CollectionUncheckedCreateNestedManyWithoutUserInput
   contributions?: Prisma.ContributionUncheckedCreateNestedManyWithoutUserInput
   reports?: Prisma.ReportUncheckedCreateNestedManyWithoutUserInput
+  quizzes?: Prisma.QuizAttemptUncheckedCreateNestedManyWithoutUserInput
+  badges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutReviewsInput = {
@@ -734,6 +784,8 @@ export type UserUpdateWithoutContributionsInput = {
   collections?: Prisma.CollectionUpdateManyWithoutUserNestedInput
   reviews?: Prisma.ContributionUpdateManyWithoutReviewedByNestedInput
   reports?: Prisma.ReportUpdateManyWithoutUserNestedInput
+  quizzes?: Prisma.QuizAttemptUpdateManyWithoutUserNestedInput
+  badges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutContributionsInput = {
@@ -754,6 +806,8 @@ export type UserUncheckedUpdateWithoutContributionsInput = {
   collections?: Prisma.CollectionUncheckedUpdateManyWithoutUserNestedInput
   reviews?: Prisma.ContributionUncheckedUpdateManyWithoutReviewedByNestedInput
   reports?: Prisma.ReportUncheckedUpdateManyWithoutUserNestedInput
+  quizzes?: Prisma.QuizAttemptUncheckedUpdateManyWithoutUserNestedInput
+  badges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutReviewsInput = {
@@ -785,6 +839,8 @@ export type UserUpdateWithoutReviewsInput = {
   collections?: Prisma.CollectionUpdateManyWithoutUserNestedInput
   contributions?: Prisma.ContributionUpdateManyWithoutUserNestedInput
   reports?: Prisma.ReportUpdateManyWithoutUserNestedInput
+  quizzes?: Prisma.QuizAttemptUpdateManyWithoutUserNestedInput
+  badges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReviewsInput = {
@@ -805,6 +861,8 @@ export type UserUncheckedUpdateWithoutReviewsInput = {
   collections?: Prisma.CollectionUncheckedUpdateManyWithoutUserNestedInput
   contributions?: Prisma.ContributionUncheckedUpdateManyWithoutUserNestedInput
   reports?: Prisma.ReportUncheckedUpdateManyWithoutUserNestedInput
+  quizzes?: Prisma.QuizAttemptUncheckedUpdateManyWithoutUserNestedInput
+  badges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutFavoritesInput = {
@@ -825,6 +883,8 @@ export type UserCreateWithoutFavoritesInput = {
   contributions?: Prisma.ContributionCreateNestedManyWithoutUserInput
   reviews?: Prisma.ContributionCreateNestedManyWithoutReviewedByInput
   reports?: Prisma.ReportCreateNestedManyWithoutUserInput
+  quizzes?: Prisma.QuizAttemptCreateNestedManyWithoutUserInput
+  badges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutFavoritesInput = {
@@ -845,6 +905,8 @@ export type UserUncheckedCreateWithoutFavoritesInput = {
   contributions?: Prisma.ContributionUncheckedCreateNestedManyWithoutUserInput
   reviews?: Prisma.ContributionUncheckedCreateNestedManyWithoutReviewedByInput
   reports?: Prisma.ReportUncheckedCreateNestedManyWithoutUserInput
+  quizzes?: Prisma.QuizAttemptUncheckedCreateNestedManyWithoutUserInput
+  badges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutFavoritesInput = {
@@ -881,6 +943,8 @@ export type UserUpdateWithoutFavoritesInput = {
   contributions?: Prisma.ContributionUpdateManyWithoutUserNestedInput
   reviews?: Prisma.ContributionUpdateManyWithoutReviewedByNestedInput
   reports?: Prisma.ReportUpdateManyWithoutUserNestedInput
+  quizzes?: Prisma.QuizAttemptUpdateManyWithoutUserNestedInput
+  badges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutFavoritesInput = {
@@ -901,6 +965,8 @@ export type UserUncheckedUpdateWithoutFavoritesInput = {
   contributions?: Prisma.ContributionUncheckedUpdateManyWithoutUserNestedInput
   reviews?: Prisma.ContributionUncheckedUpdateManyWithoutReviewedByNestedInput
   reports?: Prisma.ReportUncheckedUpdateManyWithoutUserNestedInput
+  quizzes?: Prisma.QuizAttemptUncheckedUpdateManyWithoutUserNestedInput
+  badges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutWatchlistInput = {
@@ -921,6 +987,8 @@ export type UserCreateWithoutWatchlistInput = {
   contributions?: Prisma.ContributionCreateNestedManyWithoutUserInput
   reviews?: Prisma.ContributionCreateNestedManyWithoutReviewedByInput
   reports?: Prisma.ReportCreateNestedManyWithoutUserInput
+  quizzes?: Prisma.QuizAttemptCreateNestedManyWithoutUserInput
+  badges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutWatchlistInput = {
@@ -941,6 +1009,8 @@ export type UserUncheckedCreateWithoutWatchlistInput = {
   contributions?: Prisma.ContributionUncheckedCreateNestedManyWithoutUserInput
   reviews?: Prisma.ContributionUncheckedCreateNestedManyWithoutReviewedByInput
   reports?: Prisma.ReportUncheckedCreateNestedManyWithoutUserInput
+  quizzes?: Prisma.QuizAttemptUncheckedCreateNestedManyWithoutUserInput
+  badges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutWatchlistInput = {
@@ -977,6 +1047,8 @@ export type UserUpdateWithoutWatchlistInput = {
   contributions?: Prisma.ContributionUpdateManyWithoutUserNestedInput
   reviews?: Prisma.ContributionUpdateManyWithoutReviewedByNestedInput
   reports?: Prisma.ReportUpdateManyWithoutUserNestedInput
+  quizzes?: Prisma.QuizAttemptUpdateManyWithoutUserNestedInput
+  badges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutWatchlistInput = {
@@ -997,6 +1069,8 @@ export type UserUncheckedUpdateWithoutWatchlistInput = {
   contributions?: Prisma.ContributionUncheckedUpdateManyWithoutUserNestedInput
   reviews?: Prisma.ContributionUncheckedUpdateManyWithoutReviewedByNestedInput
   reports?: Prisma.ReportUncheckedUpdateManyWithoutUserNestedInput
+  quizzes?: Prisma.QuizAttemptUncheckedUpdateManyWithoutUserNestedInput
+  badges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutRatingsInput = {
@@ -1017,6 +1091,8 @@ export type UserCreateWithoutRatingsInput = {
   contributions?: Prisma.ContributionCreateNestedManyWithoutUserInput
   reviews?: Prisma.ContributionCreateNestedManyWithoutReviewedByInput
   reports?: Prisma.ReportCreateNestedManyWithoutUserInput
+  quizzes?: Prisma.QuizAttemptCreateNestedManyWithoutUserInput
+  badges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutRatingsInput = {
@@ -1037,6 +1113,8 @@ export type UserUncheckedCreateWithoutRatingsInput = {
   contributions?: Prisma.ContributionUncheckedCreateNestedManyWithoutUserInput
   reviews?: Prisma.ContributionUncheckedCreateNestedManyWithoutReviewedByInput
   reports?: Prisma.ReportUncheckedCreateNestedManyWithoutUserInput
+  quizzes?: Prisma.QuizAttemptUncheckedCreateNestedManyWithoutUserInput
+  badges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutRatingsInput = {
@@ -1073,6 +1151,8 @@ export type UserUpdateWithoutRatingsInput = {
   contributions?: Prisma.ContributionUpdateManyWithoutUserNestedInput
   reviews?: Prisma.ContributionUpdateManyWithoutReviewedByNestedInput
   reports?: Prisma.ReportUpdateManyWithoutUserNestedInput
+  quizzes?: Prisma.QuizAttemptUpdateManyWithoutUserNestedInput
+  badges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRatingsInput = {
@@ -1093,6 +1173,8 @@ export type UserUncheckedUpdateWithoutRatingsInput = {
   contributions?: Prisma.ContributionUncheckedUpdateManyWithoutUserNestedInput
   reviews?: Prisma.ContributionUncheckedUpdateManyWithoutReviewedByNestedInput
   reports?: Prisma.ReportUncheckedUpdateManyWithoutUserNestedInput
+  quizzes?: Prisma.QuizAttemptUncheckedUpdateManyWithoutUserNestedInput
+  badges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutNotesInput = {
@@ -1113,6 +1195,8 @@ export type UserCreateWithoutNotesInput = {
   contributions?: Prisma.ContributionCreateNestedManyWithoutUserInput
   reviews?: Prisma.ContributionCreateNestedManyWithoutReviewedByInput
   reports?: Prisma.ReportCreateNestedManyWithoutUserInput
+  quizzes?: Prisma.QuizAttemptCreateNestedManyWithoutUserInput
+  badges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutNotesInput = {
@@ -1133,6 +1217,8 @@ export type UserUncheckedCreateWithoutNotesInput = {
   contributions?: Prisma.ContributionUncheckedCreateNestedManyWithoutUserInput
   reviews?: Prisma.ContributionUncheckedCreateNestedManyWithoutReviewedByInput
   reports?: Prisma.ReportUncheckedCreateNestedManyWithoutUserInput
+  quizzes?: Prisma.QuizAttemptUncheckedCreateNestedManyWithoutUserInput
+  badges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutNotesInput = {
@@ -1169,6 +1255,8 @@ export type UserUpdateWithoutNotesInput = {
   contributions?: Prisma.ContributionUpdateManyWithoutUserNestedInput
   reviews?: Prisma.ContributionUpdateManyWithoutReviewedByNestedInput
   reports?: Prisma.ReportUpdateManyWithoutUserNestedInput
+  quizzes?: Prisma.QuizAttemptUpdateManyWithoutUserNestedInput
+  badges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotesInput = {
@@ -1189,6 +1277,8 @@ export type UserUncheckedUpdateWithoutNotesInput = {
   contributions?: Prisma.ContributionUncheckedUpdateManyWithoutUserNestedInput
   reviews?: Prisma.ContributionUncheckedUpdateManyWithoutReviewedByNestedInput
   reports?: Prisma.ReportUncheckedUpdateManyWithoutUserNestedInput
+  quizzes?: Prisma.QuizAttemptUncheckedUpdateManyWithoutUserNestedInput
+  badges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCollectionsInput = {
@@ -1209,6 +1299,8 @@ export type UserCreateWithoutCollectionsInput = {
   contributions?: Prisma.ContributionCreateNestedManyWithoutUserInput
   reviews?: Prisma.ContributionCreateNestedManyWithoutReviewedByInput
   reports?: Prisma.ReportCreateNestedManyWithoutUserInput
+  quizzes?: Prisma.QuizAttemptCreateNestedManyWithoutUserInput
+  badges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCollectionsInput = {
@@ -1229,6 +1321,8 @@ export type UserUncheckedCreateWithoutCollectionsInput = {
   contributions?: Prisma.ContributionUncheckedCreateNestedManyWithoutUserInput
   reviews?: Prisma.ContributionUncheckedCreateNestedManyWithoutReviewedByInput
   reports?: Prisma.ReportUncheckedCreateNestedManyWithoutUserInput
+  quizzes?: Prisma.QuizAttemptUncheckedCreateNestedManyWithoutUserInput
+  badges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCollectionsInput = {
@@ -1265,6 +1359,8 @@ export type UserUpdateWithoutCollectionsInput = {
   contributions?: Prisma.ContributionUpdateManyWithoutUserNestedInput
   reviews?: Prisma.ContributionUpdateManyWithoutReviewedByNestedInput
   reports?: Prisma.ReportUpdateManyWithoutUserNestedInput
+  quizzes?: Prisma.QuizAttemptUpdateManyWithoutUserNestedInput
+  badges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCollectionsInput = {
@@ -1285,6 +1381,8 @@ export type UserUncheckedUpdateWithoutCollectionsInput = {
   contributions?: Prisma.ContributionUncheckedUpdateManyWithoutUserNestedInput
   reviews?: Prisma.ContributionUncheckedUpdateManyWithoutReviewedByNestedInput
   reports?: Prisma.ReportUncheckedUpdateManyWithoutUserNestedInput
+  quizzes?: Prisma.QuizAttemptUncheckedUpdateManyWithoutUserNestedInput
+  badges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutReportsInput = {
@@ -1305,6 +1403,8 @@ export type UserCreateWithoutReportsInput = {
   collections?: Prisma.CollectionCreateNestedManyWithoutUserInput
   contributions?: Prisma.ContributionCreateNestedManyWithoutUserInput
   reviews?: Prisma.ContributionCreateNestedManyWithoutReviewedByInput
+  quizzes?: Prisma.QuizAttemptCreateNestedManyWithoutUserInput
+  badges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutReportsInput = {
@@ -1325,6 +1425,8 @@ export type UserUncheckedCreateWithoutReportsInput = {
   collections?: Prisma.CollectionUncheckedCreateNestedManyWithoutUserInput
   contributions?: Prisma.ContributionUncheckedCreateNestedManyWithoutUserInput
   reviews?: Prisma.ContributionUncheckedCreateNestedManyWithoutReviewedByInput
+  quizzes?: Prisma.QuizAttemptUncheckedCreateNestedManyWithoutUserInput
+  badges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutReportsInput = {
@@ -1361,6 +1463,8 @@ export type UserUpdateWithoutReportsInput = {
   collections?: Prisma.CollectionUpdateManyWithoutUserNestedInput
   contributions?: Prisma.ContributionUpdateManyWithoutUserNestedInput
   reviews?: Prisma.ContributionUpdateManyWithoutReviewedByNestedInput
+  quizzes?: Prisma.QuizAttemptUpdateManyWithoutUserNestedInput
+  badges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReportsInput = {
@@ -1381,6 +1485,216 @@ export type UserUncheckedUpdateWithoutReportsInput = {
   collections?: Prisma.CollectionUncheckedUpdateManyWithoutUserNestedInput
   contributions?: Prisma.ContributionUncheckedUpdateManyWithoutUserNestedInput
   reviews?: Prisma.ContributionUncheckedUpdateManyWithoutReviewedByNestedInput
+  quizzes?: Prisma.QuizAttemptUncheckedUpdateManyWithoutUserNestedInput
+  badges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutQuizzesInput = {
+  id?: string
+  email: string
+  username: string
+  passwordHash: string
+  name?: string | null
+  bio?: string | null
+  role?: $Enums.Role
+  emailVerified?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
+  watchlist?: Prisma.WatchlistItemCreateNestedManyWithoutUserInput
+  ratings?: Prisma.RatingCreateNestedManyWithoutUserInput
+  notes?: Prisma.NoteCreateNestedManyWithoutUserInput
+  collections?: Prisma.CollectionCreateNestedManyWithoutUserInput
+  contributions?: Prisma.ContributionCreateNestedManyWithoutUserInput
+  reviews?: Prisma.ContributionCreateNestedManyWithoutReviewedByInput
+  reports?: Prisma.ReportCreateNestedManyWithoutUserInput
+  badges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutQuizzesInput = {
+  id?: string
+  email: string
+  username: string
+  passwordHash: string
+  name?: string | null
+  bio?: string | null
+  role?: $Enums.Role
+  emailVerified?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
+  watchlist?: Prisma.WatchlistItemUncheckedCreateNestedManyWithoutUserInput
+  ratings?: Prisma.RatingUncheckedCreateNestedManyWithoutUserInput
+  notes?: Prisma.NoteUncheckedCreateNestedManyWithoutUserInput
+  collections?: Prisma.CollectionUncheckedCreateNestedManyWithoutUserInput
+  contributions?: Prisma.ContributionUncheckedCreateNestedManyWithoutUserInput
+  reviews?: Prisma.ContributionUncheckedCreateNestedManyWithoutReviewedByInput
+  reports?: Prisma.ReportUncheckedCreateNestedManyWithoutUserInput
+  badges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutQuizzesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutQuizzesInput, Prisma.UserUncheckedCreateWithoutQuizzesInput>
+}
+
+export type UserUpsertWithoutQuizzesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutQuizzesInput, Prisma.UserUncheckedUpdateWithoutQuizzesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutQuizzesInput, Prisma.UserUncheckedCreateWithoutQuizzesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutQuizzesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutQuizzesInput, Prisma.UserUncheckedUpdateWithoutQuizzesInput>
+}
+
+export type UserUpdateWithoutQuizzesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
+  watchlist?: Prisma.WatchlistItemUpdateManyWithoutUserNestedInput
+  ratings?: Prisma.RatingUpdateManyWithoutUserNestedInput
+  notes?: Prisma.NoteUpdateManyWithoutUserNestedInput
+  collections?: Prisma.CollectionUpdateManyWithoutUserNestedInput
+  contributions?: Prisma.ContributionUpdateManyWithoutUserNestedInput
+  reviews?: Prisma.ContributionUpdateManyWithoutReviewedByNestedInput
+  reports?: Prisma.ReportUpdateManyWithoutUserNestedInput
+  badges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutQuizzesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
+  watchlist?: Prisma.WatchlistItemUncheckedUpdateManyWithoutUserNestedInput
+  ratings?: Prisma.RatingUncheckedUpdateManyWithoutUserNestedInput
+  notes?: Prisma.NoteUncheckedUpdateManyWithoutUserNestedInput
+  collections?: Prisma.CollectionUncheckedUpdateManyWithoutUserNestedInput
+  contributions?: Prisma.ContributionUncheckedUpdateManyWithoutUserNestedInput
+  reviews?: Prisma.ContributionUncheckedUpdateManyWithoutReviewedByNestedInput
+  reports?: Prisma.ReportUncheckedUpdateManyWithoutUserNestedInput
+  badges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutBadgesInput = {
+  id?: string
+  email: string
+  username: string
+  passwordHash: string
+  name?: string | null
+  bio?: string | null
+  role?: $Enums.Role
+  emailVerified?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
+  watchlist?: Prisma.WatchlistItemCreateNestedManyWithoutUserInput
+  ratings?: Prisma.RatingCreateNestedManyWithoutUserInput
+  notes?: Prisma.NoteCreateNestedManyWithoutUserInput
+  collections?: Prisma.CollectionCreateNestedManyWithoutUserInput
+  contributions?: Prisma.ContributionCreateNestedManyWithoutUserInput
+  reviews?: Prisma.ContributionCreateNestedManyWithoutReviewedByInput
+  reports?: Prisma.ReportCreateNestedManyWithoutUserInput
+  quizzes?: Prisma.QuizAttemptCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutBadgesInput = {
+  id?: string
+  email: string
+  username: string
+  passwordHash: string
+  name?: string | null
+  bio?: string | null
+  role?: $Enums.Role
+  emailVerified?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
+  watchlist?: Prisma.WatchlistItemUncheckedCreateNestedManyWithoutUserInput
+  ratings?: Prisma.RatingUncheckedCreateNestedManyWithoutUserInput
+  notes?: Prisma.NoteUncheckedCreateNestedManyWithoutUserInput
+  collections?: Prisma.CollectionUncheckedCreateNestedManyWithoutUserInput
+  contributions?: Prisma.ContributionUncheckedCreateNestedManyWithoutUserInput
+  reviews?: Prisma.ContributionUncheckedCreateNestedManyWithoutReviewedByInput
+  reports?: Prisma.ReportUncheckedCreateNestedManyWithoutUserInput
+  quizzes?: Prisma.QuizAttemptUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutBadgesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutBadgesInput, Prisma.UserUncheckedCreateWithoutBadgesInput>
+}
+
+export type UserUpsertWithoutBadgesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutBadgesInput, Prisma.UserUncheckedUpdateWithoutBadgesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutBadgesInput, Prisma.UserUncheckedCreateWithoutBadgesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutBadgesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutBadgesInput, Prisma.UserUncheckedUpdateWithoutBadgesInput>
+}
+
+export type UserUpdateWithoutBadgesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
+  watchlist?: Prisma.WatchlistItemUpdateManyWithoutUserNestedInput
+  ratings?: Prisma.RatingUpdateManyWithoutUserNestedInput
+  notes?: Prisma.NoteUpdateManyWithoutUserNestedInput
+  collections?: Prisma.CollectionUpdateManyWithoutUserNestedInput
+  contributions?: Prisma.ContributionUpdateManyWithoutUserNestedInput
+  reviews?: Prisma.ContributionUpdateManyWithoutReviewedByNestedInput
+  reports?: Prisma.ReportUpdateManyWithoutUserNestedInput
+  quizzes?: Prisma.QuizAttemptUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutBadgesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
+  watchlist?: Prisma.WatchlistItemUncheckedUpdateManyWithoutUserNestedInput
+  ratings?: Prisma.RatingUncheckedUpdateManyWithoutUserNestedInput
+  notes?: Prisma.NoteUncheckedUpdateManyWithoutUserNestedInput
+  collections?: Prisma.CollectionUncheckedUpdateManyWithoutUserNestedInput
+  contributions?: Prisma.ContributionUncheckedUpdateManyWithoutUserNestedInput
+  reviews?: Prisma.ContributionUncheckedUpdateManyWithoutReviewedByNestedInput
+  reports?: Prisma.ReportUncheckedUpdateManyWithoutUserNestedInput
+  quizzes?: Prisma.QuizAttemptUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -1397,6 +1711,8 @@ export type UserCountOutputType = {
   contributions: number
   reviews: number
   reports: number
+  quizzes: number
+  badges: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1408,6 +1724,8 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   contributions?: boolean | UserCountOutputTypeCountContributionsArgs
   reviews?: boolean | UserCountOutputTypeCountReviewsArgs
   reports?: boolean | UserCountOutputTypeCountReportsArgs
+  quizzes?: boolean | UserCountOutputTypeCountQuizzesArgs
+  badges?: boolean | UserCountOutputTypeCountBadgesArgs
 }
 
 /**
@@ -1476,6 +1794,20 @@ export type UserCountOutputTypeCountReportsArgs<ExtArgs extends runtime.Types.Ex
   where?: Prisma.ReportWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountQuizzesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.QuizAttemptWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountBadgesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.UserBadgeWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1496,6 +1828,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   contributions?: boolean | Prisma.User$contributionsArgs<ExtArgs>
   reviews?: boolean | Prisma.User$reviewsArgs<ExtArgs>
   reports?: boolean | Prisma.User$reportsArgs<ExtArgs>
+  quizzes?: boolean | Prisma.User$quizzesArgs<ExtArgs>
+  badges?: boolean | Prisma.User$badgesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1548,6 +1882,8 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   contributions?: boolean | Prisma.User$contributionsArgs<ExtArgs>
   reviews?: boolean | Prisma.User$reviewsArgs<ExtArgs>
   reports?: boolean | Prisma.User$reportsArgs<ExtArgs>
+  quizzes?: boolean | Prisma.User$quizzesArgs<ExtArgs>
+  badges?: boolean | Prisma.User$badgesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1564,6 +1900,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     contributions: Prisma.$ContributionPayload<ExtArgs>[]
     reviews: Prisma.$ContributionPayload<ExtArgs>[]
     reports: Prisma.$ReportPayload<ExtArgs>[]
+    quizzes: Prisma.$QuizAttemptPayload<ExtArgs>[]
+    badges: Prisma.$UserBadgePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1978,6 +2316,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   contributions<T extends Prisma.User$contributionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$contributionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ContributionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   reviews<T extends Prisma.User$reviewsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$reviewsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ContributionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   reports<T extends Prisma.User$reportsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$reportsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  quizzes<T extends Prisma.User$quizzesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$quizzesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$QuizAttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  badges<T extends Prisma.User$badgesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$badgesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserBadgePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2599,6 +2939,54 @@ export type User$reportsArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
   take?: number
   skip?: number
   distinct?: Prisma.ReportScalarFieldEnum | Prisma.ReportScalarFieldEnum[]
+}
+
+/**
+ * User.quizzes
+ */
+export type User$quizzesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the QuizAttempt
+   */
+  select?: Prisma.QuizAttemptSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the QuizAttempt
+   */
+  omit?: Prisma.QuizAttemptOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.QuizAttemptInclude<ExtArgs> | null
+  where?: Prisma.QuizAttemptWhereInput
+  orderBy?: Prisma.QuizAttemptOrderByWithRelationInput | Prisma.QuizAttemptOrderByWithRelationInput[]
+  cursor?: Prisma.QuizAttemptWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.QuizAttemptScalarFieldEnum | Prisma.QuizAttemptScalarFieldEnum[]
+}
+
+/**
+ * User.badges
+ */
+export type User$badgesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the UserBadge
+   */
+  select?: Prisma.UserBadgeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the UserBadge
+   */
+  omit?: Prisma.UserBadgeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserBadgeInclude<ExtArgs> | null
+  where?: Prisma.UserBadgeWhereInput
+  orderBy?: Prisma.UserBadgeOrderByWithRelationInput | Prisma.UserBadgeOrderByWithRelationInput[]
+  cursor?: Prisma.UserBadgeWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.UserBadgeScalarFieldEnum | Prisma.UserBadgeScalarFieldEnum[]
 }
 
 /**

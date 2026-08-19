@@ -146,3 +146,33 @@ export type CollectionItem = Prisma.CollectionItemModel
  * 
  */
 export type Report = Prisma.ReportModel
+/**
+ * Model Quiz
+ * 
+ */
+export type Quiz = Prisma.QuizModel
+/**
+ * Model QuizAttempt
+ * 
+ */
+export type QuizAttempt = Prisma.QuizAttemptModel
+/**
+ * Model Badge
+ * 
+ */
+export type Badge = Prisma.BadgeModel
+/**
+ * Model UserBadge
+ * 
+ */
+export type UserBadge = Prisma.UserBadgeModel
+/**
+ * Model Tour
+ * 
+ */
+export type Tour = Prisma.TourModel
+/**
+ * Model TourStep
+ * 
+ */
+export type TourStep = Prisma.TourStepModel

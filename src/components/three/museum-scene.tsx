@@ -16,6 +16,7 @@ import {
   type MuseumSceneProps,
 } from "./scene-types";
 import { CameraRig, ClickableText, SceneText } from "./scene-bits";
+import { EraEffects } from "./era-effects";
 import { SceneCanvas } from "./scene-shell";
 
 const ROOM_SPACING = 12;
@@ -113,6 +114,8 @@ export function MuseumScene({
             onOpenAnime={(slug) => router.push(`/anime/${slug}`)}
           />
         ))}
+
+        <EraEffects mode={mode} eraSlug={eras[activeRoom]?.slug ?? null} />
       </SceneCanvas>
     </div>
   );

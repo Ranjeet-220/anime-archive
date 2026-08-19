@@ -20,6 +20,7 @@ interactive 3D museum (React Three Fiber) with a fast, fully server-rendered
   `src/generated/prisma`)
 - **React Three Fiber 9** + **drei** + **three** for the 3D museum,
   timeline, Hall of Legends, Studio Archive, and Genre World experiences
+  (+ **@react-three/postprocessing** for era-based post FX)
 - **motion** (13) for page transitions, **jose** for JWT sessions,
   **bcryptjs** for passwords, **zod** for validation
 - `pg_trgm` fuzzy search with graceful fallback if the extension is absent
@@ -59,8 +60,9 @@ Open http://localhost:3000.
 | USER | `demo@animearchive.local` | `DemoUser-2026!` |
 
 The seed contains ~24 anime, 17 studios, 35 people, 30 characters, 33
-historical events, 7 eras, 17 genres, and 100+ documented sources. All data
-is demo/illustrative content; re-run `npm run seed` at any time — it is
+historical events, 7 eras, 17 genres, 100+ documented sources, plus 3
+quizzes, 4 achievement badges, and 2 guided tours. All data is
+demo/illustrative content; re-run `npm run seed` at any time — it is
 idempotent.
 
 ## Running locally (this workspace)
@@ -103,11 +105,14 @@ drop the `--webpack` flags.
 ```
 src/app/            routes: /museum /timeline /anime /movies /studios /creators
                     /characters /genres /collections /search /contribute /admin
-                    + static pages, sitemap.ts, robots.ts
-src/components/     ui (design system), layout, three (3D scenes), anime, era,
-                    transitions, user
-src/lib/            data layer, auth, validation, types, device-mode
-prisma/             schema, migrations, seed (data + data files)
+                    /quizzes /quiz/[slug] /tours /tour/[slug]
+                    + static pages, sitemap.ts, robots.ts, opengraph-image.tsx
+src/components/     ui (design system), layout, three (3D scenes + era FX +
+                    minimap), anime, era, timeline (world-history comparison),
+                    transitions, user (quiz runner, contribution diff)
+src/lib/            data layer, auth, validation, types, device-mode,
+                    world-history-data
+prisma/             schema, migrations, seed (data + data files + quiz-tours)
 ```
 
 ## Documentation & conventions

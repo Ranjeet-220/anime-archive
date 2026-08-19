@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { getHallOfLegends, getStudioArchive, getTimelineData } from "@/lib/data";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { TimelineExperience } from "@/components/three/timeline-experience";
+import { HistoryComparison } from "@/components/timeline/history-comparison";
+import { WorldAnimeComparison } from "@/components/timeline/world-anime-comparison";
 
 export const metadata: Metadata = {
   title: "Timeline",
   description:
-    "The complete timeline of anime history: seven eras from the first animated shorts of 1917 to the modern streaming age, with studios, creators, and landmark works.",
+    "The complete timeline of anime history: seven eras from the first animated shorts of 1917 to the modern streaming age — set against a century of world history, with landmark works, studios, and creators.",
   alternates: { canonical: "/timeline" },
 };
 
@@ -34,15 +35,16 @@ export default async function TimelinePage() {
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted">
           From the first animated shorts of 1917 to the streaming era — seven
           eras, their studios, their creators, and the works that defined
-          them. Explore the floating timeline in 3D, or browse the classic
-          chronological view.
+          them. Explore the floating timeline in 3D, or set anime&apos;s history
+          against a century of world events in the side-by-side comparison.
         </p>
       </header>
 
-      <TimelineExperience
+      <HistoryComparison
         eras={eras}
         studioSlugs={studioSlugs}
         creatorSlugs={creatorSlugs}
+        comparison={<WorldAnimeComparison eras={eras} />}
       />
     </div>
   );

@@ -17,6 +17,7 @@ import {
   type TimelineSceneProps,
 } from "./scene-types";
 import { CameraRig, ClickableBox, ClickableText, SceneText } from "./scene-bits";
+import { EraEffects } from "./era-effects";
 import { SceneCanvas } from "./scene-shell";
 
 const X_PER_YEAR = 0.42;
@@ -136,6 +137,8 @@ export function TimelineScene({
         >
           DRAG TO ORBIT · CLICK A NODE TO EXPLORE AN ERA
         </SceneText>
+
+        <EraEffects mode={mode} eraSlug={selectedEra?.slug ?? null} />
       </SceneCanvas>
     </div>
   );

@@ -745,3 +745,95 @@ export async function getHomepageData() {
 }
 
 export { decadeOf };
+
+// ---------------------------------------------------------------------------
+// Quizzes
+// ---------------------------------------------------------------------------
+
+export interface QuizQuestionDto {
+  question: string;
+  options: string[];
+  correctIndex: number;
+  explanation?: string | null;
+}
+
+export interface QuizBadgeDto {
+  slug: string;
+  name: string;
+  icon: string | null;
+}
+
+export async function getQuizzes() {
+  return cached("quiz:list", CACHE_TTL_MS, async () => {
+    const quizzes = await prisma.quiz.findMany({
+      where: { isPublished: true },
+      orderBy: { createdAt: "asc" },
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        description: true,
+        questions: true,
+        badge: { select: { slug: true, name: true, icon: true } },
+      },
+    });
+    return quizzes.map(({ questions, ...rest }) => ({
+      ...rest,
+      questionCount: Array.isArray(questions) ? questions.length : 0,
+    }));
+  });
+}
+
+export async function getQuizBySlug(slug: string) {
+  return cached(`quiz:bySlug:${slug}`, CACHE_TTL_MS, () =>
+    prisma.quiz.findUnique({
+      where: { slug },
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        description: true,
+        questions: true,
+        isPublished: true,
+        badge: { select: { slug: true, name: true, icon: true } },
+      },
+    })
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Guided tours
+// ---------------------------------------------------------------------------
+
+export async function getTours() {
+  return cached("tour:list", CACHE_TTL_MS, async () => {
+    const tours = await prisma.tour.findMany({
+      where: { published: true },
+      orderBy: { createdAt: "asc" },
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        description: true,
+        steps: { select: { id: true } },
+      },
+    });
+    return tours.map(({ steps, ...rest }) => ({ ...rest, stepCount: steps.length }));
+  });
+}
+
+export async function getTourBySlug(slug: string) {
+  return cached(`tour:bySlug:${slug}`, CACHE_TTL_MS, () =>
+    prisma.tour.findUnique({
+      where: { slug },
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        description: true,
+        published: true,
+        steps: { orderBy: { order: "asc" } },
+      },
+    })
+  );
+}

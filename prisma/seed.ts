@@ -6,6 +6,7 @@ import { people } from "./seed-data/people";
 import { animeEarly } from "./seed-data/anime-early";
 import { animeModern } from "./seed-data/anime-modern";
 import { events } from "./seed-data/events";
+import { quizzes, badges, tours } from "./seed-data/quiz-tours";
 
 async function main() {
   console.log("Seeding Anime Archive database…");
@@ -31,6 +32,12 @@ async function main() {
     prisma.genre.deleteMany(),
     prisma.anime.deleteMany(),
     prisma.era.deleteMany(),
+    prisma.quizAttempt.deleteMany(),
+    prisma.userBadge.deleteMany(),
+    prisma.tourStep.deleteMany(),
+    prisma.tour.deleteMany(),
+    prisma.badge.deleteMany(),
+    prisma.quiz.deleteMany(),
     prisma.user.deleteMany(),
   ]);
 
@@ -297,6 +304,72 @@ async function main() {
       name: "Demo Visitor",
     },
   });
+
+  // Quizzes
+  for (const quiz of quizzes) {
+    await prisma.quiz.upsert({
+      where: { slug: quiz.slug },
+      update: {
+        title: quiz.title,
+        description: quiz.description,
+        questions: quiz.questions as never,
+        isPublished: true,
+      },
+      create: {
+        slug: quiz.slug,
+        title: quiz.title,
+        description: quiz.description,
+        questions: quiz.questions as never,
+        isPublished: true,
+      },
+    });
+  }
+
+  // Badges (linked to their awarding quiz where applicable)
+  for (const badge of badges) {
+    await prisma.badge.upsert({
+      where: { slug: badge.slug },
+      update: {
+        name: badge.name,
+        description: badge.description,
+        icon: badge.icon,
+        quiz: badge.quizSlug ? { connect: { slug: badge.quizSlug } } : undefined,
+      },
+      create: {
+        slug: badge.slug,
+        name: badge.name,
+        description: badge.description,
+        icon: badge.icon,
+        quiz: badge.quizSlug ? { connect: { slug: badge.quizSlug } } : undefined,
+      },
+    });
+  }
+
+  // Guided tours
+  for (const tour of tours) {
+    const created = await prisma.tour.upsert({
+      where: { slug: tour.slug },
+      update: { title: tour.title, description: tour.description, published: true },
+      create: {
+        slug: tour.slug,
+        title: tour.title,
+        description: tour.description,
+        published: true,
+      },
+    });
+    await prisma.tourStep.deleteMany({ where: { tourId: created.id } });
+    await prisma.tourStep.createMany({
+      data: tour.steps.map((s) => ({
+        tourId: created.id,
+        order: s.order,
+        title: s.title,
+        description: s.description,
+        year: s.year ?? null,
+        eraSlug: s.eraSlug ?? null,
+        animeSlug: s.animeSlug ?? null,
+      })),
+    });
+  }
 
   const stats = {
     anime: allAnime.length,

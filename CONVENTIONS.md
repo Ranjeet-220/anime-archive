@@ -18,11 +18,13 @@
 
 ## Data & API layer (already built — import, don't duplicate)
 - `src/lib/prisma.ts` — exported `prisma` client (PrismaPg adapter). 
-- `src/lib/data.ts` — server-only data access: `getAnimeList(params)`, `getAnimeBySlug(slug)`, `getEras()`, `getEraBySlug(slug)`, `getTimelineData()`, `getMuseumData()`, `getStudioArchive()`, `getStudios()`, `getStudioBySlug(slug)`, `getHallOfLegends()`, `getCreators()`, `getPersonBySlug(slug)`, `getCharacters(q?)`, `getCharacterBySlug(slug)`, `getGenres()`, `getGenreBySlug(slug)`, `getMovies()`, `getStats()`, `getOnThisDay()`, `getRecentEvents()`, `searchAll(q)`, `getHomepageData()`. **All read functions are cached** (in-process TTL, 5 min, tag-prefixed keys via `src/lib/cache.ts`); do NOT bypass `data.ts` with raw `prisma` reads in pages.
+- `src/lib/data.ts` — server-only data access: `getAnimeList(params)`, `getAnimeBySlug(slug)`, `getEras()`, `getEraBySlug(slug)`, `getTimelineData()`, `getMuseumData()`, `getStudioArchive()`, `getStudios()`, `getStudioBySlug(slug)`, `getHallOfLegends()`, `getCreators()`, `getPersonBySlug(slug)`, `getCharacters(q?)`, `getCharacterBySlug(slug)`, `getGenres()`, `getGenreBySlug(slug)`, `getMovies()`, `getStats()`, `getOnThisDay()`, `getRecentEvents()`, `searchAll(q)`, `getHomepageData()`, plus quiz/tour accessors (`getQuizzes()`, `getQuizBySlug()`, `getQuizLeaderboard()`, `getTours()`, `getTourBySlug()`). **All read functions are cached** (in-process TTL, 5 min, tag-prefixed keys via `src/lib/cache.ts`); do NOT bypass `data.ts` with raw `prisma` reads in pages.
 - `src/lib/cache.ts` — `cached(key, ttlMs, fn)` + `invalidateCacheTags(tags)`. Key format `<tag>:...`; tags: `anime`, `era`, `studio`, `person`, `character`, `genre`, `event`, `stats`, `home`. **After any mutation, call `invalidateCacheTags([...])`** (see existing admin/user API routes for the per-entity tag sets). In-memory only — per-process; values are returned as-is (Date objects intact). Do not use `unstable_cache`/`use cache` — this project intentionally uses its own cache (no cacheComponents flag).
 - `src/lib/rate-limit.ts` — `checkRateLimit(key, max, windowMs)`, `clientIp(req)`, `RATE` presets (login/register/contact/contribute). In-memory sliding window per process. Always rate-limit public mutation endpoints (auth, contact, contribute).
 - `src/lib/types.ts` — DTO types for 3D payloads (EraDto, MuseumAnimeDto, etc.).
 - `src/lib/format.ts` — label maps (FORMAT_LABELS, STATUS_LABELS, EVENT_KIND_LABELS, ratingColor).
+- `src/lib/world-history-data.ts` — static `WORLD_HISTORY_EVENTS` (52 entries, 1910s–2020s) used by the timeline's "World + Anime" comparison view (`src/components/timeline/world-anime-comparison.tsx`). Client-side tab toggle lives in `src/components/timeline/history-comparison.tsx`.
+- `src/components/user/contribution-diff.ts` — pure line-diff helpers (`parsePayload`, `flattenPayload`, `lineDiff` LCS, `prettyJson`) used by the admin contributions table's expandable Diff panel. Keep it framework-free (unit-testable, no React import).
 - `src/lib/utils.ts` — `cn()`, `slugify()`, `formatDate()`, `truncate()`, `pluralize()`, etc.
 - `src/lib/auth.ts` — server-only auth: `getSessionUser()` (cache), `requireUser()`, `requireRole()`, `hashPassword()`, `verifyPassword()`, `setSessionCookie()`, `clearSessionCookie()`, `canReview()`, `canManage()`, `PUBLIC_USER_FIELDS`. JWT session cookie `aa_session` (httpOnly). Roles: USER, CONTRIBUTOR, EDITOR, ADMIN.
 - Prisma types import from `@/generated/prisma/client` (e.g. `import type { Prisma, AnimeFormat } from "@/generated/prisma/client"`).
@@ -37,6 +39,7 @@
 
 ## Route structure (all in src/app)
 Already-required routes (do not change): `/`, `/museum`, `/timeline`, `/timeline/[era]`, `/anime`, `/anime/[slug]`, `/movies`, `/studios`, `/studio/[slug]`, `/creators`, `/creator/[slug]`, `/characters`, `/character/[slug]`, `/genres`, `/collections`, `/search`, `/favorites`, `/watchlist`, `/profile`, `/login`, `/register`, `/contribute`, `/about`, `/methodology`, `/sources`, `/copyright`, `/privacy`, `/terms`, `/contact`, `/content-removal`, `/admin/**`, plus `/api/**`.
+Added routes: `/quizzes`, `/quiz/[slug]` (interactive quiz runner + results), `/tours`, `/tour/[slug]` (guided tours with steps), `/api/user/quiz-results` (POST = submit attempt, awards a badge at ≥80%; GET = best attempt). Quizzes/badges/tours are seeded by `prisma/seed-data/quiz-tours.ts`.
 SEO URLs are slug-based: `/anime/akira`, `/studio/madhouse`, `/creator/satoshi-kon`, `/timeline/1990s` (use era slugs like `golden-age`? NO — use the real slugs from DB: the-beginning, television-era, golden-age, global-expansion, digital-revolution, streaming-era, modern-anime).
 
 ## Page conventions
@@ -45,11 +48,18 @@ SEO URLs are slug-based: `/anime/akira`, `/studio/madhouse`, `/creator/satoshi-k
 - Detail pages: `generateMetadata` + JSON-LD (ld+json script tag) with BreadcrumbList/Thing schema.
 - Use `await params`/`await searchParams` (Promises!).
 - 3D scenes: client components in `src/components/three/`, lazy-loaded via `next/dynamic` with `ssr: false` from server page wrappers; always provide a graceful 2D fallback UI; respect `prefers-reduced-motion`; WebGL detection before mounting Canvas; device mode (IMMERSIVE/BALANCED/PERFORMANCE) via `src/lib/device-mode.ts` + localStorage.
+  - Post-processing (`src/components/three/era-effects.tsx`): `EraEffects` wraps a `@react-three/postprocessing` `EffectComposer` gated by device mode — PERFORMANCE renders nothing, BALANCED only cheap effects (sepia/grain/scanlines), IMMERSIVE full bloom/SMAA/vignette. `eraVisualKind(slug)` returns the palette. Render `<EraEffects slug={eraSlug}/>` inside a scene when era tinting is wanted.
+  - Minimap (`src/components/three/museum-minimap.tsx`): DOM overlay HUD (not a texture) that teleports via the scene's `focusRoom(ref)` callback. Wire it through the canvas parent so the ref passes down to the scene.
 - Do not block content on the DB: if DB is unreachable, pages must render a sensible error/empty state, never crash the build.
 
 ## API routes
 `/api/*` route handlers: JSON in/out, `try/catch`, status codes (400/401/403/404/500), no stack traces in responses. Auth via `getSessionUser()`/`requireUser()`.
-Existing/planned: `/api/auth/register|login|logout|me`, `/api/search?q=`, `/api/user/favorites|watchlist|rating|notes|collections`, `/api/contribute`, `/api/admin/contributions|users|sources|events|anime`, `/api/three/museum|timeline|hall|studios|genres`, `/api/stats`.
+Existing/planned: `/api/auth/register|login|logout|me`, `/api/search?q=`, `/api/user/favorites|watchlist|rating|notes|collections|quiz-results`, `/api/contribute`, `/api/admin/contributions|users|sources|events|anime`, `/api/three/museum|timeline|hall|studios|genres`, `/api/stats`.
+
+## Open Graph images
+- `src/app/opengraph-image.tsx` (site default) and `src/app/anime/[slug]/opengraph-image.tsx` (per-anime, via `generateImageMetadata`).
+- Font: load the STATIC `public/fonts/SpaceGrotesk-Static.ttf` (not the variable `SpaceGrotesk.ttf`) — the bundled satori/opentype cannot parse the variable font's `fvar` table ("Cannot read properties of undefined (reading '256')"). Load it with `readFile(process.cwd() + "/public/fonts/SpaceGrotesk-Static.ttf")` — the `new URL(..., import.meta.url)` pattern breaks webpack ("Can't resolve .../public/fonts/...").
+- `ImageResponse` renders lazily on body stream — errors surface during prerender, not construction.
 
 ## Verification
 - Typecheck: `./node_modules/.bin/tsc --noEmit`

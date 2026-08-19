@@ -11,6 +11,7 @@ import { MUSEUM_VIEW_KEY } from "./scene-types";
 import { useSceneSupport } from "./use-scene-support";
 import { SceneGate, SceneUnavailable } from "./scene-shell";
 import { SceneLoading } from "./scene-shell";
+import { MuseumMinimap } from "./museum-minimap";
 
 const MuseumSceneCanvas = dynamic(
   () => import("./museum-scene").then((m) => m.MuseumScene),
@@ -139,6 +140,12 @@ export function MuseumExperience({ eras }: { eras: EraDto[] }) {
               />
             )}
           </SceneGate>
+
+          <MuseumMinimap
+            eras={eras}
+            activeRoom={activeRoom}
+            onSelectRoom={focusRoom}
+          />
 
           {/* Room nav + current room actions */}
           <div className="absolute inset-x-0 top-4 z-10 flex items-center justify-between gap-2 px-4">
