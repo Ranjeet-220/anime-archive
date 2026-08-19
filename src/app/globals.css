@@ -1,26 +1,226 @@
 @import "tailwindcss";
 
+/* ------------------------------------------------------------------ */
+/* Anime Archive — design tokens                                        */
+/* ------------------------------------------------------------------ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Surfaces */
+  --color-ink: #0a0a0c;
+  --color-charcoal: #131316;
+  --color-charcoal-2: #1a1a20;
+  --color-charcoal-3: #22222a;
+  --color-line: #26262e;
+  --color-line-2: #33333d;
+
+  /* Text */
+  --color-paper: #f1ece5;
+  --color-paper-2: #d6d0c8;
+  --color-muted: #a39c94;
+  --color-faint: #6e6760;
+
+  /* Crimson accent */
+  --color-crimson-300: #e88a8f;
+  --color-crimson-400: #d95c64;
+  --color-crimson-500: #c8383f;
+  --color-crimson-600: #a92c33;
+  --color-crimson-700: #7f2026;
+
+  /* Holographic cyan (secondary, used sparingly) */
+  --color-holo-300: #8fd9e4;
+  --color-holo-400: #5ac4d4;
+  --color-holo-500: #2f9faf;
+
+  /* Status */
+  --color-ok: #6fbf8f;
+  --color-warn: #d9a94e;
+  --color-danger: #d95c64;
+
+  /* Fonts */
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-display: var(--font-space-grotesk), var(--font-inter), sans-serif;
+  --font-jp: var(--font-noto-sans-jp), sans-serif;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-ink: var(--color-ink);
+  --color-charcoal: var(--color-charcoal);
+  --color-charcoal-2: var(--color-charcoal-2);
+  --color-charcoal-3: var(--color-charcoal-3);
+  --color-line: var(--color-line);
+  --color-line-2: var(--color-line-2);
+  --color-paper: var(--color-paper);
+  --color-paper-2: var(--color-paper-2);
+  --color-muted: var(--color-muted);
+  --color-faint: var(--color-faint);
+  --color-crimson-300: var(--color-crimson-300);
+  --color-crimson-400: var(--color-crimson-400);
+  --color-crimson-500: var(--color-crimson-500);
+  --color-crimson-600: var(--color-crimson-600);
+  --color-crimson-700: var(--color-crimson-700);
+  --color-holo-300: var(--color-holo-300);
+  --color-holo-400: var(--color-holo-400);
+  --color-holo-500: var(--color-holo-500);
+  --color-ok: var(--color-ok);
+  --color-warn: var(--color-warn);
+  --color-danger: var(--color-danger);
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
+  --font-jp: var(--font-jp);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ------------------------------------------------------------------ */
+/* Base                                                                */
+/* ------------------------------------------------------------------ */
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-ink);
+  color: var(--color-paper);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background-color: var(--color-crimson-500);
+  color: var(--color-paper);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-ink);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-line-2);
+  border-radius: 6px;
+  border: 2px solid var(--color-ink);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-crimson-600);
+}
+
+/* Focus visibility */
+:focus-visible {
+  outline: 2px solid var(--color-holo-400);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Utilities                                                           */
+/* ------------------------------------------------------------------ */
+
+@utility text-balance {
+  text-wrap: balance;
+}
+
+@utility surface-card {
+  background-color: var(--color-charcoal);
+  border: 1px solid var(--color-line);
+  border-radius: 0.5rem;
+}
+
+@utility surface-panel {
+  background: linear-gradient(180deg, var(--color-charcoal-2), var(--color-charcoal));
+  border: 1px solid var(--color-line);
+  border-radius: 0.625rem;
+}
+
+@utility edge-crimson {
+  border-top: 1px solid var(--color-crimson-500);
+}
+
+/* Subtle film-grain backdrop for heroes */
+@utility film-grain {
+  position: relative;
+}
+.film-grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
+}
+
+/* Vignette */
+@utility vignette {
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(6, 6, 8, 0.85) 100%);
+}
+
+/* Japanese text */
+@utility font-jp {
+  font-family: var(--font-jp);
+}
+
+/* Long-form editorial text */
+@utility editorial {
+  color: var(--color-paper-2);
+  line-height: 1.75;
+  font-size: 0.95rem;
+}
+.editorial p {
+  margin-bottom: 1rem;
+}
+.editorial strong {
+  color: var(--color-paper);
+  font-weight: 600;
+}
+.editorial a {
+  color: var(--color-holo-400);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.editorial h2 {
+  color: var(--color-paper);
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  letter-spacing: 0.01em;
+  margin: 2rem 0 0.75rem;
+}
+.editorial h3 {
+  color: var(--color-paper);
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  margin: 1.5rem 0 0.5rem;
+}
+.editorial ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+  margin-bottom: 1rem;
+}
+.editorial li {
+  margin-bottom: 0.35rem;
+}
+
+/* Reduced-motion safe hover lift */
+@utility lift {
+  transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lift:hover {
+    transform: translateY(-2px);
+  }
 }

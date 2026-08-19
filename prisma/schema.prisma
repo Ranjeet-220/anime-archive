@@ -1,0 +1,503 @@
+// Anime Archive — Prisma 7 schema (PostgreSQL)
+// Import the generated client from `@/generated/prisma/client`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+  runtime  = "nodejs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum Role {
+  USER
+  CONTRIBUTOR
+  EDITOR
+  ADMIN
+}
+
+enum AnimeFormat {
+  TV
+  MOVIE
+  OVA
+  ONA
+  SPECIAL
+  WEB
+}
+
+enum AnimeStatus {
+  FINISHED
+  AIRING
+  UPCOMING
+  UNKNOWN
+}
+
+enum WatchStatus {
+  PLANNED
+  WATCHING
+  COMPLETED
+  ON_HOLD
+  DROPPED
+}
+
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  UNVERIFIED
+}
+
+enum ContributionStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  VERIFIED
+  PUBLISHED
+  REJECTED
+}
+
+enum ContributionType {
+  NEW_ANIME
+  NEW_CREATOR
+  NEW_STUDIO
+  NEW_SOURCE
+  CORRECTION
+  REPORT
+  OTHER
+}
+
+enum ReportStatus {
+  OPEN
+  RESOLVED
+  DISMISSED
+}
+
+enum EventKind {
+  PREMIERE
+  RELEASE
+  FOUNDING
+  MILESTONE
+  INDUSTRY
+  BIRTH
+  DEATH
+  AWARD
+}
+
+// ---------------------------------------------------------------------------
+// Users
+// ---------------------------------------------------------------------------
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  username      String         @unique
+  passwordHash  String
+  name          String?
+  bio           String?
+  role          Role           @default(USER)
+  emailVerified Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  favorites     Favorite[]
+  watchlist     WatchlistItem[]
+  ratings       Rating[]
+  notes         Note[]
+  collections   Collection[]
+  contributions Contribution[] @relation("UserContributions")
+  reviews       Contribution[] @relation("ReviewerContributions")
+  reports       Report[]
+}
+
+// ---------------------------------------------------------------------------
+// Anime
+// ---------------------------------------------------------------------------
+
+model Anime {
+  id                      String         @id @default(cuid())
+  slug                    String         @unique
+  title                   String
+  japaneseTitle           String?
+  alternativeTitles       String[]
+  synopsis                String?
+  releaseDate             DateTime?
+  endDate                 DateTime?
+  year                    Int?
+  decade                  Int?
+  format                  AnimeFormat    @default(TV)
+  episodeCount            Int?
+  duration                Int?
+  status                  AnimeStatus    @default(UNKNOWN)
+  sourceMaterial          String?
+  officialWebsite         String?
+  trailerUrl              String?
+  coverUrl                String?
+  backdropUrl             String?
+  historicalSignificance  String?
+  productionHistory       String?
+  reception               String?
+  awards                  String?
+  culturalImpact          String?
+  legacy                  String?
+  historyTimeline         Json?
+  isDemoData              Boolean        @default(true)
+  averageRating           Float          @default(0)
+  ratingCount             Int            @default(0)
+  createdAt               DateTime       @default(now())
+  updatedAt               DateTime       @updatedAt
+
+  eraId                   String?
+  era                     Era?           @relation(fields: [eraId], references: [id])
+  studioId                String?
+  studio                  Studio?        @relation(fields: [studioId], references: [id])
+  creatorId               String?
+  creator                 Person?        @relation("AnimeCreator", fields: [creatorId], references: [id])
+  directorId              String?
+  director                Person?        @relation("AnimeDirector", fields: [directorId], references: [id])
+
+  genres                  Genre[]        @relation("AnimeGenres")
+  characters              Character[]
+  episodes                Episode[]
+  staff                   PersonCredit[]
+  relatedFrom             AnimeRelation[] @relation("AnimeRelationFrom")
+  relatedTo               AnimeRelation[] @relation("AnimeRelationTo")
+  favorites               Favorite[]
+  watchlist               WatchlistItem[]
+  ratings                 Rating[]
+  notes                   Note[]
+  collectionItems         CollectionItem[]
+
+  @@index([year])
+  @@index([decade])
+  @@index([format])
+  @@index([status])
+  @@index([eraId])
+  @@index([studioId])
+}
+
+model AnimeRelation {
+  id        String @id @default(cuid())
+  animeId   String
+  relatedId String
+  type      String
+  anime     Anime  @relation("AnimeRelationFrom", fields: [animeId], references: [id])
+  related   Anime  @relation("AnimeRelationTo", fields: [relatedId], references: [id])
+
+  @@unique([animeId, relatedId, type])
+}
+
+// ---------------------------------------------------------------------------
+// Eras / Rooms
+// ---------------------------------------------------------------------------
+
+model Era {
+  id          String            @id @default(cuid())
+  slug        String            @unique
+  name        String
+  period      String
+  startYear   Int
+  endYear     Int?
+  order       Int
+  description String?
+  imageUrl    String?
+  anime       Anime[]
+}
+
+// ---------------------------------------------------------------------------
+// Studios
+// ---------------------------------------------------------------------------
+
+model Studio {
+  id          String        @id @default(cuid())
+  slug        String        @unique
+  name        String
+  japaneseName String?
+  foundedYear Int?
+  headquarters String?
+  founders    String?
+  history     String?
+  techniques  String?
+  significance String?
+  status      String?
+  website     String?
+  logoUrl     String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  anime       Anime[]
+  people      StudioPerson[]
+}
+
+// ---------------------------------------------------------------------------
+// People (creators, directors, writers, composers, voice actors...)
+// ---------------------------------------------------------------------------
+
+model Person {
+  id           String         @id @default(cuid())
+  slug         String         @unique
+  name         String
+  japaneseName String?
+  role         String?
+  bornYear     Int?
+  diedYear     Int?
+  birthplace   String?
+  biography    String?
+  career       String?
+  majorWorks   String?
+  awards       String?
+  contribution String?
+  website      String?
+  profileUrl   String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  directed     Anime[]        @relation("AnimeDirector")
+  created      Anime[]        @relation("AnimeCreator")
+  credits      PersonCredit[]
+  studios      StudioPerson[]
+}
+
+model PersonCredit {
+  id        String @id @default(cuid())
+  animeId   String
+  personId  String
+  role      String
+  anime     Anime  @relation(fields: [animeId], references: [id])
+  person    Person @relation(fields: [personId], references: [id])
+
+  @@unique([animeId, personId, role])
+}
+
+model StudioPerson {
+  id        String @id @default(cuid())
+  studioId  String
+  personId  String
+  role      String?
+  studio    Studio @relation(fields: [studioId], references: [id])
+  person    Person @relation(fields: [personId], references: [id])
+
+  @@unique([studioId, personId])
+}
+
+// ---------------------------------------------------------------------------
+// Characters
+// ---------------------------------------------------------------------------
+
+model Character {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  name         String
+  japaneseName String?
+  role         String?
+  biography    String?
+  imageUrl     String?
+  voiceActorName String?
+  animeId      String?
+  anime        Anime?   @relation(fields: [animeId], references: [id])
+
+  @@index([animeId])
+}
+
+// ---------------------------------------------------------------------------
+// Episodes
+// ---------------------------------------------------------------------------
+
+model Episode {
+  id           String   @id @default(cuid())
+  animeId      String
+  number       Int
+  title        String?
+  airDate      DateTime?
+  synopsis     String?
+  anime        Anime    @relation(fields: [animeId], references: [id])
+
+  @@unique([animeId, number])
+  @@index([animeId])
+}
+
+// ---------------------------------------------------------------------------
+// Genres
+// ---------------------------------------------------------------------------
+
+model Genre {
+  id          String  @id @default(cuid())
+  slug        String  @unique
+  name        String
+  japaneseName String?
+  description String?
+  anime       Anime[] @relation("AnimeGenres")
+}
+
+// ---------------------------------------------------------------------------
+// Historical Events
+// ---------------------------------------------------------------------------
+
+model HistoricalEvent {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  title       String
+  date        DateTime?
+  year        Int?
+  month       Int?
+  day         Int?
+  description String?
+  kind        EventKind @default(MILESTONE)
+  eraId       String?
+  animeId     String?
+  studioId    String?
+  personId    String?
+
+  @@index([year])
+  @@index([month])
+  @@index([day])
+  @@index([eraId])
+}
+
+// ---------------------------------------------------------------------------
+// Sources & verification
+// ---------------------------------------------------------------------------
+
+model Source {
+  id                String             @id @default(cuid())
+  entityType        String
+  entityId          String
+  sourceUrl         String
+  sourceName        String
+  sourceTitle       String?
+  author            String?
+  publisher         String?
+  verificationDate  DateTime?
+  verificationStatus VerificationStatus @default(PENDING)
+  contributorId     String?
+
+  @@index([entityType, entityId])
+}
+
+// ---------------------------------------------------------------------------
+// Contributions
+// ---------------------------------------------------------------------------
+
+model Contribution {
+  id           String             @id @default(cuid())
+  type         ContributionType
+  title        String
+  description  String?
+  payload      Json?
+  status       ContributionStatus @default(SUBMITTED)
+  reviewerNotes String?
+  userId       String
+  user         User               @relation("UserContributions", fields: [userId], references: [id])
+  reviewedById String?
+  reviewedBy   User?              @relation("ReviewerContributions", fields: [reviewedById], references: [id])
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  @@index([status])
+  @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// User features
+// ---------------------------------------------------------------------------
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  animeId   String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  anime     Anime    @relation(fields: [animeId], references: [id])
+
+  @@unique([userId, animeId])
+  @@index([animeId])
+}
+
+model WatchlistItem {
+  id        String      @id @default(cuid())
+  userId    String
+  animeId   String
+  status    WatchStatus @default(PLANNED)
+  addedAt   DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  user      User        @relation(fields: [userId], references: [id])
+  anime     Anime       @relation(fields: [animeId], references: [id])
+
+  @@unique([userId, animeId])
+  @@index([animeId])
+}
+
+model Rating {
+  id        String   @id @default(cuid())
+  userId    String
+  animeId   String
+  score     Int
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+  anime     Anime    @relation(fields: [animeId], references: [id])
+
+  @@unique([userId, animeId])
+  @@index([animeId])
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  userId    String
+  animeId   String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+  anime     Anime    @relation(fields: [animeId], references: [id])
+
+  @@index([userId, animeId])
+}
+
+model Collection {
+  id          String           @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  isPublic    Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  user        User             @relation(fields: [userId], references: [id])
+  items       CollectionItem[]
+
+  @@index([userId])
+}
+
+model CollectionItem {
+  id           String     @id @default(cuid())
+  collectionId String
+  animeId      String
+  addedAt      DateTime   @default(now())
+  collection   Collection @relation(fields: [collectionId], references: [id])
+  anime        Anime      @relation(fields: [animeId], references: [id])
+
+  @@unique([collectionId, animeId])
+}
+
+// ---------------------------------------------------------------------------
+// Reports (moderation)
+// ---------------------------------------------------------------------------
+
+model Report {
+  id          String       @id @default(cuid())
+  userId      String
+  targetType  String
+  targetId    String
+  reason      String
+  details     String?
+  status      ReportStatus @default(OPEN)
+  createdAt   DateTime     @default(now())
+  resolvedAt  DateTime?
+  user        User         @relation(fields: [userId], references: [id])
+
+  @@index([status])
+}

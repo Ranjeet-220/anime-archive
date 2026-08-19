@@ -1,36 +1,126 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ANIME ARCHIVE
 
-## Getting Started
+A digital museum and historical encyclopedia of Japanese animation — from the
+earliest shorts of 1917 to the streaming era. The archive blends an
+interactive 3D museum (React Three Fiber) with a fast, fully server-rendered
+2D encyclopedia.
 
-First, run the development server:
+> **Important**: This is an informational, non-commercial historical archive.
+> It is not affiliated with any production studio, and its editorial content
+> (genres, classifications, biographies) is the work of the archive's
+> contributors, not of the studios themselves.
+
+## Stack
+
+- **Next.js 16** (App Router, React 19, Turbopack-ready) — note: this repo
+  builds with `--webpack` (`npm run build`) because the local
+  `node_modules` lives on a symlinked filesystem; see "Running locally".
+- **TypeScript**, **Tailwind CSS v4** (design tokens in `globals.css`)
+- **PostgreSQL 16** + **Prisma 7** (driver adapters, generated client at
+  `src/generated/prisma`)
+- **React Three Fiber 9** + **drei** + **three** for the 3D museum,
+  timeline, Hall of Legends, Studio Archive, and Genre World experiences
+- **motion** (13) for page transitions, **jose** for JWT sessions,
+  **bcryptjs** for passwords, **zod** for validation
+- `pg_trgm` fuzzy search with graceful fallback if the extension is absent
+
+## Prerequisites
+
+- Node.js ≥ 20 (developed against Node 24)
+- PostgreSQL ≥ 15 running locally, reachable via `DATABASE_URL`
+- npm ≥ 10
+
+## Setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env        # then fill in DATABASE_URL, AUTH_SECRET, admin creds
+npx prisma migrate deploy   # apply schema migrations
+npm run seed                # idempotent demo dataset
+npm run dev                 # next dev --webpack
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Environment variables (`.env`)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable | Purpose |
+| --- | --- |
+| `DATABASE_URL` | PostgreSQL connection string |
+| `AUTH_SECRET` | HS256 secret for session JWTs — **rotate before production** |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Credentials used by the seed to create the admin account |
+| `NEXT_PUBLIC_SITE_URL` | Canonical origin for sitemap/robots/metadata |
 
-## Learn More
+### Seed accounts (demo data only — change before production)
 
-To learn more about Next.js, take a look at the following resources:
+| Role | Email | Password |
+| --- | --- | --- |
+| ADMIN | `admin@animearchive.local` | `ChangeMe-Admin-2026!` |
+| USER | `demo@animearchive.local` | `DemoUser-2026!` |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The seed contains ~24 anime, 17 studios, 35 people, 30 characters, 33
+historical events, 7 eras, 17 genres, and 100+ documented sources. All data
+is demo/illustrative content; re-run `npm run seed` at any time — it is
+idempotent.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Running locally (this workspace)
 
-## Deploy on Vercel
+This workspace's `node_modules` is a symlink to a shared install tree, which
+Turbopack rejects (`Symlink [project]/node_modules is invalid`). The npm
+scripts therefore run Next with the webpack bundler:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm run dev      # next dev --webpack
+npm run build    # next build --webpack
+npm run start    # next start
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+If your `node_modules` is a real directory (normal clone elsewhere), you can
+drop the `--webpack` flags.
+
+### Database convenience script
+
+```bash
+./scripts/db.sh start    # start PostgreSQL (data dir from DB_DATA_DIR, default /tmp/opencode/pgdata)
+./scripts/db.sh status   # is it running?
+./scripts/db.sh seed     # migrate + seed
+```
+
+## Scripts
+
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Dev server (webpack) |
+| `npm run build` | Production build (webpack) |
+| `npm run start` | Serve the production build |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | `tsc --noEmit` |
+| `npm test` | Vitest unit tests (`src/lib/__tests__/`, no DB needed) |
+| `npm run seed` | Migrate + seed the database |
+
+## Project layout
+
+```
+src/app/            routes: /museum /timeline /anime /movies /studios /creators
+                    /characters /genres /collections /search /contribute /admin
+                    + static pages, sitemap.ts, robots.ts
+src/components/     ui (design system), layout, three (3D scenes), anime, era,
+                    transitions, user
+src/lib/            data layer, auth, validation, types, device-mode
+prisma/             schema, migrations, seed (data + data files)
+```
+
+## Documentation & conventions
+
+- `CONVENTIONS.md` — build contract followed by the codebase (routing,
+  data access, auth, styling, 3D rules).
+- `/methodology`, `/about`, `/sources`, `/copyright` — editorial policy of
+  the archive itself.
+
+## Content / legal
+
+- All anime, studio, person, character and event records are documented for
+  historical and informational purposes. Cover images and trademarks belong
+  to their respective owners; no such assets are bundled.
+- See `/content-removal` for takedown requests, and `/privacy` + `/terms`
+  for site policy.
