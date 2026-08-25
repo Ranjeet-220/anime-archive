@@ -3,7 +3,7 @@
 **Read this before writing any code.** This is a Next.js 16 App Router project (src/), TypeScript strict, Tailwind v4, Prisma 7 + PostgreSQL (running locally on port 5432), React 19.
 
 ## Critical environment notes
-- `node_modules` is a SYMLINK to `/tmp/opencode/installer/node_modules` (NTFS cannot store exec bits). NEVER run `npm install` / `npx <pkg>@latest` in the project dir. Install new packages by running `npm i <pkg>` inside `/tmp/opencode/installer`, then `cp package.json package-lock.json "/mnt/data/Anime history/"`.
+- `node_modules` is a symlink to persistent storage if run on NTFS.
 - DB is already migrated + seeded. To re-seed: `DATABASE_URL=... npx tsx prisma/seed.ts` (from project root). Seed is idempotent.
 - `npx`-free commands: use `./node_modules/.bin/<tool>` or add `PATH="/mnt/data/Anime history/node_modules/.bin:$PATH"` prefix.
 - The NTFS mount means `next dev` file-watching is unreliable; prefer `next build && next start` for verification.

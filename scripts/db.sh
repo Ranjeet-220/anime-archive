@@ -4,10 +4,10 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PG_BIN="${PG_BIN:-/tmp/opencode/pg16/bin}"
-PGDATA="${PG_DATA_DIR:-/tmp/opencode/pgdata}"
+PG_BIN="${PG_BIN:-/usr/bin}"
+PGDATA="${PG_DATA_DIR:-$HOME/.local/share/anime_pgdata}"
 PGPORT="${PG_PORT:-5432}"
-PGSOCK="${PG_SOCKET_DIR:-/tmp/opencode}"
+PGSOCK="${PG_SOCKET_DIR:-/tmp}"
 PGLOG="$PGDATA/server.log"
 
 require_bin() {

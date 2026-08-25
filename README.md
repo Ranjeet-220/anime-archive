@@ -85,7 +85,7 @@ drop the `--webpack` flags.
 ### Database convenience script
 
 ```bash
-./scripts/db.sh start    # start PostgreSQL (data dir from DB_DATA_DIR, default /tmp/opencode/pgdata)
+./scripts/db.sh start    # start PostgreSQL (data dir from DB_DATA_DIR)
 ./scripts/db.sh status   # is it running?
 ./scripts/db.sh seed     # migrate + seed
 ```
