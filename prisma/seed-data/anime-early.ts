@@ -16,7 +16,7 @@ export interface AnimeSeed {
   status: AnimeStatus;
   sourceMaterial: string;
   officialWebsite?: string;
-  studio: string;
+  studio: string | null;
   creator?: string;
   director?: string;
   genreSlugs: string[];
@@ -49,7 +49,7 @@ export const animeEarly: AnimeSeed[] = [
     duration: 4,
     status: "FINISHED",
     sourceMaterial: "Original",
-    studio: "tms-entertainment",
+    studio: null,
     genreSlugs: ["comedy", "historical"],
     eraSlug: "the-beginning",
     characters: [],
@@ -90,7 +90,7 @@ export const animeEarly: AnimeSeed[] = [
     duration: 74,
     status: "FINISHED",
     sourceMaterial: "Original (based on the folk tale)",
-    studio: "toei-animation",
+    studio: null,
     genreSlugs: ["adventure", "historical"],
     eraSlug: "the-beginning",
     characters: [],

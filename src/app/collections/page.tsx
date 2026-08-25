@@ -141,7 +141,7 @@ export default async function CollectionsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-7xl space-y-14 px-4 py-10 sm:px-6">
+    <div className="mx-auto max-w-[1720px] w-full space-y-14 px-4 py-10 sm:px-8 lg:px-12">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Breadcrumbs items={[{ label: "Collections" }]} />
 

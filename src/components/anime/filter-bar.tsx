@@ -1,10 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, SlidersHorizontal } from "lucide-react";
-import { Button, LinkButton } from "@/components/ui/button";
-import { Field, Input, Select } from "@/components/ui/field";
-import { FORMAT_LABELS, STATUS_LABELS } from "@/lib/format";
+import { useRouter } from "next/navigation";
+import { Search, SlidersHorizontal, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface FilterBarValues {
@@ -31,11 +29,10 @@ export interface FilterOption {
 const DECADES = [1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020];
 
 const SORT_OPTIONS: FilterOption[] = [
-  { value: "year", label: "Year ↑ (oldest first)" },
-  { value: "year_desc", label: "Year ↓ (newest first)" },
+  { value: "rating", label: "Popularity / Rating" },
+  { value: "year_desc", label: "Newest First" },
+  { value: "year", label: "Oldest First" },
   { value: "title", label: "Title A–Z" },
-  { value: "rating", label: "Top rated" },
-  { value: "newest", label: "Recently added" },
 ];
 
 export function FilterBar({
@@ -51,138 +48,190 @@ export function FilterBar({
   eras: FilterOption[];
   className?: string;
 }) {
-  const [open, setOpen] = useState(false);
+  const router = useRouter();
+  const [q, setQ] = useState(initial.q ?? "");
+  const [genre, setGenre] = useState(initial.genre ?? "");
+  const [era, setEra] = useState(initial.era ?? "");
+  const [studio, setStudio] = useState(initial.studio ?? "");
+  const [year, setYear] = useState(initial.year ?? initial.decade ?? "");
+  const [sort, setSort] = useState(initial.sort ?? "rating");
+  const [moreFiltersOpen, setMoreFiltersOpen] = useState(false);
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    applyFilters();
+  };
+
+  const applyFilters = () => {
+    const params = new URLSearchParams();
+    if (q) params.set("q", q);
+    if (genre) params.set("genre", genre);
+    if (era) params.set("era", era);
+    if (studio) params.set("studio", studio);
+    if (year) {
+      if (year.endsWith("0s") || Number(year) % 10 === 0) {
+        params.set("decade", year.replace("s", ""));
+      } else {
+        params.set("year", year);
+      }
+    }
+    if (sort) params.set("sort", sort);
+    router.push(`/anime?${params.toString()}`);
+  };
 
   return (
-    <div className={cn("rounded-lg border border-line bg-charcoal/60", className)}>
-      <div className="flex items-center justify-between gap-3 px-4 pt-3">
-        <h2 className="flex items-center gap-2 font-display text-[11px] uppercase tracking-[0.3em] text-muted">
-          <SlidersHorizontal className="h-3.5 w-3.5 text-crimson-400" aria-hidden />
-          Filters
-        </h2>
+    <div className={cn("flex flex-col gap-4", className)}>
+      {/* Search Input Bar with Red Search Button */}
+      <form onSubmit={handleSearchSubmit} className="relative flex items-center w-full">
+        <input
+          type="text"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Search anime, movies, creators..."
+          className="w-full h-12 rounded-lg border border-[#25282C] bg-[#111316] pl-4 pr-14 text-sm text-paper placeholder:text-[#666A70] focus:border-crimson-500 focus:outline-none focus:ring-1 focus:ring-crimson-500 transition-all"
+        />
         <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          aria-expanded={open}
-          aria-controls="anime-filters"
-          className="inline-flex h-8 items-center gap-1.5 rounded border border-line px-2.5 font-display text-[11px] uppercase tracking-wider text-muted transition-colors hover:border-line-2 hover:text-paper md:hidden"
+          type="submit"
+          aria-label="Search"
+          className="absolute right-1.5 top-1.5 bottom-1.5 w-10 flex items-center justify-center rounded-md bg-crimson-500 text-white transition-all hover:bg-crimson-400 hover:shadow-[0_0_12px_rgba(227,38,46,0.5)]"
         >
-          {open ? "Hide" : "Show"}
-          <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", open && "rotate-180")} aria-hidden />
+          <Search className="h-4 w-4" />
         </button>
-      </div>
+      </form>
 
-      <form id="anime-filters" action="/anime" method="get" className={cn("px-4 pb-4 pt-3", !open && "hidden md:block")}>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <Field label="Search" htmlFor="f-q" className="sm:col-span-2 lg:col-span-4">
-            <Input
-              id="f-q"
-              name="q"
-              type="search"
-              placeholder="Title, Japanese title, alternative title…"
-              defaultValue={initial.q}
-            />
-          </Field>
-
-          <Field label="Decade" htmlFor="f-decade">
-            <Select id="f-decade" name="decade" defaultValue={initial.decade ?? ""}>
-              <option value="">All decades</option>
-              {DECADES.map((d) => (
-                <option key={d} value={d}>
-                  {d}s
-                </option>
-              ))}
-            </Select>
-          </Field>
-
-          <Field label="Year" htmlFor="f-year">
-            <Input id="f-year" name="year" type="number" min={1917} max={2100} placeholder="e.g. 1988" defaultValue={initial.year} />
-          </Field>
-
-          <Field label="Genre" htmlFor="f-genre">
-            <Select id="f-genre" name="genre" defaultValue={initial.genre ?? ""}>
-              <option value="">All genres</option>
+      {/* Filter Selectors Row */}
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs">
+        {/* GENRE */}
+        <div className="flex flex-col flex-1 min-w-[130px]">
+          <span className="mb-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#666A70]">
+            GENRE
+          </span>
+          <div className="relative">
+            <select
+              value={genre}
+              onChange={(e) => {
+                setGenre(e.target.value);
+              }}
+              className="w-full appearance-none rounded-lg border border-[#25282C] bg-[#111316] px-3 py-2.5 text-xs text-paper focus:border-crimson-500 focus:outline-none cursor-pointer"
+            >
+              <option value="">All Genres</option>
               {genres.map((g) => (
                 <option key={g.value} value={g.value}>
                   {g.label}
                 </option>
               ))}
-            </Select>
-          </Field>
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#666A70]" />
+          </div>
+        </div>
 
-          <Field label="Studio" htmlFor="f-studio">
-            <Select id="f-studio" name="studio" defaultValue={initial.studio ?? ""}>
-              <option value="">All studios</option>
-              {studios.map((s) => (
-                <option key={s.value} value={s.value}>
-                  {s.label}
-                </option>
-              ))}
-            </Select>
-          </Field>
-
-          <Field label="Format" htmlFor="f-format">
-            <Select id="f-format" name="format" defaultValue={initial.format ?? ""}>
-              <option value="">All formats</option>
-              {Object.entries(FORMAT_LABELS).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </Select>
-          </Field>
-
-          <Field label="Status" htmlFor="f-status">
-            <Select id="f-status" name="status" defaultValue={initial.status ?? ""}>
-              <option value="">All statuses</option>
-              {Object.entries(STATUS_LABELS).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </Select>
-          </Field>
-
-          <Field label="Era" htmlFor="f-era">
-            <Select id="f-era" name="era" defaultValue={initial.era ?? ""}>
-              <option value="">All eras</option>
+        {/* ERA */}
+        <div className="flex flex-col flex-1 min-w-[130px]">
+          <span className="mb-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#666A70]">
+            ERA
+          </span>
+          <div className="relative">
+            <select
+              value={era}
+              onChange={(e) => {
+                setEra(e.target.value);
+              }}
+              className="w-full appearance-none rounded-lg border border-[#25282C] bg-[#111316] px-3 py-2.5 text-xs text-paper focus:border-crimson-500 focus:outline-none cursor-pointer"
+            >
+              <option value="">All Eras</option>
               {eras.map((e) => (
                 <option key={e.value} value={e.value}>
                   {e.label}
                 </option>
               ))}
-            </Select>
-          </Field>
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#666A70]" />
+          </div>
+        </div>
 
-          <Field label="Min episodes" htmlFor="f-min">
-            <Input id="f-min" name="minEpisodes" type="number" min={1} placeholder="e.g. 12" defaultValue={initial.minEpisodes} />
-          </Field>
+        {/* STUDIO */}
+        <div className="flex flex-col flex-1 min-w-[130px]">
+          <span className="mb-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#666A70]">
+            STUDIO
+          </span>
+          <div className="relative">
+            <select
+              value={studio}
+              onChange={(e) => {
+                setStudio(e.target.value);
+              }}
+              className="w-full appearance-none rounded-lg border border-[#25282C] bg-[#111316] px-3 py-2.5 text-xs text-paper focus:border-crimson-500 focus:outline-none cursor-pointer"
+            >
+              <option value="">All Studios</option>
+              {studios.map((s) => (
+                <option key={s.value} value={s.value}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#666A70]" />
+          </div>
+        </div>
 
-          <Field label="Max episodes" htmlFor="f-max">
-            <Input id="f-max" name="maxEpisodes" type="number" min={1} placeholder="e.g. 50" defaultValue={initial.maxEpisodes} />
-          </Field>
+        {/* YEAR */}
+        <div className="flex flex-col flex-1 min-w-[110px]">
+          <span className="mb-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#666A70]">
+            YEAR
+          </span>
+          <div className="relative">
+            <select
+              value={year}
+              onChange={(e) => {
+                setYear(e.target.value);
+              }}
+              className="w-full appearance-none rounded-lg border border-[#25282C] bg-[#111316] px-3 py-2.5 text-xs text-paper focus:border-crimson-500 focus:outline-none cursor-pointer"
+            >
+              <option value="">All Years</option>
+              {DECADES.map((d) => (
+                <option key={d} value={`${d}s`}>
+                  {d}s Decade
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#666A70]" />
+          </div>
+        </div>
 
-          <Field label="Sort" htmlFor="f-sort">
-            <Select id="f-sort" name="sort" defaultValue={initial.sort ?? ""}>
-              <option value="">Default (year)</option>
+        {/* SORT BY */}
+        <div className="flex flex-col flex-1 min-w-[130px]">
+          <span className="mb-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#666A70]">
+            SORT BY
+          </span>
+          <div className="relative">
+            <select
+              value={sort}
+              onChange={(e) => {
+                setSort(e.target.value);
+              }}
+              className="w-full appearance-none rounded-lg border border-[#25282C] bg-[#111316] px-3 py-2.5 text-xs text-paper focus:border-crimson-500 focus:outline-none cursor-pointer"
+            >
               {SORT_OPTIONS.map((s) => (
                 <option key={s.value} value={s.value}>
                   {s.label}
                 </option>
               ))}
-            </Select>
-          </Field>
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#666A70]" />
+          </div>
         </div>
 
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          <Button type="submit" size="sm">
-            Apply filters
-          </Button>
-          <LinkButton href="/anime" variant="outline" size="sm">
-            Reset
-          </LinkButton>
+        {/* FILTERS APPLY BUTTON */}
+        <div className="flex flex-col self-end">
+          <button
+            type="button"
+            onClick={applyFilters}
+            className="flex items-center justify-center gap-1.5 h-10 rounded-lg border border-[#25282C] bg-[#181B1F] px-4 text-xs font-semibold uppercase tracking-wider text-paper transition-all hover:border-crimson-500 hover:bg-crimson-500/10 hover:text-crimson-300"
+          >
+            <SlidersHorizontal className="h-3.5 w-3.5 text-crimson-400" />
+            <span>FILTERS</span>
+          </button>
         </div>
-      </form>
+      </div>
     </div>
   );
 }

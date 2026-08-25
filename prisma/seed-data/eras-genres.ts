@@ -191,4 +191,47 @@ export const genres = [
     description:
       "Suspense, pursuit, and high-stakes games of wits — the engine of Death Note's global appeal.",
   },
+  {
+    slug: "dark-fantasy",
+    name: "Dark Fantasy",
+    japaneseName: "ダークファンタジー",
+    description: "Grim and supernatural fantasy worlds filled with danger and existential stakes.",
+  },
+  {
+    slug: "magic",
+    name: "Magic",
+    japaneseName: "魔法",
+    description: "Stories centering around sorcery, spells, and magical academies or worlds.",
+  },
+  {
+    slug: "superhero",
+    name: "Superhero",
+    japaneseName: "スーパーヒーロー",
+    description: "Extraordinary abilities, heroic ideals, and vigilante battles.",
+  },
+  {
+    slug: "cyberpunk",
+    name: "Cyberpunk",
+    japaneseName: "サイバーパンク",
+    description: "High-tech, low-life futuristic dystopias dominated by networks and cybernetics.",
+  },
+  {
+    slug: "martial-arts",
+    name: "Martial Arts",
+    japaneseName: "格闘",
+    description: "Hand-to-hand combat, tournaments, and warrior disciplines.",
+  },
+  {
+    slug: "ninja",
+    name: "Ninja",
+    japaneseName: "忍者",
+    description: "Shinobi legends, covert techniques, and clan warfare.",
+  },
+  {
+    slug: "shounen",
+    name: "Shounen",
+    japaneseName: "少年",
+    description: "Action-packed coming-of-age adventures driven by friendship, effort, and victory.",
+  },
 ];
+

@@ -80,6 +80,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "An event with this slug already exists." }, { status: 409 });
     }
 
+    const refs = [
+      { entity: "era", id: data.eraId },
+      { entity: "anime", id: data.animeId },
+      { entity: "studio", id: data.studioId },
+      { entity: "person", id: data.personId },
+    ] as const;
+    for (const { entity, id } of refs) {
+      if (!id) continue;
+      let found: { id: string } | null = null;
+      if (entity === "anime") found = await prisma.anime.findUnique({ where: { id }, select: { id: true } });
+      else if (entity === "era") found = await prisma.era.findUnique({ where: { id }, select: { id: true } });
+      else if (entity === "studio") found = await prisma.studio.findUnique({ where: { id }, select: { id: true } });
+      else found = await prisma.person.findUnique({ where: { id }, select: { id: true } });
+      if (!found) {
+        return NextResponse.json({ error: `Referenced ${entity} does not exist.` }, { status: 400 });
+      }
+    }
+
     const event = await prisma.historicalEvent.create({
       data: {
         slug: data.slug,

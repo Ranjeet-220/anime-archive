@@ -70,10 +70,22 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
   try {
     await requireRole("ADMIN", "EDITOR");
     const { id } = await params;
-    const deleted = await prisma.studio.deleteMany({ where: { id } });
-    if (deleted.count === 0) {
+    const studio = await prisma.studio.findUnique({ where: { id }, select: { id: true } });
+    if (!studio) {
       return NextResponse.json({ error: "Studio not found." }, { status: 404 });
     }
+    const [anime, people, events] = await prisma.$transaction([
+      prisma.anime.count({ where: { studioId: studio.id } }),
+      prisma.studioPerson.count({ where: { studioId: studio.id } }),
+      prisma.historicalEvent.count({ where: { studioId: studio.id } }),
+    ]);
+    if (anime + people + events > 0) {
+      return NextResponse.json(
+        { error: "Studio is linked to anime, people, or events; unlink those first." },
+        { status: 409 }
+      );
+    }
+    await prisma.studio.deleteMany({ where: { id } });
     invalidateCacheTags(["studio", "anime", "stats"]);
     return NextResponse.json({ ok: true });
   } catch (err) {

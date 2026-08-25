@@ -17,9 +17,9 @@ export function MoviesIndex({ movies }: { movies: AnimeCardData[] }) {
 
   const [decade, setDecade] = useState<number | null>(null);
 
-  const filtered = decade === null ? movies : movies.filter((m) => decadeOf(m.year) === decade);
-  const classic = filtered.filter((m) => (m.year ?? Number.MAX_SAFE_INTEGER) < 1990);
-  const modern = filtered.filter((m) => (m.year ?? 0) >= 1990);
+  const filtered = decade === null ? movies : movies.filter((m) => decadeOf(m.year ?? null) === decade);
+  const classic = filtered.filter((m) => m.year != null && m.year < 1990);
+  const modern = filtered.filter((m) => m.year == null || m.year >= 1990);
 
   return (
     <div>

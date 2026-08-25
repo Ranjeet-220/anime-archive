@@ -187,7 +187,7 @@ export default async function EraPage({ params }: EraPageProps) {
           __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
         }}
       />
-      <PageFade className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8 sm:py-12">
+      <PageFade className="mx-auto w-full max-w-[1720px] px-4 py-8 sm:px-8 lg:px-12 sm:py-12">
         <Breadcrumbs items={[{ label: "Timeline", href: "/timeline" }, { label: era.name }]} />
         <div className="mt-6">
           <EraHero era={era} />

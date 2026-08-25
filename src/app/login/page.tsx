@@ -9,9 +9,10 @@ export const metadata: Metadata = {
   description: "Sign in to Anime Archive.",
 };
 
-export default async function LoginPage() {
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
   const session = await getSessionUser();
   if (session) redirect("/profile");
+  const { next } = await searchParams;
 
   return (
     <div className="mx-auto max-w-md px-4 py-16 sm:py-24">
@@ -26,7 +27,7 @@ export default async function LoginPage() {
       </p>
 
       <div className="surface-panel mt-8 p-6">
-        <LoginForm />
+        <LoginForm next={next} />
       </div>
 
       <div className="mt-6 rounded-lg border border-line bg-charcoal/60 px-4 py-3 text-xs text-muted">

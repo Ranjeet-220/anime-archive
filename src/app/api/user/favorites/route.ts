@@ -63,6 +63,38 @@ export async function POST(req: NextRequest) {
   }
 }
 
+export async function PATCH(req: NextRequest) {
+  try {
+    const user = await requireUser();
+    const body = await req.json().catch(() => null);
+    const slug = typeof body?.slug === "string" ? body.slug : "";
+
+    if (!slug) {
+      return NextResponse.json({ error: "slug is required." }, { status: 400 });
+    }
+    const anime = await prisma.anime.findUnique({ where: { slug }, select: { id: true } });
+    if (!anime) {
+      return NextResponse.json({ error: "Anime not found." }, { status: 404 });
+    }
+    const existing = await prisma.favorite.findUnique({
+      where: { userId_animeId: { userId: user.id, animeId: anime.id } },
+      select: { id: true },
+    });
+    if (existing) {
+      await prisma.favorite.delete({ where: { id: existing.id } });
+      return NextResponse.json({ ok: true, favorited: false });
+    }
+    await prisma.favorite.create({ data: { userId: user.id, animeId: anime.id } });
+    return NextResponse.json({ ok: true, favorited: true });
+  } catch (err) {
+    if ((err as Error).message === "UNAUTHORIZED") {
+      return NextResponse.json({ error: "Not signed in." }, { status: 401 });
+    }
+    console.error("[user/favorites]", err);
+    return NextResponse.json({ error: "Failed to update favorites." }, { status: 500 });
+  }
+}
+
 export async function DELETE(req: NextRequest) {
   try {
     const user = await requireUser();

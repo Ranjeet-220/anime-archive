@@ -65,10 +65,30 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
   try {
     await requireRole("ADMIN", "EDITOR");
     const { slug } = await params;
-    const deleted = await prisma.anime.deleteMany({ where: { slug } });
-    if (deleted.count === 0) {
+    const anime = await prisma.anime.findUnique({ where: { slug }, select: { id: true } });
+    if (!anime) {
       return NextResponse.json({ error: "Anime not found." }, { status: 404 });
     }
+    const dependents = await prisma.$transaction([
+      prisma.favorite.count({ where: { animeId: anime.id } }),
+      prisma.watchlistItem.count({ where: { animeId: anime.id } }),
+      prisma.rating.count({ where: { animeId: anime.id } }),
+      prisma.note.count({ where: { animeId: anime.id } }),
+      prisma.collectionItem.count({ where: { animeId: anime.id } }),
+      prisma.rankingItem.count({ where: { animeId: anime.id } }),
+      prisma.episode.count({ where: { animeId: anime.id } }),
+      prisma.character.count({ where: { animeId: anime.id } }),
+      prisma.personCredit.count({ where: { animeId: anime.id } }),
+      prisma.animeRelation.count({ where: { OR: [{ animeId: anime.id }, { relatedId: anime.id }] } }),
+      prisma.source.count({ where: { entityType: "anime", entityId: anime.id } }),
+    ]);
+    if (dependents.some((n) => n > 0)) {
+      return NextResponse.json(
+        { error: "Anime is referenced by user data, characters, or rankings; delete those first." },
+        { status: 409 }
+      );
+    }
+    await prisma.anime.deleteMany({ where: { slug } });
     invalidateCacheTags(["anime", "stats", "home"]);
     return NextResponse.json({ ok: true });
   } catch (err) {

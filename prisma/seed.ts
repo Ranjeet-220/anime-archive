@@ -5,8 +5,14 @@ import { studios } from "./seed-data/studios";
 import { people } from "./seed-data/people";
 import { animeEarly } from "./seed-data/anime-early";
 import { animeModern } from "./seed-data/anime-modern";
+import { animeCuratedTierS } from "./seed-data/anime-curated-tier-s";
+import { animeCuratedPopular } from "./seed-data/anime-curated-popular";
+import { animeCuratedCinema } from "./seed-data/anime-curated-cinema";
+import { animeCuratedModern } from "./seed-data/anime-curated-modern";
+import { anime60Cards } from "./seed-data/anime-60-cards";
 import { events } from "./seed-data/events";
 import { quizzes, badges, tours } from "./seed-data/quiz-tours";
+import { rankings } from "./seed-data/rankings";
 
 async function main() {
   console.log("Seeding Anime Archive database…");
@@ -27,10 +33,13 @@ async function main() {
     prisma.character.deleteMany(),
     prisma.personCredit.deleteMany(),
     prisma.studioPerson.deleteMany(),
+    prisma.rankingItem.deleteMany(),
+    prisma.ranking.deleteMany(),
     prisma.person.deleteMany(),
     prisma.studio.deleteMany(),
     prisma.genre.deleteMany(),
     prisma.anime.deleteMany(),
+
     prisma.era.deleteMany(),
     prisma.quizAttempt.deleteMany(),
     prisma.userBadge.deleteMany(),
@@ -79,9 +88,24 @@ async function main() {
     personById[person.slug] = created.id;
   }
 
-  // Anime
+  // Anime — curated entries carry full data; anime60Cards only provides
+  // cover art (its own placeholder entries are never created).
   const animeIdBySlug: Record<string, string> = {};
-  const allAnime = [...animeEarly, ...animeModern];
+  const coverBySlug = new Map(anime60Cards.map((a) => [a.slug, a.coverUrl]));
+  const rawAnimeList = [
+    ...animeEarly,
+    ...animeModern,
+    ...animeCuratedTierS,
+    ...animeCuratedPopular,
+    ...animeCuratedCinema,
+    ...animeCuratedModern,
+  ];
+  const seenSlugs = new Set<string>();
+  const allAnime = rawAnimeList.filter((a) => {
+    if (seenSlugs.has(a.slug)) return false;
+    seenSlugs.add(a.slug);
+    return true;
+  });
   for (const a of allAnime) {
     const created = await prisma.anime.create({
       data: {
@@ -92,7 +116,7 @@ async function main() {
         synopsis: a.synopsis,
         releaseDate: a.releaseDate ? new Date(a.releaseDate) : null,
         endDate: a.endDate ? new Date(a.endDate) : null,
-        coverUrl: a.coverUrl ?? null,
+        coverUrl: a.coverUrl ?? coverBySlug.get(a.slug) ?? null,
         year: a.year,
         decade: Math.floor(a.year / 10) * 10,
         format: a.format,
@@ -367,6 +391,35 @@ async function main() {
         year: s.year ?? null,
         eraSlug: s.eraSlug ?? null,
         animeSlug: s.animeSlug ?? null,
+      })),
+    });
+  }
+
+  // Curated rankings
+  for (const ranking of rankings) {
+    const created = await prisma.ranking.upsert({
+      where: { slug: ranking.slug },
+      update: {
+        name: ranking.name,
+        tagline: ranking.tagline,
+        description: ranking.description,
+        methodology: ranking.methodology,
+      },
+      create: {
+        slug: ranking.slug,
+        name: ranking.name,
+        tagline: ranking.tagline,
+        description: ranking.description,
+        methodology: ranking.methodology,
+      },
+    });
+    await prisma.rankingItem.deleteMany({ where: { rankingId: created.id } });
+    await prisma.rankingItem.createMany({
+      data: ranking.items.map((item, index) => ({
+        rankingId: created.id,
+        animeId: animeIdBySlug[item.slug],
+        rank: index + 1,
+        note: item.note ?? null,
       })),
     });
   }

@@ -123,6 +123,16 @@ export type CollectionItem = Prisma.CollectionItemModel
  */
 export type Report = Prisma.ReportModel
 /**
+ * Model Ranking
+ * 
+ */
+export type Ranking = Prisma.RankingModel
+/**
+ * Model RankingItem
+ * 
+ */
+export type RankingItem = Prisma.RankingItemModel
+/**
  * Model Quiz
  * 
  */

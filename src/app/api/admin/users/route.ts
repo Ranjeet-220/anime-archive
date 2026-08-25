@@ -1,16 +1,17 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
+import { canManage } from "@/lib/auth";
 
 export async function GET() {
   try {
-    await requireRole("ADMIN", "EDITOR");
+    const reviewer = await requireRole("ADMIN", "EDITOR");
     const users = await prisma.user.findMany({
       orderBy: { createdAt: "desc" },
       select: {
         id: true,
         username: true,
-        email: true,
+        email: canManage(reviewer.role),
         role: true,
         name: true,
         createdAt: true,

@@ -59,11 +59,13 @@ Open http://localhost:3000.
 | ADMIN | `admin@animearchive.local` | `ChangeMe-Admin-2026!` |
 | USER | `demo@animearchive.local` | `DemoUser-2026!` |
 
-The seed contains ~24 anime, 17 studios, 35 people, 30 characters, 33
-historical events, 7 eras, 17 genres, 100+ documented sources, plus 3
-quizzes, 4 achievement badges, and 2 guided tours. All data is
-demo/illustrative content; re-run `npm run seed` at any time — it is
-idempotent.
+The seed contains 67 anime, 31 studios, 72 people, 116 characters, 33
+historical events, 7 eras, 17 genres, 100+ documented sources, 3
+quizzes, 4 achievement badges, 2 guided tours, and 7 curated rankings
+(the Archive's "Top 60" across Most Popular, Most Watched, Highest
+Rated, Most Influential, Global Icons, Popular in India, and Historical
+Milestones). All data is demo/illustrative content; re-run `npm run seed`
+at any time — it is idempotent.
 
 ## Running locally (this workspace)
 
@@ -105,14 +107,15 @@ drop the `--webpack` flags.
 ```
 src/app/            routes: /museum /timeline /anime /movies /studios /creators
                     /characters /genres /collections /search /contribute /admin
-                    /quizzes /quiz/[slug] /tours /tour/[slug]
+                    /quizzes /quiz/[slug] /tours /tour/[slug] /rankings
                     + static pages, sitemap.ts, robots.ts, opengraph-image.tsx
 src/components/     ui (design system), layout, three (3D scenes + era FX +
                     minimap), anime, era, timeline (world-history comparison),
                     transitions, user (quiz runner, contribution diff)
 src/lib/            data layer, auth, validation, types, device-mode,
                     world-history-data
-prisma/             schema, migrations, seed (data + data files + quiz-tours)
+prisma/             schema, migrations, seed (data + data files + quiz-tours +
+                    rankings)
 ```
 
 ## Documentation & conventions

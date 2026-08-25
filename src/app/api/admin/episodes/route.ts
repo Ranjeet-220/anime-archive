@@ -47,9 +47,12 @@ export async function PATCH(req: NextRequest) {
     const body = await req.json().catch(() => null);
     const episodeId = typeof body?.episodeId === "string" ? body.episodeId : null;
     if (!episodeId) return NextResponse.json({ error: "episodeId is required." }, { status: 400 });
-    const number = typeof body?.number === "number" ? body.number : undefined;
+    const number = typeof body?.number === "number" && Number.isInteger(body.number) ? body.number : undefined;
+    if (typeof body?.number === "number" && (!Number.isInteger(body.number) || body.number < 1)) {
+      return NextResponse.json({ error: "Episode number must be a positive integer." }, { status: 400 });
+    }
     const data: Record<string, unknown> = {};
-    if (number !== undefined && number >= 1) data.number = number;
+    if (number !== undefined) data.number = number;
     if (typeof body?.title === "string") data.title = body.title;
     if (typeof body?.synopsis === "string") data.synopsis = body.synopsis;
     if (typeof body?.airDate === "string") {

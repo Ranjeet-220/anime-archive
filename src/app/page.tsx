@@ -6,12 +6,14 @@ import { AnimeCard, type AnimeCardData } from "@/components/ui/anime-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { EVENT_KIND_LABELS } from "@/lib/format";
-import { HomeHero } from "@/components/three/home-hero";
+import { HeroCinematic } from "@/components/home/hero-cinematic";
+import { ExploreCollections } from "@/components/home/explore-collections";
+import { ArrowRight, Sparkles } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Anime Archive — Walk Through the History of Anime",
   description:
-    "Step into the Anime Archive: a 3D digital museum of Japanese animation. Explore eras, studios, creators, and landmark works from 1917 to today.",
+    "Step into the Anime Archive: a digital museum and historical encyclopedia of Japanese animation. Explore eras, studios, creators, and landmark works from 1917 to today.",
   alternates: { canonical: "/" },
 };
 
@@ -36,6 +38,7 @@ function toCard(
     averageRating: number;
     coverUrl: string | null;
     studio: { slug: string; name: string } | null;
+    genres?: { slug: string; name: string }[];
   } | null,
   extra: Partial<AnimeCardData> = {}
 ): AnimeCardData | null {
@@ -49,6 +52,7 @@ function toCard(
     averageRating: a.averageRating,
     coverUrl: a.coverUrl,
     studio: a.studio,
+    genres: a.genres,
     ...extra,
   };
 }
@@ -59,24 +63,97 @@ export default async function HomePage() {
   const { stats, onThisDay, latest, landmark } = home;
 
   return (
-    <div className="flex flex-col gap-20 pb-24">
+    <div className="flex flex-col gap-16 sm:gap-20 pb-24 bg-ink">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(WEBSITE_SCHEMA) }}
       />
 
-      {/* Cinematic 3D intro hero */}
-      <HomeHero />
+      {/* Cinematic Hero matching reference image */}
+      <HeroCinematic />
 
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6">
-        {/* Archive statistics */}
+      <div className="mx-auto w-full max-w-[1720px] px-4 sm:px-8 lg:px-12 flex flex-col gap-20">
+        {/* Explore The Collections: 6 Cards */}
+        <ExploreCollections />
+
+        {/* Landmark Classics / Top Masterpieces */}
+        <section aria-labelledby="landmark-heading">
+          <div className="flex items-end justify-between mb-6">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-crimson-400">
+                Landmarks of Animation
+              </p>
+              <h2
+                id="landmark-heading"
+                className="font-display text-2xl font-extrabold uppercase tracking-tight text-paper sm:text-3xl"
+              >
+                Iconic Anime Masterpieces
+              </h2>
+            </div>
+            <Link
+              href="/rankings"
+              className="text-xs font-semibold uppercase tracking-wider text-crimson-400 hover:text-crimson-300 transition-colors hidden sm:inline-flex items-center gap-1"
+            >
+              <span>Top 60 Hall of Fame</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+
+          {landmark.length ? (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 sm:gap-4">
+              {landmark.map((a) => {
+                const card = toCard(a);
+                return card ? <AnimeCard key={card.slug} data={card} /> : null;
+              })}
+            </div>
+          ) : (
+            <EmptyState
+              title="Landmarks not archived yet"
+              description="The golden-age showcase is being digitised."
+            />
+          )}
+        </section>
+
+        {/* 3D Museum Interactive Banner */}
+        <section className="relative overflow-hidden rounded-2xl border border-[#25282C] bg-[#111316] p-6 sm:p-10">
+          <div className="absolute right-0 top-0 bottom-0 w-1/2 opacity-20 pointer-events-none bg-[radial-gradient(ellipse_at_center,rgba(227,38,46,0.6),transparent_70%)]" />
+          <div className="relative z-10 max-w-2xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-crimson-500/40 bg-crimson-500/10 px-3 py-1 text-xs font-semibold text-crimson-400">
+              <Sparkles className="h-3.5 w-3.5" />
+              <span>INTERACTIVE EXPERIENCE</span>
+            </div>
+            <h3 className="mt-4 font-serif text-2xl sm:text-4xl font-bold uppercase tracking-tight text-paper">
+              WALK THROUGH THE 3D MUSEUM
+            </h3>
+            <p className="mt-3 text-sm leading-relaxed text-[#9A9A9A]">
+              Immerse yourself in our real-time 3D museum chambers. Walk through distinct historical eras, explore floating exhibits, inspect archival cel artwork, and interact with the physical history of anime.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-4">
+              <Link
+                href="/museum"
+                className="inline-flex items-center gap-2 rounded-full bg-crimson-500 px-6 py-3 text-xs font-bold uppercase tracking-[0.16em] text-white shadow-[0_0_16px_rgba(227,38,46,0.4)] transition-all hover:bg-crimson-400 hover:scale-[1.02]"
+              >
+                <span>LAUNCH 3D SPACE</span>
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                href="/tours"
+                className="inline-flex items-center gap-2 rounded-full border border-line bg-charcoal px-6 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-paper transition-colors hover:border-line-2 hover:bg-charcoal-2"
+              >
+                <span>GUIDED TOURS</span>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Archive Statistics */}
         <section aria-labelledby="stats-heading">
           <SectionHeading
             eyebrow="The archive in numbers"
             title="A Century of Japanese Animation"
             align="center"
           />
-          <dl className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-6">
+          <dl className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
             <Stat value={stats.anime} label="Anime Archived" />
             <Stat value={stats.studios} label="Studios Documented" />
             <Stat value={stats.creators} label="Creators Documented" />
@@ -86,10 +163,10 @@ export default async function HomePage() {
           </dl>
         </section>
 
-        {/* On this day */}
-        <section aria-labelledby="on-this-day-heading" className="mt-20">
+        {/* On this day in history */}
+        <section aria-labelledby="on-this-day-heading">
           <SectionHeading
-            eyebrow="Today in history"
+            eyebrow="Chronicle of milestones"
             title="On This Day in Anime History"
           />
           {onThisDay.length ? (
@@ -102,11 +179,11 @@ export default async function HomePage() {
                     : null;
                 const body = (
                   <>
-                    <span className="font-display text-[11px] uppercase tracking-[0.2em] text-crimson-400 tabular-nums">
+                    <span className="font-display text-[11px] uppercase tracking-[0.2em] text-crimson-400 tabular-nums font-semibold">
                       {date ? `${date} · ` : ""}
                       {event.year ?? ""}
                     </span>
-                    <span className="mt-1 block text-sm text-paper-2">
+                    <span className="mt-1 block text-sm font-semibold text-paper">
                       {EVENT_KIND_LABELS[event.kind] ?? "Event"} — {event.title}
                     </span>
                     {event.description ? (
@@ -117,7 +194,7 @@ export default async function HomePage() {
                   </>
                 );
                 return (
-                  <li key={event.id} className="surface-card p-4">
+                  <li key={event.id} className="surface-card p-4 transition-all hover:border-crimson-500/50 hover:bg-[#181B1F]">
                     {era ? (
                       <Link href={`/timeline/${era.slug}`} className="block transition-colors hover:text-crimson-300">
                         {body}
@@ -140,36 +217,29 @@ export default async function HomePage() {
           )}
         </section>
 
-        {/* Landmark of the 1980s */}
-        <section aria-labelledby="landmark-heading" className="mt-20">
-          <SectionHeading
-            eyebrow="Landmark of the 1980s"
-            title="The Golden Age Defined"
-            description="Works that proved anime's artistic and commercial reach worldwide."
-          />
-          {landmark.length ? (
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-              {landmark.map((a) => {
-                const card = toCard(a);
-                return card ? <AnimeCard key={card.slug} data={card} /> : null;
-              })}
-            </div>
-          ) : (
-            <EmptyState
-              title="Landmarks not archived yet"
-              description="The golden-age showcase is being digitised."
-            />
-          )}
-        </section>
-
         {/* Recently added */}
-        <section aria-labelledby="recent-heading" className="mt-20">
-          <SectionHeading
-            eyebrow="Fresh from the archive"
-            title="Recently Added to the Archive"
-          />
+        <section aria-labelledby="recent-heading">
+          <div className="flex items-end justify-between mb-6">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-crimson-400">
+                Fresh from the archive
+              </p>
+              <h2
+                id="recent-heading"
+                className="font-display text-2xl font-extrabold uppercase tracking-tight text-paper sm:text-3xl"
+              >
+                Recently Documented
+              </h2>
+            </div>
+            <Link
+              href="/anime"
+              className="text-xs font-semibold uppercase tracking-wider text-crimson-400 hover:text-crimson-300 transition-colors"
+            >
+              Browse All →
+            </Link>
+          </div>
           {latest.length ? (
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 sm:gap-4">
               {latest.map((a) => {
                 const card = toCard(a);
                 return card ? <AnimeCard key={card.slug} data={card} /> : null;
@@ -182,21 +252,8 @@ export default async function HomePage() {
             />
           )}
         </section>
-
-        <section className="mt-20 text-center">
-          <div className="inline-flex flex-wrap items-center justify-center gap-3">
-            <Badge tone="crimson">1917 — 2020s</Badge>
-            <Badge>7 eras</Badge>
-            <Badge>16 genres</Badge>
-            <Link
-              href="/museum"
-              className="font-display text-[11px] uppercase tracking-[0.26em] text-holo-300 underline-offset-4 transition-colors hover:text-holo-400 hover:underline"
-            >
-              Enter the 3D museum →
-            </Link>
-          </div>
-        </section>
       </div>
     </div>
   );
 }
+

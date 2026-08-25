@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
 import { invalidateCacheTags } from "@/lib/cache";
 import { slugify } from "@/lib/utils";
+import type { Prisma } from "@/generated/prisma/client";
 import type { ContributionStatus, AnimeFormat } from "@/generated/prisma/client";
 
 const STATUSES: ContributionStatus[] = ["SUBMITTED", "UNDER_REVIEW", "VERIFIED", "PUBLISHED", "REJECTED"];
@@ -19,7 +20,7 @@ async function uniqueSlug(base: string): Promise<string> {
   return slug;
 }
 
-async function publishAnime(payload: unknown): Promise<{ ok: boolean; error?: string; slug?: string }> {
+async function publishAnime(tx: Prisma.TransactionClient, payload: unknown): Promise<{ ok: boolean; error?: string; slug?: string }> {
   const p = payload as Record<string, unknown>;
   if (!p || typeof p !== "object" || typeof p.title !== "string" || !p.title.trim()) {
     return { ok: false, error: "Payload must contain a 'title' to publish a new anime." };
@@ -33,12 +34,12 @@ async function publishAnime(payload: unknown): Promise<{ ok: boolean; error?: st
 
   let studioId: string | null = null;
   if (typeof p.studioSlug === "string" && p.studioSlug) {
-    const studio = await prisma.studio.findUnique({ where: { slug: p.studioSlug }, select: { id: true } });
+    const studio = await tx.studio.findUnique({ where: { slug: p.studioSlug }, select: { id: true } });
     studioId = studio?.id ?? null;
   }
 
   const slug = await uniqueSlug(typeof p.slug === "string" && p.slug ? p.slug : String(p.title));
-  const anime = await prisma.anime.create({
+  const anime = await tx.anime.create({
     data: {
       slug,
       title: String(p.title).trim(),
@@ -77,28 +78,38 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     // Publishing a NEW_ANIME contribution creates the anime record from its payload.
     let publishedSlug: string | undefined;
+    let contribution;
+    if (status === "PUBLISHED" && existing.status === "PUBLISHED") {
+      return NextResponse.json({ error: "Contribution is already published." }, { status: 409 });
+    }
     if (status === "PUBLISHED" && existing.type === "NEW_ANIME") {
-      const result = await publishAnime(existing.payload);
-      if (!result.ok) {
+      const outcome = await prisma.$transaction(async (tx) => {
+        const result = await publishAnime(tx, existing.payload);
+        if (!result.ok) return { ...result, contribution: null };
+        const updated = await tx.contribution.update({
+          where: { id },
+          data: { status, reviewerNotes: reviewerNotes ?? undefined, reviewedById: reviewer.id },
+        });
+        return { ...result, contribution: updated };
+      });
+      if (!outcome.ok) {
         return NextResponse.json(
-          { error: result.error ?? "Cannot publish: invalid payload." },
+          { error: outcome.error ?? "Cannot publish: invalid payload." },
           { status: 400 }
         );
       }
-      publishedSlug = result.slug;
+      publishedSlug = outcome.slug;
+      contribution = outcome.contribution as NonNullable<typeof outcome.contribution>;
+    } else {
+      contribution = await prisma.contribution.update({
+        where: { id },
+        data: {
+          status,
+          reviewerNotes: reviewerNotes ?? undefined,
+          reviewedById: reviewer.id,
+        },
+      });
     }
-
-    const contribution = await prisma.contribution.update({
-      where: { id },
-      data: {
-        status,
-        reviewerNotes: reviewerNotes ?? undefined,
-        reviewedById: reviewer.id,
-        ...(status === "REJECTED" || status === "VERIFIED" || status === "PUBLISHED"
-          ? { reviewedById: reviewer.id }
-          : {}),
-      },
-    });
 
     if (status === "PUBLISHED") {
       invalidateCacheTags(["anime", "stats", "home"]);

@@ -34,7 +34,7 @@ export default async function WatchlistPage() {
   });
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
+    <div className="mx-auto max-w-[1720px] w-full px-4 py-10 sm:px-8 lg:px-12">
       <Breadcrumbs items={[{ label: "Profile", href: "/profile" }, { label: "Watchlist" }]} />
       <div className="mt-6 mb-8">
         <h1 className="font-display text-3xl text-paper">My watchlist</h1>

@@ -57,11 +57,11 @@ export function AdminEpisodesManager({ animeId }: { animeId: string }) {
 
   async function load() {
     if (loaded) return;
-    setLoaded(true);
     const res = await fetch(`/api/anime/${animeId}/episodes`).catch(() => null);
     if (res?.ok) {
       const data = await res.json().catch(() => null);
       if (data?.episodes) setRows(data.episodes.map(toRow));
+      setLoaded(true);
     }
   }
 

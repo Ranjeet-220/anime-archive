@@ -418,6 +418,8 @@ export const ModelName = {
   Collection: 'Collection',
   CollectionItem: 'CollectionItem',
   Report: 'Report',
+  Ranking: 'Ranking',
+  RankingItem: 'RankingItem',
   Quiz: 'Quiz',
   QuizAttempt: 'QuizAttempt',
   Badge: 'Badge',
@@ -439,7 +441,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "anime" | "animeRelation" | "era" | "studio" | "person" | "personCredit" | "studioPerson" | "character" | "episode" | "genre" | "historicalEvent" | "source" | "contribution" | "favorite" | "watchlistItem" | "rating" | "note" | "collection" | "collectionItem" | "report" | "quiz" | "quizAttempt" | "badge" | "userBadge" | "tour" | "tourStep"
+    modelProps: "user" | "anime" | "animeRelation" | "era" | "studio" | "person" | "personCredit" | "studioPerson" | "character" | "episode" | "genre" | "historicalEvent" | "source" | "contribution" | "favorite" | "watchlistItem" | "rating" | "note" | "collection" | "collectionItem" | "report" | "ranking" | "rankingItem" | "quiz" | "quizAttempt" | "badge" | "userBadge" | "tour" | "tourStep"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1997,6 +1999,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Ranking: {
+      payload: Prisma.$RankingPayload<ExtArgs>
+      fields: Prisma.RankingFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.RankingFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RankingPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.RankingFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RankingPayload>
+        }
+        findFirst: {
+          args: Prisma.RankingFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RankingPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.RankingFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RankingPayload>
+        }
+        findMany: {
+          args: Prisma.RankingFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RankingPayload>[]
+        }
+        create: {
+          args: Prisma.RankingCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RankingPayload>
+        }
+        createMany: {
+          args: Prisma.RankingCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.RankingCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RankingPayload>[]
+        }
+        delete: {
+          args: Prisma.RankingDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RankingPayload>
+        }
+        update: {
+          args: Prisma.RankingUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RankingPayload>
+        }
+        deleteMany: {
+          args: Prisma.RankingDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.RankingUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.RankingUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RankingPayload>[]
+        }
+        upsert: {
+          args: Prisma.RankingUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RankingPayload>
+        }
+        aggregate: {
+          args: Prisma.RankingAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRanking>
+        }
+        groupBy: {
+          args: Prisma.RankingGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RankingGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.RankingCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RankingCountAggregateOutputType> | number
+        }
+      }
+    }
+    RankingItem: {
+      payload: Prisma.$RankingItemPayload<ExtArgs>
+      fields: Prisma.RankingItemFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.RankingItemFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RankingItemPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.RankingItemFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RankingItemPayload>
+        }
+        findFirst: {
+          args: Prisma.RankingItemFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RankingItemPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.RankingItemFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RankingItemPayload>
+        }
+        findMany: {
+          args: Prisma.RankingItemFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RankingItemPayload>[]
+        }
+        create: {
+          args: Prisma.RankingItemCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RankingItemPayload>
+        }
+        createMany: {
+          args: Prisma.RankingItemCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.RankingItemCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RankingItemPayload>[]
+        }
+        delete: {
+          args: Prisma.RankingItemDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RankingItemPayload>
+        }
+        update: {
+          args: Prisma.RankingItemUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RankingItemPayload>
+        }
+        deleteMany: {
+          args: Prisma.RankingItemDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.RankingItemUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.RankingItemUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RankingItemPayload>[]
+        }
+        upsert: {
+          args: Prisma.RankingItemUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RankingItemPayload>
+        }
+        aggregate: {
+          args: Prisma.RankingItemAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRankingItem>
+        }
+        groupBy: {
+          args: Prisma.RankingItemGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RankingItemGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.RankingItemCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RankingItemCountAggregateOutputType> | number
+        }
+      }
+    }
     Quiz: {
       payload: Prisma.$QuizPayload<ExtArgs>
       fields: Prisma.QuizFieldRefs
@@ -2802,6 +2952,30 @@ export const ReportScalarFieldEnum = {
 export type ReportScalarFieldEnum = (typeof ReportScalarFieldEnum)[keyof typeof ReportScalarFieldEnum]
 
 
+export const RankingScalarFieldEnum = {
+  id: 'id',
+  slug: 'slug',
+  name: 'name',
+  tagline: 'tagline',
+  description: 'description',
+  methodology: 'methodology',
+  order: 'order'
+} as const
+
+export type RankingScalarFieldEnum = (typeof RankingScalarFieldEnum)[keyof typeof RankingScalarFieldEnum]
+
+
+export const RankingItemScalarFieldEnum = {
+  id: 'id',
+  rankingId: 'rankingId',
+  animeId: 'animeId',
+  rank: 'rank',
+  note: 'note'
+} as const
+
+export type RankingItemScalarFieldEnum = (typeof RankingItemScalarFieldEnum)[keyof typeof RankingItemScalarFieldEnum]
+
+
 export const QuizScalarFieldEnum = {
   id: 'id',
   slug: 'slug',
@@ -3307,6 +3481,8 @@ export type GlobalOmitConfig = {
   collection?: Prisma.CollectionOmit
   collectionItem?: Prisma.CollectionItemOmit
   report?: Prisma.ReportOmit
+  ranking?: Prisma.RankingOmit
+  rankingItem?: Prisma.RankingItemOmit
   quiz?: Prisma.QuizOmit
   quizAttempt?: Prisma.QuizAttemptOmit
   badge?: Prisma.BadgeOmit

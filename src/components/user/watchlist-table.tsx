@@ -81,7 +81,7 @@ export function WatchlistTable({ items }: { items: WatchlistItemDto[] }) {
                         </Link>
                         <span className="ml-2 text-xs text-faint">
                           {item.anime.year ?? "—"}
-                          {item.anime.averageRating ? ` · ${item.anime.averageRating.toFixed(1)}★` : ""}
+                          {item.anime.averageRating != null ? ` · ${item.anime.averageRating.toFixed(1)}★` : ""}
                         </span>
                       </td>
                       <td className="w-40 px-3 py-2.5">

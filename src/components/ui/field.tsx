@@ -25,9 +25,12 @@ export function Field({
   className?: string;
   children: React.ReactNode;
 }) {
+  const generatedId = htmlFor ?? (typeof children === "object" && children !== null && "props" in children && typeof (children as { props?: { id?: string } }).props?.id === "string"
+    ? (children as { props: { id: string } }).props.id
+    : undefined);
   return (
     <div className={cn("space-y-1.5", className)}>
-      <label htmlFor={htmlFor} className="block text-xs font-medium tracking-wide text-muted">
+      <label htmlFor={generatedId} className="block text-xs font-medium tracking-wide text-muted">
         {label}
       </label>
       {children}

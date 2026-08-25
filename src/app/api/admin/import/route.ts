@@ -28,6 +28,36 @@ export interface ImportAnalysis {
   }[];
 }
 
+function parseCsvLine(line: string): string[] {
+  const parts: string[] = [];
+  let current = "";
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (line[i + 1] === '"') {
+          current += '"';
+          i++;
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        current += ch;
+      }
+    } else if (ch === '"') {
+      inQuotes = true;
+    } else if (ch === ",") {
+      parts.push(current.trim());
+      current = "";
+    } else {
+      current += ch;
+    }
+  }
+  parts.push(current.trim());
+  return parts;
+}
+
 function parseCsv(text: string): ImportRow[] {
   const lines = text
     .split(/\r?\n/)
@@ -35,28 +65,32 @@ function parseCsv(text: string): ImportRow[] {
     .filter(Boolean);
   if (lines.length === 0) return [];
 
-  const header = lines[0].split(",").map((h) => h.trim().toLowerCase());
+  const header = parseCsvLine(lines[0]).map((h) => h.trim().toLowerCase());
   const isHeader = header.some((h) => h === "title" || h === "slug" || h === "name");
   const start = isHeader ? 1 : 0;
   const col = (row: string[], key: string): string | undefined => {
-    const idx = isHeader ? header.indexOf(key) : { title: 0, slug: 1, year: 2, format: 3, synopsis: 4 }[key] ?? -1;
+    const idx = isHeader ? header.indexOf(key) : { title: 0, slug: 1, year: 2, format: 3, japanesetitle: 4, synopsis: 5 }[key] ?? -1;
     return idx >= 0 ? row[idx]?.trim() : undefined;
   };
 
   const rows: ImportRow[] = [];
   for (let i = start; i < lines.length; i++) {
-    const parts = lines[i].split(",").map((p) => p.trim());
+    const parts = parseCsvLine(lines[i]);
     const title = col(parts, "title");
     const slug = col(parts, "slug");
     const year = Number(col(parts, "year"));
     const format = col(parts, "format");
+    const japaneseTitle = col(parts, "japanesetitle") ?? col(parts, "japanese_title");
+    const synopsis = col(parts, "synopsis");
     rows.push({
       title: title ?? "",
       slug,
+      japaneseTitle: japaneseTitle || undefined,
       year: Number.isInteger(year) && year >= 1900 && year <= 2100 ? year : undefined,
       format: format && FORMATS.includes(format.toUpperCase() as AnimeFormat)
         ? (format.toUpperCase() as AnimeFormat)
         : undefined,
+      synopsis: synopsis || undefined,
     });
   }
   return rows;

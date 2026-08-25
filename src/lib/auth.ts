@@ -10,7 +10,13 @@ const SESSION_COOKIE = "aa_session";
 const SESSION_DAYS = 30;
 
 const secret = new TextEncoder().encode(
-  process.env.AUTH_SECRET ?? "dev-secret-change-me-in-production"
+  (() => {
+    const value = process.env.AUTH_SECRET;
+    if (process.env.NODE_ENV === "production" && !value) {
+      throw new Error("AUTH_SECRET must be set in production — refusing to use a forgeable fallback secret.");
+    }
+    return value ?? "dev-secret-change-me-in-production";
+  })()
 );
 
 export interface SessionUser {

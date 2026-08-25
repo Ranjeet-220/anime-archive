@@ -100,10 +100,10 @@ export function AnimePoster({
 
   // Seeded abstract composition: disk offset, frame bands, film perforations.
   const diskX = 70 + (seed % 70);
-  const diskY = 78 + ((seed >> 3) % 56);
-  const diskR = 34 + ((seed >> 6) % 30);
-  const bars = 3 + ((seed >> 9) % 3);
-  const ring = (seed >> 12) % 3;
+  const diskY = 78 + ((seed >>> 3) % 56);
+  const diskR = 34 + ((seed >>> 6) % 30);
+  const bars = 3 + ((seed >>> 9) % 3);
+  const ring = (seed >>> 12) % 3;
 
   const perfs = Array.from({ length: 12 }, (_, i) => ({
     y: 16 + i * 30,
@@ -139,7 +139,7 @@ export function AnimePoster({
       <rect width={W} height={H} fill={`url(#bg-${seed})`} />
 
       {/* Horizon band */}
-      <rect x="0" y={150 + ((seed >> 4) % 30)} width={W} height="2" fill={p.frame} />
+      <rect x="0" y={150 + ((seed >>> 4) % 30)} width={W} height="2" fill={p.frame} />
 
       {/* Vertical Japanese title column (right side) */}
       {jp ? (
@@ -169,15 +169,15 @@ export function AnimePoster({
 
       {/* Abstract bars — skyline / horizon line */}
       {Array.from({ length: bars }, (_, i) => {
-        const bw = 26 + ((seed >> (4 + i * 3)) % 34);
-        const bx = 30 + ((seed >> (6 + i * 4)) % 90);
+        const bw = 26 + ((seed >>> (4 + i * 3)) % 34);
+        const bx = 30 + ((seed >>> (6 + i * 4)) % 90);
         return (
           <rect
             key={i}
             x={bx}
-            y={158 + ((seed >> (3 + i * 2)) % 22) + i * 22}
+            y={158 + ((seed >>> (3 + i * 2)) % 22) + i * 22}
             width={bw}
-            height={3 + ((seed >> (8 + i)) % 6)}
+            height={3 + ((seed >>> (8 + i)) % 6)}
             fill={p.accent}
             opacity={0.5 - i * 0.12}
           />

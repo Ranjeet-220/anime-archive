@@ -58,10 +58,23 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
   try {
     await requireRole("ADMIN", "EDITOR");
     const { id } = await params;
-    const deleted = await prisma.person.deleteMany({ where: { id } });
-    if (deleted.count === 0) {
+    const person = await prisma.person.findUnique({ where: { id }, select: { id: true } });
+    if (!person) {
       return NextResponse.json({ error: "Person not found." }, { status: 404 });
     }
+    const [directed, created, credits, studioLinks] = await prisma.$transaction([
+      prisma.anime.count({ where: { directorId: person.id } }),
+      prisma.anime.count({ where: { creatorId: person.id } }),
+      prisma.personCredit.count({ where: { personId: person.id } }),
+      prisma.studioPerson.count({ where: { personId: person.id } }),
+    ]);
+    if (directed + created + credits + studioLinks > 0) {
+      return NextResponse.json(
+        { error: "Person is linked to anime or studios; unlink those first." },
+        { status: 409 }
+      );
+    }
+    await prisma.person.deleteMany({ where: { id } });
     invalidateCacheTags(["person", "anime"]);
     return NextResponse.json({ ok: true });
   } catch (err) {

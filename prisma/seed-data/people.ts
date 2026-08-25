@@ -560,6 +560,588 @@ export const people = [
     contribution:
       "Championed the most artistically ambitious productions of three decades of anime.",
   },
+  {
+    slug: "yoshihiro-togashi",
+    name: "Yoshihiro Togashi",
+    japaneseName: "冨樫 義博",
+    role: "Creator · Manga artist",
+    bornYear: 1966,
+    birthplace: "Shinjuku, Tokyo, Japan",
+    biography:
+      "Creator of Yu Yu Hakusho and Hunter × Hunter, Togashi is one of the most influential shōnen storytellers of his generation, known for intricate power systems and morally complex characters.",
+    career:
+      "Debuted in 1986; Yu Yu Hakusho (1990) became a smash hit, and Hunter × Hunter (1998) redefined shōnen depth with its Nen combat system.",
+    majorWorks: "Yu Yu Hakusho, Hunter × Hunter, Level E",
+    awards: "Shogakukan Manga Award (1993); Tezuka Osamu Cultural Prize nomination",
+    contribution:
+      "Elevated battle manga into a vehicle for psychological and tactical depth.",
+  },
+  {
+    slug: "tite-kubo",
+    name: "Tite Kubo",
+    japaneseName: "久保 帯人",
+    role: "Creator · Manga artist",
+    bornYear: 1977,
+    birthplace: "Hiroshima Prefecture, Japan",
+    biography:
+      "Creator of Bleach, one of the 'Big Three' of shōnen anime, known for his stylish swordsmanship, fashion-forward character design, and atmospheric urban fantasy.",
+    career:
+      "Debuted in 1996; Bleach (2001) ran for 15 years in Weekly Shōnen Jump and its anime spanned 366 episodes.",
+    majorWorks: "Bleach, Burn the Witch",
+    awards: "Shogakukan Manga Award (2004); honored for the Thousand-Year Blood War anime (2022–23)",
+    contribution:
+      "One of the defining voices of 2000s shōnen manga and anime.",
+  },
+  {
+    slug: "satoshi-tajiri",
+    name: "Satoshi Tajiri",
+    japaneseName: "田尻 智",
+    role: "Creator · Game designer",
+    bornYear: 1965,
+    birthplace: "Machida, Tokyo, Japan",
+    biography:
+      "The creator of Pokémon, whose collecting-and-trading creature concept grew into the largest media franchise in the world, with an anime series that has aired since 1997.",
+    career:
+      "Founded Game Freak in 1989; Pokémon Red/Green (1996) launched the franchise; the anime followed in 1997.",
+    majorWorks: "Pokémon, the media franchise; founder of Game Freak",
+    awards: "Recognized as one of the architects of the Pokémon phenomenon",
+    contribution:
+      "Created a franchise that introduced millions of children worldwide to anime and Japanese pop culture.",
+  },
+  {
+    slug: "kohei-horikoshi",
+    name: "Kōhei Horikoshi",
+    japaneseName: "堀越 耕平",
+    role: "Creator · Manga artist",
+    bornYear: 1986,
+    birthplace: "Aichi Prefecture, Japan",
+    biography:
+      "Creator of My Hero Academia, the flagship superhero anime of the streaming era and one of the best-selling manga of the 2010s.",
+    career:
+      "Debuted in 2007; My Hero Academia (2014) ran in Weekly Shōnen Jump until 2024, with a globally popular anime since 2016.",
+    majorWorks: "My Hero Academia, Barrage, Oumagadoki Doubutsuen",
+    awards: "Best-selling manga awards; multiple Crunchyroll Anime Award nominations",
+    contribution:
+      "Reinvented the superhero genre for anime, becoming a defining franchise of the 2010s–2020s.",
+  },
+  {
+    slug: "reki-kawahara",
+    name: "Reki Kawahara",
+    japaneseName: "川原 礫",
+    role: "Creator · Author",
+    bornYear: 1974,
+    birthplace: "Tochigi Prefecture, Japan",
+    biography:
+      "Author of Sword Art Online, the light novel series that became a worldwide phenomenon and a landmark of the isekai genre.",
+    career:
+      "Wrote SAO originally as a web novel (2002) before its 2009 publication; the anime began in 2012 and spawned films and a global franchise.",
+    majorWorks: "Sword Art Online, Accel World, The Isolator",
+    awards: "SAO is among the best-selling light novel series ever",
+    contribution:
+      "Helped popularize isekai and VRMMO fiction for a global audience.",
+  },
+  {
+    slug: "sui-ishida",
+    name: "Sui Ishida",
+    japaneseName: "石田 スイ",
+    role: "Creator · Manga artist",
+    bornYear: 1986,
+    birthplace: "Fukuoka Prefecture, Japan",
+    biography:
+      "Creator of Tokyo Ghoul, the dark urban fantasy that became a major anime hit of 2014 and a global bestseller.",
+    career:
+      "Debuted in 2011; Tokyo Ghoul (2011–2014) ran in Weekly Young Jump; its anime premiered in 2014.",
+    majorWorks: "Tokyo Ghoul, Choujin X",
+    awards: "Multiple award nominations; the franchise has sold tens of millions of volumes",
+    contribution:
+      "Defined the 2010s dark-fantasy aesthetic in anime and manga.",
+  },
+  {
+    slug: "yuki-tabata",
+    name: "Yūki Tabata",
+    japaneseName: "田畠 裕基",
+    role: "Creator · Manga artist",
+    bornYear: 1984,
+    birthplace: "Nagasaki Prefecture, Japan",
+    biography:
+      "Creator of Black Clover, the long-running fantasy battle manga whose anime became a weekly fixture from 2017 to 2021.",
+    career:
+      "Debuted in 2011; Black Clover (2015) ran in Weekly Shōnen Jump with a 170-episode anime.",
+    majorWorks: "Black Clover, Hungry Joker",
+    awards: "Shogakukan Manga Award nomination",
+    contribution:
+      "Carried the shōnen action tradition into the late 2010s.",
+  },
+  {
+    slug: "hiro-mashima",
+    name: "Hiro Mashima",
+    japaneseName: "真島 ヒロ",
+    role: "Creator · Manga artist",
+    bornYear: 1977,
+    birthplace: "Nagano Prefecture, Japan",
+    biography:
+      "Creator of Fairy Tail and Edens Zero, one of the most prolific shōnen storytellers of the 2000s–2010s.",
+    career:
+      "Debuted in 1998; Fairy Tail (2006) ran for a decade with a beloved 328-episode anime beginning in 2009.",
+    majorWorks: "Rave Master, Fairy Tail, Edens Zero",
+    awards: "Kodansha Manga Award (2009)",
+    contribution:
+      "Built one of the most popular friendship-and-fantasy franchises of the 2010s.",
+  },
+  {
+    slug: "haruichi-furudate",
+    name: "Haruichi Furudate",
+    japaneseName: "古舘 春一",
+    role: "Creator · Manga artist",
+    bornYear: 1983,
+    birthplace: "Iwate Prefecture, Japan",
+    biography:
+      "Creator of Haikyū!!, the volleyball manga whose anime (2014) became one of the most beloved sports anime of all time.",
+    career:
+      "Debuted in 2006; Haikyū!! (2012) ran in Weekly Shōnen Jump until 2020; the anime spawned films concluding the story in 2024.",
+    majorWorks: "Haikyū!!, Kiben Gakuha",
+    awards: "Shogakukan Manga Award (2016); honored for the franchise's global popularity",
+    contribution:
+      "Revived the sports genre and set a new standard for athletic, character-driven competition anime.",
+  },
+  {
+    slug: "hirohiko-araki",
+    name: "Hirohiko Araki",
+    japaneseName: "荒木 飛呂彦",
+    role: "Creator · Manga artist",
+    bornYear: 1960,
+    birthplace: "Sendai, Miyagi Prefecture, Japan",
+    biography:
+      "Creator of JoJo's Bizarre Adventure, the decades-spanning saga running since 1987 whose anime (2012) became a global cultural phenomenon.",
+    career:
+      "Debuted in 1980; JoJo's Bizarre Adventure (1987–present) has been adapted into six anime parts and films.",
+    majorWorks: "JoJo's Bizarre Adventure, Baoh, The Lives of Eo",
+    awards: "Tezuka Osamu Cultural Prize (2022); exhibited at the Louvre (2009)",
+    contribution:
+      "Created one of the most influential and meme-permeated manga/anime franchises of all time.",
+  },
+  {
+    slug: "tatsuki-fujimoto",
+    name: "Tatsuki Fujimoto",
+    japaneseName: "藤本 タツキ",
+    role: "Creator · Manga artist",
+    bornYear: 1992,
+    birthplace: "Nichinan, Miyazaki Prefecture, Japan",
+    biography:
+      "Creator of Chainsaw Man, the boundary-pushing manga whose 2022 anime adaptation by MAPPA was a global event.",
+    career:
+      "Debuted in 2013; Chainsaw Man (2018) ran in Weekly Shōnen Jump; its anime premiered in October 2022.",
+    majorWorks: "Chainsaw Man, Fire Punch, Look Back, Goodbye, Eri",
+    awards: "Harvey Award (2021); multiple 'best manga' honors",
+    contribution:
+      "One of the defining voices of 2020s manga and anime, known for chaotic sincerity and cinematic storytelling.",
+  },
+  {
+    slug: "tatsuya-endo",
+    name: "Tatsuya Endō",
+    japaneseName: "遠藤 達哉",
+    role: "Creator · Manga artist",
+    bornYear: 1980,
+    birthplace: "Ibaraki Prefecture, Japan",
+    biography:
+      "Creator of Spy × Family, the family-comedy spy manga whose anime (2022) became an immediate worldwide hit.",
+    career:
+      "Debuted in 2000; Spy × Family (2019) runs in Shōnen Jump+; its anime premiered in April 2022.",
+    majorWorks: "Spy × Family, Tista, Gekka Bijin",
+    awards: "Shogakukan Manga Award (2021); multiple Crunchyroll Anime Award wins",
+    contribution:
+      "Created one of the most beloved and broadly appealing anime of the 2020s.",
+  },
+  {
+    slug: "muneyuki-kaneshiro",
+    name: "Muneyuki Kaneshiro",
+    japaneseName: "金城 宗幸",
+    role: "Creator · Writer",
+    bornYear: 1985,
+    birthplace: "Osaka Prefecture, Japan",
+    biography:
+      "Creator of Blue Lock, the 'egoist' football manga whose anime (2022) became a worldwide sports phenomenon.",
+    career:
+      "Debuted in 2013; Blue Lock (2018) runs in Weekly Shōnen Magazine; the anime premiered in October 2022.",
+    majorWorks: "Blue Lock, Kami-sama no Iu Toori (with Akeji Fujimura)",
+    awards: "Kodansha Manga Award (2021); the franchise is among the decade's biggest sports hits",
+    contribution:
+      "Reinvented the sports genre around ruthless individual ambition.",
+  },
+  {
+    slug: "makoto-yukimura",
+    name: "Makoto Yukimura",
+    japaneseName: "幸村 誠",
+    role: "Creator · Manga artist",
+    bornYear: 1976,
+    birthplace: "Yokohama, Kanagawa Prefecture, Japan",
+    biography:
+      "Creator of Vinland Saga, the historical epic acclaimed as one of the greatest manga of its generation, adapted into a celebrated anime (2019) by WIT and MAPPA.",
+    career:
+      "Debuted in 1999; Planetes ran 1999–2004; Vinland Saga (2005–present) is his masterpiece.",
+    majorWorks: "Vinland Saga, Planetes",
+    awards: "Kodansha Manga Award (2009); Harvey and Eisner Award nominations",
+    contribution:
+      "Brought literary, historical depth to the shōnen seinen epic.",
+  },
+  {
+    slug: "tappei-nagatsuki",
+    name: "Tappei Nagatsuki",
+    japaneseName: "長月 達平",
+    role: "Creator · Author",
+    bornYear: 1987,
+    birthplace: "Tokyo, Japan",
+    biography:
+      "Author of Re:Zero − Starting Life in Another World, the isekai series whose anime (2016) became a landmark of the genre.",
+    career:
+      "Wrote Re:Zero as a web novel (2012) before its 2014 publication; the anime premiered in April 2016.",
+    majorWorks: "Re:Zero − Starting Life in Another World",
+    awards: "The series is among the best-selling isekai franchises of its era",
+    contribution:
+      "Brought psychological trauma and nonlinear storytelling to mainstream isekai.",
+  },
+  {
+    slug: "rifujin-na-magonote",
+    name: "Rifujin na Magonote",
+    japaneseName: "理不尽な孫の手",
+    role: "Creator · Author",
+    biography:
+      "Author of Mushoku Tensei: Jobless Reincarnation, the foundational isekai novel whose 2021 anime redefined the genre's production ambitions.",
+    career:
+      "Wrote Mushoku Tensei as a web novel (2012) before its 2014 publication; the anime premiered in January 2021.",
+    majorWorks: "Mushoku Tensei: Jobless Reincarnation",
+    awards: "The series is considered the archetypal modern isekai",
+    contribution:
+      "Established the modern isekai template and influenced a decade of the genre.",
+  },
+  {
+    slug: "nakaba-suzuki",
+    name: "Nakaba Suzuki",
+    japaneseName: "鈴木 央",
+    role: "Creator · Manga artist",
+    bornYear: 1977,
+    birthplace: "Sukagawa, Fukushima Prefecture, Japan",
+    biography:
+      "Creator of The Seven Deadly Sins, the fantasy battle manga whose anime (2014) was one of Netflix's first global anime hits.",
+    career:
+      "Debuted in 1994; The Seven Deadly Sins (2012) ran in Weekly Shōnen Magazine until 2020.",
+    majorWorks: "The Seven Deadly Sins, Kongō Banchō, Rising Impact",
+    awards: "Kodansha Manga Award (2015)",
+    contribution:
+      "One of the key franchises of Netflix's early anime expansion.",
+  },
+  {
+    slug: "riichiro-inagaki",
+    name: "Riichiro Inagaki",
+    japaneseName: "稲垣 理一郎",
+    role: "Creator · Writer",
+    bornYear: 1975,
+    birthplace: "Tokyo, Japan",
+    biography:
+      "Creator of Dr. Stone, the science-adventure manga whose anime (2019) became a beloved modern hit, and co-creator of Eyeshield 21.",
+    career:
+      "Debuted in 2002 with Eyeshield 21; Dr. Stone (2017) ran in Weekly Shōnen Jump until 2022.",
+    majorWorks: "Eyeshield 21, Dr. Stone",
+    awards: "Shogakukan Manga Award (2019)",
+    contribution:
+      "Made science education thrilling, a rare feat in battle manga.",
+  },
+  {
+    slug: "fuse",
+    name: "Fuse",
+    japaneseName: "伏瀬",
+    role: "Creator · Author",
+    biography:
+      "Author of That Time I Got Reincarnated as a Slime, the isekai novel whose anime (2018) became one of the most popular franchises of the decade.",
+    career:
+      "Wrote the series as a web novel (2013) before its 2014 publication; the anime premiered in October 2018.",
+    majorWorks: "That Time I Got Reincarnated as a Slime",
+    awards: "The franchise is among the best-selling light novel series in the world",
+    contribution:
+      "Created one of the defining isekai franchises of the 2010s–2020s.",
+  },
+  {
+    slug: "yoshitoki-oima",
+    name: "Yoshitoki Ōima",
+    japaneseName: "大今 良時",
+    role: "Creator · Manga artist",
+    bornYear: 1989,
+    birthplace: "Ōgaki, Gifu Prefecture, Japan",
+    biography:
+      "Creator of A Silent Voice, the acclaimed manga about bullying and redemption, adapted into Kyoto Animation's 2016 film.",
+    career:
+      "Debuted in 2008; A Silent Voice (2013) ran in Weekly Shōnen Magazine; the film premiered in September 2016.",
+    majorWorks: "A Silent Voice, To Your Eternity",
+    awards: "Kodansha Manga Award (2015); the film won the Japan Academy Prize for Animation of the Year",
+    contribution:
+      "One of the most sensitive and important works about disability and forgiveness in modern manga.",
+  },
+  {
+    slug: "naoki-urasawa",
+    name: "Naoki Urasawa",
+    japaneseName: "浦沢 直樹",
+    role: "Creator · Manga artist",
+    bornYear: 1960,
+    birthplace: "Fuchū, Tokyo, Japan",
+    biography:
+      "One of the greatest manga storytellers alive, creator of Monster, 20th Century Boys, and Pluto, acclaimed for thriller mastery and humanist depth.",
+    career:
+      "Debuted in 1981; Monster (1994) ran until 2001; its anime aired 2004–2005.",
+    majorWorks: "Monster, 20th Century Boys, Pluto, Yawara!, Billy Bat",
+    awards: "Shogakukan Manga Award (1999); Tezuka Osamu Cultural Prize (2001); multiple international awards",
+    contribution:
+      "Brought literary thriller storytelling to manga and anime at a level rarely seen.",
+  },
+  {
+    slug: "kentaro-miura",
+    name: "Kentaro Miura",
+    japaneseName: "三浦 建太郎",
+    role: "Creator · Manga artist",
+    bornYear: 1966,
+    diedYear: 2021,
+    birthplace: "Chiba Prefecture, Japan",
+    biography:
+      "Creator of Berserk, the dark-fantasy masterpiece whose 1997 anime adaptation remains a landmark of the genre and whose artwork is among the most detailed in manga history.",
+    career:
+      "Debuted in 1985; Berserk (1989) ran until his death in 2021; the 1997 anime was produced by OLM.",
+    majorWorks: "Berserk, King of Wolves, Duranki",
+    awards: "Tezuka Osamu Cultural Prize nomination; Berserk is cited as an influence by creators worldwide",
+    contribution:
+      "Set the standard for dark fantasy in manga and anime.",
+  },
+  {
+    slug: "chiaki-konaka",
+    name: "Chiaki J. Konaka",
+    japaneseName: "小中 千昭",
+    role: "Writer · Screenwriter",
+    bornYear: 1961,
+    birthplace: "Tokyo, Japan",
+    biography:
+      "Screenwriter and creator of Serial Experiments Lain, the 1998 cyberpunk landmark about identity and the networked self.",
+    career:
+      "Wrote for Ultraman and numerous anime; Serial Experiments Lain (1998) is his defining work.",
+    majorWorks: "Serial Experiments Lain, Digimon Tamers, The Big O",
+    awards: "Serial Experiments Lain is a touchstone of 1990s experimental anime",
+    contribution:
+      "Predicted the internet's effects on identity and culture years before social media.",
+  },
+  {
+    slug: "natsu-hyuuga",
+    name: "Natsu Hyūga",
+    japaneseName: "日向 夏",
+    role: "Creator · Author",
+    biography:
+      "Author of The Apothecary Diaries, the mystery novel series whose 2023 anime became a worldwide critical and commercial hit.",
+    career:
+      "Wrote the series as a web novel (2011) before its 2012 publication; the anime premiered in October 2023.",
+    majorWorks: "The Apothecary Diaries",
+    awards: "The anime won Anime of the Year honors at multiple 2024 awards",
+    contribution:
+      "Revived the historical mystery genre for modern audiences.",
+  },
+  {
+    slug: "aka-akasaka",
+    name: "Aka Akasaka",
+    japaneseName: "赤坂 アカ",
+    role: "Creator · Manga artist",
+    bornYear: 1988,
+    birthplace: "Miyazaki Prefecture, Japan",
+    biography:
+      "Creator of Kaguya-sama: Love Is War and Oshi no Ko, two of the most acclaimed manga of the late 2010s–2020s, both adapted into major anime hits.",
+    career:
+      "Debuted in 2011; Kaguya-sama (2015) ran until 2022; Oshi no Ko (2020) is ongoing.",
+    majorWorks: "Kaguya-sama: Love Is War, Oshi no Ko, Instant Bullet",
+    awards: "Kodansha Manga Award (2020); Oshi no Ko's anime premiere set streaming records",
+    contribution:
+      "One of the defining comedic and dramatic voices of modern manga.",
+  },
+  {
+    slug: "akihito-tsukushi",
+    name: "Akihito Tsukushi",
+    japaneseName: "つくし あきひと",
+    role: "Creator · Manga artist",
+    bornYear: 1979,
+    birthplace: "Okayama Prefecture, Japan",
+    biography:
+      "Creator of Made in Abyss, the beloved dark-fantasy adventure manga adapted into an acclaimed anime (2017) by Kinema Citrus.",
+    career:
+      "Debuted in 2012; Made in Abyss (2012–present) is his masterpiece.",
+    majorWorks: "Made in Abyss",
+    awards: "The anime won multiple awards including the Crunchyroll Anime Award for Best Fantasy",
+    contribution:
+      "Created one of the most imaginative and emotionally devastating worlds in modern anime.",
+  },
+  {
+    slug: "kaiu-shirai",
+    name: "Kaiu Shirai",
+    japaneseName: "白井 カイウ",
+    role: "Creator · Writer",
+    bornYear: 1988,
+    birthplace: "Shizuoka Prefecture, Japan",
+    biography:
+      "Co-creator of The Promised Neverland, the psychological thriller manga adapted into a hit anime (2019) by CloverWorks.",
+    career:
+      "Debuted in 2015; The Promised Neverland (2016) ran in Weekly Shōnen Jump until 2020.",
+    majorWorks: "The Promised Neverland, Tista",
+    awards: "The anime won multiple 'Best Thriller' honors",
+    contribution:
+      "Brought tense, child-protagonist thriller storytelling to mainstream shōnen.",
+  },
+  {
+    slug: "syougo-kinugasa",
+    name: "Shōgo Kinugasa",
+    japaneseName: "衣笠 彰梧",
+    role: "Creator · Author",
+    biography:
+      "Author of Classroom of the Elite, the school thriller light novel series adapted into a major anime (2017) by Lerche.",
+    career:
+      "Debuted as a visual novel writer; Classroom of the Elite (2015) is his signature series.",
+    majorWorks: "Classroom of the Elite",
+    awards: "The franchise is among the best-selling light novel series of its decade",
+    contribution:
+      "Created one of the defining school-drama franchises of the 2010s–2020s.",
+  },
+  {
+    slug: "kouta-hirano",
+    name: "Kouta Hirano",
+    japaneseName: "平野 耕太",
+    role: "Creator · Manga artist",
+    bornYear: 1973,
+    birthplace: "Adachi, Tokyo, Japan",
+    biography:
+      "Creator of Hellsing and Drifters, known for his hyperviolent, cinematic action manga; Hellsing Ultimate (2006–2012) is a landmark of the OVA format.",
+    career:
+      "Debuted in 1996; Hellsing (1997) ran until 2008; the anime adaptations include the 2001 TV series and the 10-episode Hellsing Ultimate OVAs.",
+    majorWorks: "Hellsing, Hellsing Ultimate, Drifters",
+    awards: "Hellsing Ultimate is one of the best-selling OVA series in anime history",
+    contribution:
+      "Defined the ultraviolent gothic action aesthetic in anime.",
+  },
+  {
+    slug: "one",
+    name: "ONE",
+    japaneseName: "ワン",
+    role: "Creator · Manga artist",
+    biography:
+      "Creator of One-Punch Man and Mob Psycho 100, two of the most influential webcomic-born manga of the 2010s, both adapted into acclaimed anime.",
+    career:
+      "Self-published One-Punch Man (2009) as a webcomic; its remade manga (2012) became a global hit; Mob Psycho 100 (2012) followed.",
+    majorWorks: "One-Punch Man, Mob Psycho 100",
+    awards: "One-Punch Man won the 2012 Next Manga Award web division",
+    contribution:
+      "Proved indie webcomics could become global anime franchises.",
+  },
+  {
+    slug: "chugong",
+    name: "Chugong",
+    japaneseName: "추공",
+    role: "Creator · Author",
+    biography:
+      "Author of Solo Leveling, the South Korean web novel whose manhwa and 2024 anime adaptation (by A-1 Pictures) became a worldwide phenomenon.",
+    career:
+      "Published Solo Leveling (2016) as a web novel; the manhwa (2018) and anime (2024) followed.",
+    majorWorks: "Solo Leveling",
+    awards: "The anime's premiere set Crunchyroll viewing records",
+    contribution:
+      "Introduced manhwa and the 'leveling' genre to a massive global anime audience.",
+  },
+  {
+    slug: "goro-taniguchi",
+    name: "Gorō Taniguchi",
+    japaneseName: "谷口 悟朗",
+    role: "Director",
+    bornYear: 1966,
+    birthplace: "Aichi Prefecture, Japan",
+    biography:
+      "Director of Code Geass, the mecha-political masterpiece that became one of the most popular anime of the 2000s.",
+    career:
+      "Joined Sunrise in 1994; directed Code Geass (2006–2008) and later one of its film recaps.",
+    majorWorks: "Code Geass, Gunparade March, Infinite Ryvius",
+    awards: "Code Geass won multiple Tokyo Anime Awards",
+    contribution:
+      "One of the architects of the modern political-thriller mecha anime.",
+  },
+  {
+    slug: "hiroshi-hamasaki",
+    name: "Hiroshi Hamasaki",
+    japaneseName: "浜崎 博嗣",
+    role: "Director",
+    bornYear: 1965,
+    birthplace: "Tokyo, Japan",
+    biography:
+      "Director of Steins;Gate (2011) and Steins;Gate 0, adapting the science-fiction visual novel into one of the highest-rated anime ever made.",
+    career:
+      "Debuted in the 1990s; Steins;Gate is his defining work.",
+    majorWorks: "Steins;Gate, Steins;Gate 0, Texhnolyze",
+    awards: "Steins;Gate has ranked among the top anime on international aggregators for over a decade",
+    contribution:
+      "Brought visual-novel storytelling to the pinnacle of anime criticism.",
+  },
+  {
+    slug: "ryutaro-nakamura",
+    name: "Ryūtarō Nakamura",
+    japaneseName: "中村 隆太郎",
+    role: "Director",
+    bornYear: 1955,
+    diedYear: 2013,
+    birthplace: "Kobe, Hyogo Prefecture, Japan",
+    biography:
+      "Director of Serial Experiments Lain (1998), the defining cyberpunk anime about identity and the internet.",
+    career:
+      "Debuted in the 1980s; Serial Experiments Lain is his most celebrated work.",
+    majorWorks: "Serial Experiments Lain, Armitage III, Colorful",
+    awards: "Serial Experiments Lain is a touchstone of experimental 1990s anime",
+    contribution:
+      "Created one of the most influential and prescient works about networked identity.",
+  },
+  {
+    slug: "shingo-natsume",
+    name: "Shingo Natsume",
+    japaneseName: "夏目 真悟",
+    role: "Director",
+    bornYear: 1980,
+    birthplace: "Fukuoka Prefecture, Japan",
+    biography:
+      "Director of One-Punch Man (2015) and Mob Psycho 100 (2016–2022), two of the most acclaimed action anime of the 2010s.",
+    career:
+      "Debuted in 2006; One-Punch Man's first season made him a star director.",
+    majorWorks: "One-Punch Man, Mob Psycho 100, Space Dandy, Sonny Boy",
+    awards: "Multiple Crunchyroll Anime Award wins for Mob Psycho 100",
+    contribution:
+      "One of the defining action directors of the streaming era.",
+  },
+  {
+    slug: "ryu-nakayama",
+    name: "Ryū Nakayama",
+    japaneseName: "中山 竜",
+    role: "Director",
+    bornYear: 1987,
+    birthplace: "Tokyo, Japan",
+    biography:
+      "Director of the 2022 Chainsaw Man anime, whose cinematic style and film-language storytelling made it a global event.",
+    career:
+      "Worked as an episode director and storyboarder before Chainsaw Man; directed the 2025 Chainsaw Man – The Movie: Reze Arc.",
+    majorWorks: "Chainsaw Man, Chainsaw Man – The Movie: Reze Arc",
+    awards: "Chainsaw Man won multiple Crunchyroll Anime Awards",
+    contribution:
+      "Brought feature-film language to television anime production.",
+  },
+  {
+    slug: "shunsuke-nakashige",
+    name: "Shunsuke Nakashige",
+    japaneseName: "中重 俊祐",
+    role: "Director",
+    bornYear: 1980,
+    birthplace: "Japan",
+    biography:
+      "Director of Solo Leveling (2024), the global breakout isekai-fantasy of the streaming era, produced by A-1 Pictures.",
+    career:
+      "Worked as an episode director and animation director before helming Solo Leveling, which became one of the most-watched anime premieres on streaming platforms.",
+    majorWorks: "Solo Leveling",
+    awards: "Solo Leveling won multiple Crunchyroll Anime Awards",
+    contribution:
+      "Directed one of the defining power-fantasy adaptations of the 2020s.",
+  },
 ];
 
 export const peopleMap = Object.fromEntries(people.map((p) => [p.slug, p]));

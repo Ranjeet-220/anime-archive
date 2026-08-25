@@ -229,10 +229,10 @@ export const tours: TourSeed[] = [
       {
         order: 2,
         year: 1998,
-        eraSlug: "digital-revolution",
+        eraSlug: "global-expansion",
         title: "The Wired Millennium",
         description:
-          "As the internet reached Japanese homes, Serial Experiments Lain turned cyberpunk inward — a ghost haunting the network itself. Lain has yet to be archived; the era that produced it begins here.",
+          "As the internet reached Japanese homes, Serial Experiments Lain turned cyberpunk inward — a ghost haunting the network itself. The era that produced it ends here, on the eve of the digital millennium.",
       },
       {
         order: 3,
@@ -245,7 +245,7 @@ export const tours: TourSeed[] = [
       {
         order: 4,
         year: 2002,
-        eraSlug: "global-expansion",
+        eraSlug: "digital-revolution",
         title: "The Genre Goes Global",
         description:
           "As the millennium turned, the aesthetics born in Neo-Tokyo spread across world cinema — from bullet-time red pills to a thousand rain-drenched megacities — while anime itself crossed into the global mainstream.",
@@ -293,7 +293,7 @@ export const tours: TourSeed[] = [
       {
         order: 4,
         year: 2007,
-        eraSlug: "modern-anime",
+        eraSlug: "digital-revolution",
         title: "The Hand-Drawn Rebuild",
         description:
           "Evangelion's Rebuild films proved hand-drawn mecha could still command theaters in the digital age — a century-old craft carried forward by a new generation of animators.",

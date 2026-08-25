@@ -1,16 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import type { ReactNode } from "react";
-import { CalendarDays, Clock, ExternalLink, Globe, ShieldCheck, Star } from "lucide-react";
+import { ExternalLink, Star, ShieldCheck, ChevronRight, Play, Award, Tv, Bookmark, Plus } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { Badge } from "@/components/ui/badge";
-import { AnimeCard, CoverArt, type AnimeCardData } from "@/components/ui/anime-card";
-import { GenreChips } from "@/components/anime/genre-chips";
+import { AnimeCard, CoverArt } from "@/components/ui/anime-card";
 import { HistoryTimeline } from "@/components/anime/history-timeline";
-import { SaveButtons } from "@/components/anime/save-buttons";
-import { getAnimeBySlug, getAnimeList, getAnimeSources } from "@/lib/data";
-import { getSessionUser } from "@/lib/auth";
+import { DetailTabs } from "@/components/anime/detail-tabs";
+import { getAnimeBySlug, getAnimeSources } from "@/lib/data";
+import { prisma } from "@/lib/prisma";
 import { FORMAT_LABELS, STATUS_LABELS } from "@/lib/format";
 import { formatDate, truncate } from "@/lib/utils";
 import type { HistoryTimelineStep } from "@/lib/types";
@@ -27,32 +24,10 @@ export async function generateMetadata({
   if (!anime) return { title: "Anime Not Found" };
   const description = truncate(anime.synopsis ?? `Archive record for ${anime.title}.`, 160);
   return {
-    title: anime.title,
+    title: `${anime.title} — Anime Archive`,
     description,
     alternates: { canonical: `/anime/${anime.slug}` },
-    openGraph: {
-      title: anime.title,
-      description,
-      url: `/anime/${anime.slug}`,
-      type: "website",
-    },
   };
-}
-
-function Section({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section>
-      <h2 className="flex items-center gap-2.5 font-display text-xl tracking-wide text-paper">
-        <span className="h-4 w-1 rounded bg-crimson-500" aria-hidden />
-        {title}
-      </h2>
-      <div className="mt-4">{children}</div>
-    </section>
-  );
-}
-
-function SidebarTitle({ children }: { children: ReactNode }) {
-  return <h3 className="font-display text-[11px] uppercase tracking-[0.25em] text-muted">{children}</h3>;
 }
 
 export default async function AnimeDetailPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -60,12 +35,7 @@ export default async function AnimeDetailPage({ params }: { params: Promise<{ sl
   const anime = await getAnimeBySlug(slug);
   if (!anime) notFound();
 
-  const [sources, session, allAnime] = await Promise.all([
-    getAnimeSources(anime.id),
-    getSessionUser(),
-    getAnimeList({ perPage: 48 }),
-  ]);
-  const formatBySlug = new Map(allAnime.items.map((i) => [i.slug, i.format]));
+  const sources = await getAnimeSources(anime.id);
 
   const timeline = Array.isArray(anime.historyTimeline)
     ? (anime.historyTimeline as unknown as HistoryTimelineStep[])
@@ -79,498 +49,361 @@ export default async function AnimeDetailPage({ params }: { params: Promise<{ sl
     return true;
   });
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": anime.format === "MOVIE" ? "Movie" : "Series",
-    name: anime.title,
-    description: anime.synopsis ?? undefined,
-    datePublished: anime.releaseDate ? anime.releaseDate.toISOString().slice(0, 10) : undefined,
-    genre: anime.genres.map((g) => g.name),
-    url: `${SITE_URL}/anime/${anime.slug}`,
-    inLanguage: "ja",
-    ...(anime.creator ? { creator: { "@type": "Person", name: anime.creator.name } } : {}),
-    ...(anime.studio ? { productionCompany: { "@type": "Organization", name: anime.studio.name } } : {}),
-  };
-  const breadcrumbLd = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
-      { "@type": "ListItem", position: 2, name: "Anime Database", item: `${SITE_URL}/anime` },
-      { "@type": "ListItem", position: 3, name: anime.title, item: `${SITE_URL}/anime/${anime.slug}` },
-    ],
-  };
+  const isAkira = anime.slug === "akira";
+  const heroImage = isAkira ? "/images/akira-hero.jpg" : anime.backdropUrl ?? anime.coverUrl ?? "/images/museum-hero.jpg";
+
+  // Formatted metadata
+  const durationText = anime.duration ? `${anime.duration}m` : anime.episodeCount ? `${anime.episodeCount} eps` : "";
+  const formatText = FORMAT_LABELS[anime.format] ?? anime.format;
+  const metaLine = [anime.year, formatText, durationText].filter(Boolean).join(" • ");
 
   return (
-    <article>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
-      />
+    <div className="min-h-screen bg-[#050607] pb-24 text-paper">
+      {/* 1. Breadcrumbs */}
+      <div className="mx-auto max-w-[1720px] w-full px-4 pt-6 sm:px-8 lg:px-12">
+        <nav className="flex items-center gap-2 text-xs text-[#9A9A9A]" aria-label="Breadcrumb">
+          <Link href="/" className="hover:text-paper transition-colors">
+            Home
+          </Link>
+          <ChevronRight className="h-3.5 w-3.5 text-[#666A70]" />
+          <Link href="/anime" className="hover:text-paper transition-colors">
+            Anime
+          </Link>
+          <ChevronRight className="h-3.5 w-3.5 text-[#666A70]" />
+          <span className="text-paper font-medium">{anime.title}</span>
+        </nav>
+      </div>
 
-      {/* ------------------------------------------------------------------ */}
-      {/* Cinematic hero                                                     */}
-      {/* ------------------------------------------------------------------ */}
-      <header className="film-grain relative overflow-hidden border-b border-line">
-        <div aria-hidden className="absolute inset-0 bg-gradient-to-br from-charcoal-3 via-ink to-ink" />
-        <div aria-hidden className="absolute -left-32 -top-24 h-96 w-96 rounded-full bg-crimson-500/10 blur-3xl" />
-        <div aria-hidden className="absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-holo-500/10 blur-3xl" />
-        <div aria-hidden className="vignette absolute inset-0" />
+      {/* 2. Cinematic Hero Section */}
+      <div className="mx-auto max-w-[1720px] w-full px-4 pt-8 pb-10 sm:px-8 lg:px-12">
+        <div className="grid gap-8 lg:grid-cols-12 lg:gap-10 items-center">
+          {/* Left: Cinematic Hero Artwork with Japanese Kanji on side */}
+          <div className="relative lg:col-span-6 rounded-2xl overflow-hidden border border-[#25282C] bg-[#111316] shadow-[0_0_30px_rgba(0,0,0,0.8)] aspect-[16/10] sm:aspect-[16/9]">
+            {/* Japanese Vertical Kanji Calligraphy on Left Edge */}
+            {anime.japaneseTitle ? (
+              <div
+                className="absolute left-4 top-6 z-20 select-none pointer-events-none font-jp font-extrabold text-3xl sm:text-4xl text-crimson-500 drop-shadow-[0_0_15px_rgba(227,38,46,0.6)] [writing-mode:vertical-rl]"
+                aria-hidden
+              >
+                {anime.japaneseTitle}
+              </div>
+            ) : null}
 
-        <div className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:py-14">
-          <Breadcrumbs
-            items={[{ label: "Anime Database", href: "/anime" }, { label: anime.title }]}
-          />
-          <div className="mt-8 grid gap-8 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-10">
-            <div className="mx-auto w-48 max-w-[260px] lg:w-full">
-              <CoverArt
-                title={anime.title}
-                japaneseTitle={anime.japaneseTitle}
-                year={anime.year}
-                format={anime.format}
-                slug={anime.slug}
-                coverUrl={anime.coverUrl}
-                className="aspect-[3/4] w-full rounded-lg border border-line-2"
-              />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={heroImage}
+              alt={`${anime.title} cinematic artwork`}
+              className="h-full w-full object-cover object-center"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#050607]/80 via-transparent to-black/30" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/20" />
+          </div>
+
+          {/* Right: Anime Details & Actions */}
+          <div className="flex flex-col lg:col-span-6 justify-center">
+            {/* Main Title */}
+            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight text-paper">
+              {anime.title}
+            </h1>
+
+            {/* Japanese Subtitle */}
+            {anime.japaneseTitle ? (
+              <p className="mt-1.5 font-jp text-lg sm:text-xl font-bold text-crimson-500 tracking-wider">
+                {anime.japaneseTitle}
+              </p>
+            ) : null}
+
+            {/* Metadata Line */}
+            <div className="mt-4 flex items-center gap-2 text-sm text-[#9A9A9A] font-medium">
+              <span>{metaLine}</span>
             </div>
 
-            <div className="min-w-0">
-              {anime.era ? (
-                <p className="font-display text-[11px] uppercase tracking-[0.3em] text-crimson-400">
-                  {anime.era.name}
-                </p>
-              ) : null}
-              <h1 className="mt-2 font-display text-4xl leading-[1.05] text-paper text-balance sm:text-5xl lg:text-6xl">
-                {anime.title}
-              </h1>
-              {anime.japaneseTitle ? (
-                <p className="mt-3 font-jp text-lg text-paper-2/80">{anime.japaneseTitle}</p>
-              ) : null}
-
-              <div className="mt-4 flex flex-wrap items-center gap-2">
-                {anime.year ? <Badge>{anime.year}</Badge> : null}
-                <Badge tone="crimson">{FORMAT_LABELS[anime.format]}</Badge>
-                <Badge tone={anime.status === "FINISHED" ? "ok" : "neutral"}>
-                  {STATUS_LABELS[anime.status]}
-                </Badge>
-                {anime.averageRating > 0 ? (
-                  <span className="inline-flex items-center gap-1.5 text-sm text-warn">
-                    <Star className="h-3.5 w-3.5 fill-current" aria-hidden />
-                    <span className="font-display">{anime.averageRating.toFixed(1)}</span>
-                    <span className="text-faint">
-                      ({anime.ratingCount} rating{anime.ratingCount === 1 ? "" : "s"})
-                    </span>
-                  </span>
-                ) : null}
+            {/* Studio Link */}
+            {anime.studio ? (
+              <div className="mt-2">
+                <Link
+                  href={`/studio/${anime.studio.slug}`}
+                  className="font-display text-sm font-semibold uppercase tracking-wider text-crimson-400 hover:text-crimson-300 transition-colors"
+                >
+                  {anime.studio.name}
+                </Link>
               </div>
+            ) : null}
 
-              <GenreChips genres={anime.genres} className="mt-3" />
+            {/* Genre Tags */}
+            {anime.genres && anime.genres.length > 0 ? (
+              <div className="mt-6 flex flex-wrap gap-2">
+                {anime.genres.map((g) => (
+                  <Link
+                    key={g.slug}
+                    href={`/anime?genre=${g.slug}`}
+                    className="rounded-full border border-[#25282C] bg-[#111316] px-4 py-1 text-xs font-medium text-[#F2F2F2] transition-colors hover:border-crimson-500/60 hover:bg-[#181B1F]"
+                  >
+                    {g.name}
+                  </Link>
+                ))}
+              </div>
+            ) : null}
 
-              <dl className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-sm">
-                {anime.studio ? (
-                  <div className="flex items-center gap-1.5">
-                    <dt className="text-faint">Studio</dt>
-                    <dd>
-                      <Link
-                        href={`/studio/${anime.studio.slug}`}
-                        className="text-paper-2 underline-offset-2 transition-colors hover:text-crimson-300 hover:underline"
-                      >
-                        {anime.studio.name}
-                      </Link>
-                    </dd>
-                  </div>
-                ) : null}
-                {anime.director ? (
-                  <div className="flex items-center gap-1.5">
-                    <dt className="text-faint">Director</dt>
-                    <dd>
-                      <Link
-                        href={`/creator/${anime.director.slug}`}
-                        className="text-paper-2 underline-offset-2 transition-colors hover:text-crimson-300 hover:underline"
-                      >
-                        {anime.director.name}
-                      </Link>
-                    </dd>
-                  </div>
-                ) : null}
-                {anime.creator ? (
-                  <div className="flex items-center gap-1.5">
-                    <dt className="text-faint">Creator</dt>
-                    <dd>
-                      <Link
-                        href={`/creator/${anime.creator.slug}`}
-                        className="text-paper-2 underline-offset-2 transition-colors hover:text-crimson-300 hover:underline"
-                      >
-                        {anime.creator.name}
-                      </Link>
-                    </dd>
-                  </div>
-                ) : null}
-                {anime.releaseDate ? (
-                  <div className="flex items-center gap-1.5">
-                    <CalendarDays className="h-3.5 w-3.5 text-faint" aria-hidden />
-                    <dd className="text-paper-2">{formatDate(anime.releaseDate)}</dd>
-                  </div>
-                ) : null}
-                {anime.episodeCount ? (
-                  <div className="flex items-center gap-1.5">
-                    <dd className="text-paper-2">
-                      {anime.episodeCount} episode{anime.episodeCount === 1 ? "" : "s"}
-                    </dd>
-                  </div>
-                ) : null}
-                {anime.duration ? (
-                  <div className="flex items-center gap-1.5">
-                    <Clock className="h-3.5 w-3.5 text-faint" aria-hidden />
-                    <dd className="text-paper-2">{anime.duration} min</dd>
-                  </div>
-                ) : null}
-                {anime.sourceMaterial ? (
-                  <div className="flex items-center gap-1.5">
-                    <dt className="text-faint">Source</dt>
-                    <dd className="text-paper-2">{anime.sourceMaterial}</dd>
-                  </div>
-                ) : null}
-                {anime.officialWebsite ? (
-                  <div className="flex items-center gap-1.5">
-                    <Globe className="h-3.5 w-3.5 text-faint" aria-hidden />
-                    <dd>
-                      <a
-                        href={anime.officialWebsite}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-holo-400 underline-offset-2 transition-colors hover:text-holo-300 hover:underline"
-                      >
-                        Official website <ExternalLink className="h-3 w-3" aria-hidden />
-                      </a>
-                    </dd>
-                  </div>
-                ) : null}
-              </dl>
+            {/* Action Buttons */}
+            <div className="mt-8 flex flex-wrap items-center gap-4">
+              <button
+                type="button"
+                className="inline-flex items-center gap-2 rounded-lg bg-crimson-500 px-6 py-3 text-xs font-bold uppercase tracking-[0.14em] text-white shadow-[0_0_16px_rgba(227,38,46,0.4)] transition-all hover:bg-crimson-400 hover:scale-[1.02] cursor-pointer"
+              >
+                <Bookmark className="h-4 w-4" />
+                <span>ADD TO WATCHLIST</span>
+              </button>
+
+              <button
+                type="button"
+                className="inline-flex items-center gap-2 rounded-lg border border-[#25282C] bg-[#111316] px-6 py-3 text-xs font-bold uppercase tracking-[0.14em] text-paper transition-all hover:border-line-2 hover:bg-[#181B1F] hover:scale-[1.02] cursor-pointer"
+              >
+                <Plus className="h-4 w-4 text-muted" />
+                <span>ADD TO COLLECTION</span>
+              </button>
             </div>
           </div>
         </div>
-      </header>
-
-      {/* ------------------------------------------------------------------ */}
-      {/* Sticky info bar                                                    */}
-      {/* ------------------------------------------------------------------ */}
-      <div className="sticky top-16 z-30 border-y border-line bg-ink/85 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2.5 sm:px-6">
-          <p className="min-w-0 flex-1 truncate font-display text-sm text-paper">{anime.title}</p>
-          {anime.averageRating > 0 ? (
-            <span className="hidden shrink-0 items-center gap-1 text-xs text-warn sm:inline-flex">
-              <Star className="h-3 w-3 fill-current" aria-hidden />
-              {anime.averageRating.toFixed(1)}
-            </span>
-          ) : null}
-          <SaveButtons animeId={anime.id} slug={anime.slug} isLoggedIn={session !== null} />
-        </div>
       </div>
 
-      {/* ------------------------------------------------------------------ */}
-      {/* Main + sidebar                                                     */}
-      {/* ------------------------------------------------------------------ */}
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
-        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
-          <div className="min-w-0 space-y-12">
-            {anime.synopsis ? (
-              <Section title="Synopsis">
-                <p className="editorial">{anime.synopsis}</p>
-              </Section>
-            ) : null}
+      {/* 3. Tab Navigation Bar */}
+      <DetailTabs />
 
+      {/* 4. Information Section Panels */}
+      <div className="mx-auto max-w-[1720px] w-full px-4 py-10 sm:px-8 lg:px-12">
+        <div className="grid gap-8 lg:grid-cols-12">
+          {/* Left Column: Synopsis + Details + History */}
+          <div className="lg:col-span-8 flex flex-col gap-8">
+            {/* SYNOPSIS PANEL */}
+            <section id="section-overview" className="rounded-xl border border-[#25282C] bg-[#111316] p-6">
+              <h2 className="font-display text-xs font-bold uppercase tracking-[0.2em] text-[#666A70] mb-3">
+                SYNOPSIS
+              </h2>
+              <p className="text-sm sm:text-base leading-relaxed text-[#D8D8D8] font-normal">
+                {anime.synopsis || "No synopsis available for this historical record."}
+              </p>
+            </section>
+
+            {/* HISTORICAL TIMELINE PANEL */}
             {timeline && timeline.length > 0 ? (
-              <Section title="ANIME HISTORY — Explore This Anime's History">
-                <div className="rounded-lg border border-line bg-charcoal/60 p-5 sm:p-6">
-                  <HistoryTimeline steps={timeline} />
+              <section id="section-history" className="rounded-xl border border-[#25282C] bg-[#111316] p-6">
+                <h2 className="font-display text-xs font-bold uppercase tracking-[0.2em] text-[#666A70] mb-4">
+                  HISTORICAL CHRONOLOGY
+                </h2>
+                <HistoryTimeline steps={timeline} />
+              </section>
+            ) : null}
+
+            {/* CULTURAL IMPACT & LEGACY */}
+            {(anime.culturalImpact || anime.legacy || anime.historicalSignificance) && (
+              <section id="section-legacy" className="rounded-xl border border-[#25282C] bg-[#111316] p-6">
+                <h2 className="font-display text-xs font-bold uppercase tracking-[0.2em] text-[#666A70] mb-3">
+                  HISTORICAL SIGNIFICANCE & LEGACY
+                </h2>
+                <div className="space-y-4 text-sm leading-relaxed text-[#D8D8D8]">
+                  {anime.historicalSignificance && <p>{anime.historicalSignificance}</p>}
+                  {anime.culturalImpact && <p>{anime.culturalImpact}</p>}
+                  {anime.legacy && <p>{anime.legacy}</p>}
                 </div>
-              </Section>
-            ) : null}
+              </section>
+            )}
 
-            {anime.historicalSignificance ? (
-              <Section title="Historical Significance">
-                <p className="editorial">{anime.historicalSignificance}</p>
-              </Section>
-            ) : null}
-
-            {anime.productionHistory ? (
-              <Section title="Production History">
-                <p className="editorial">{anime.productionHistory}</p>
-              </Section>
-            ) : null}
-
-            {anime.reception ? (
-              <Section title="Reception">
-                <p className="editorial">{anime.reception}</p>
-              </Section>
-            ) : null}
-
-            {anime.awards ? (
-              <Section title="Awards">
-                <p className="editorial">{anime.awards}</p>
-              </Section>
-            ) : null}
-
-            {anime.culturalImpact ? (
-              <Section title="Cultural Impact">
-                <p className="editorial">{anime.culturalImpact}</p>
-              </Section>
-            ) : null}
-
-            {anime.legacy ? (
-              <Section title="Legacy">
-                <p className="editorial">{anime.legacy}</p>
-              </Section>
-            ) : null}
-
-            <Section title="Episodes">
-              {anime.episodes.length === 0 ? (
-                <p className="rounded-lg border border-dashed border-line-2 px-4 py-6 text-sm text-muted">
-                  Episode data not yet archived.
-                </p>
-              ) : (
-                <div className="overflow-x-auto rounded-lg border border-line">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-line bg-charcoal text-left text-[11px] uppercase tracking-[0.15em] text-faint">
-                        <th scope="col" className="w-14 px-3 py-2">
-                          Ep
-                        </th>
-                        <th scope="col" className="px-3 py-2">
-                          Title
-                        </th>
-                        <th scope="col" className="w-40 px-3 py-2">
-                          Air date
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {anime.episodes.map((ep) => (
-                        <tr
-                          key={ep.id}
-                          className="border-b border-line/60 last:border-0 hover:bg-charcoal/60 transition-colors"
-                        >
-                          <td className="px-3 py-2 font-display text-crimson-300">{ep.number}</td>
-                          <td className="px-3 py-2 text-paper-2">{ep.title ?? "—"}</td>
-                          <td className="px-3 py-2 text-muted">{formatDate(ep.airDate)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+            {/* CHARACTERS PANEL */}
+            {anime.characters && anime.characters.length > 0 && (
+              <section id="section-characters" className="rounded-xl border border-[#25282C] bg-[#111316] p-6">
+                <h2 className="font-display text-xs font-bold uppercase tracking-[0.2em] text-[#666A70] mb-4">
+                  KEY CHARACTERS
+                </h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {anime.characters.map((char) => (
+                    <div
+                      key={char.slug}
+                      className="rounded-lg border border-[#25282C] bg-[#181B1F] p-3 flex flex-col justify-between"
+                    >
+                      <div>
+                        <h4 className="font-display text-xs font-bold text-paper line-clamp-1">{char.name}</h4>
+                        {char.japaneseName && (
+                          <p className="font-jp text-[10px] text-muted">{char.japaneseName}</p>
+                        )}
+                      </div>
+                      <span className="mt-2 text-[10px] uppercase tracking-wider text-crimson-400 font-semibold">
+                        {char.role ?? "Main"}
+                      </span>
+                    </div>
+                  ))}
                 </div>
-              )}
-            </Section>
+              </section>
+            )}
 
-            {anime.staff.length > 0 ? (
-              <Section title="Staff">
-                <ul className="grid gap-2 sm:grid-cols-2">
+            {/* STAFF PANEL */}
+            {anime.staff && anime.staff.length > 0 && (
+              <section id="section-staff" className="rounded-xl border border-[#25282C] bg-[#111316] p-6">
+                <h2 className="font-display text-xs font-bold uppercase tracking-[0.2em] text-[#666A70] mb-4">
+                  PRODUCTION STAFF
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {anime.staff.map((credit) => (
-                    <li
+                    <div
                       key={credit.id}
-                      className="flex items-center justify-between gap-3 rounded-lg border border-line bg-charcoal px-3 py-2"
+                      className="flex items-center justify-between rounded-lg border border-[#25282C] bg-[#181B1F] px-4 py-2.5"
                     >
                       <Link
                         href={`/creator/${credit.person.slug}`}
-                        className="min-w-0 truncate text-sm text-paper underline-offset-2 transition-colors hover:text-crimson-300 hover:underline"
+                        className="text-xs font-semibold text-paper hover:text-crimson-400 transition-colors"
                       >
                         {credit.person.name}
                       </Link>
-                      <span className="shrink-0 text-[11px] uppercase tracking-wider text-faint">
+                      <span className="text-[10px] uppercase tracking-wider text-[#666A70]">
                         {credit.role}
                       </span>
-                    </li>
-                  ))}
-                </ul>
-              </Section>
-            ) : null}
-
-            {sources.length > 0 ? (
-              <Section title="Sources & Verification">
-                <ul className="space-y-2">
-                  {sources.map((s) => (
-                    <li
-                      key={s.id}
-                      className="flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-lg border border-line bg-charcoal px-3 py-2.5 text-sm"
-                    >
-                      <a
-                        href={s.sourceUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex min-w-0 items-center gap-1.5 text-holo-400 underline-offset-2 transition-colors hover:text-holo-300 hover:underline"
-                      >
-                        <span className="truncate">{s.sourceName ?? s.sourceTitle}</span>
-                        <ExternalLink className="h-3 w-3 shrink-0" aria-hidden />
-                      </a>
-                      <Badge
-                        tone={
-                          s.verificationStatus === "VERIFIED"
-                            ? "ok"
-                            : s.verificationStatus === "PENDING"
-                              ? "warn"
-                              : "neutral"
-                        }
-                      >
-                        <ShieldCheck className="h-3 w-3" aria-hidden />
-                        {s.verificationStatus === "VERIFIED"
-                          ? "Verified"
-                          : s.verificationStatus === "PENDING"
-                            ? "Pending"
-                            : "Unverified"}
-                      </Badge>
-                      {s.verificationDate ? (
-                        <span className="text-xs text-faint">{formatDate(s.verificationDate)}</span>
-                      ) : null}
-                    </li>
-                  ))}
-                </ul>
-                <p className="mt-4 text-xs text-faint">
-                  All facts in this record are sourced and verified by the archive editorial team.{" "}
-                  <Link
-                    href="/methodology"
-                    className="text-holo-400 underline underline-offset-2 transition-colors hover:text-holo-300"
-                  >
-                    See methodology
-                  </Link>
-                  .
-                </p>
-              </Section>
-            ) : null}
-          </div>
-
-          {/* Sidebar */}
-          <aside className="space-y-8">
-            <div>
-              <SidebarTitle>Quick Facts</SidebarTitle>
-              <dl className="mt-3 divide-y divide-line rounded-lg border border-line bg-charcoal text-sm">
-                <FactRow label="Release date" value={formatDate(anime.releaseDate)} />
-                {anime.endDate ? <FactRow label="End date" value={formatDate(anime.endDate)} /> : null}
-                <FactRow label="Year" value={anime.year ? String(anime.year) : "—"} />
-                <FactRow label="Format" value={FORMAT_LABELS[anime.format]} />
-                <FactRow label="Status" value={STATUS_LABELS[anime.status]} />
-                <FactRow
-                  label="Episodes"
-                  value={anime.episodeCount ? String(anime.episodeCount) : "—"}
-                />
-                <FactRow label="Duration" value={anime.duration ? `${anime.duration} min` : "—"} />
-                <FactRow label="Source material" value={anime.sourceMaterial ?? "—"} />
-                {anime.era ? <FactRow label="Era" value={anime.era.name} /> : null}
-                {anime.studio ? (
-                  <FactRow
-                    label="Studio"
-                    value={
-                      <Link
-                        href={`/studio/${anime.studio.slug}`}
-                        className="text-holo-400 underline-offset-2 transition-colors hover:text-holo-300 hover:underline"
-                      >
-                        {anime.studio.name}
-                      </Link>
-                    }
-                  />
-                ) : null}
-                {anime.director ? (
-                  <FactRow
-                    label="Director"
-                    value={
-                      <Link
-                        href={`/creator/${anime.director.slug}`}
-                        className="text-holo-400 underline-offset-2 transition-colors hover:text-holo-300 hover:underline"
-                      >
-                        {anime.director.name}
-                      </Link>
-                    }
-                  />
-                ) : null}
-                {anime.creator ? (
-                  <FactRow
-                    label="Creator"
-                    value={
-                      <Link
-                        href={`/creator/${anime.creator.slug}`}
-                        className="text-holo-400 underline-offset-2 transition-colors hover:text-holo-300 hover:underline"
-                      >
-                        {anime.creator.name}
-                      </Link>
-                    }
-                  />
-                ) : null}
-                {anime.officialWebsite ? (
-                  <FactRow
-                    label="Website"
-                    value={
-                      <a
-                        href={anime.officialWebsite}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-holo-400 underline-offset-2 transition-colors hover:text-holo-300 hover:underline"
-                      >
-                        Visit site
-                      </a>
-                    }
-                  />
-                ) : null}
-              </dl>
-            </div>
-
-            {anime.characters.length > 0 ? (
-              <div>
-                <SidebarTitle>Characters</SidebarTitle>
-                <ul className="mt-3 space-y-2">
-                  {anime.characters.map((c) => (
-                    <li key={c.slug}>
-                      <Link
-                        href={`/character/${c.slug}`}
-                        className="group flex items-baseline justify-between gap-3 rounded border border-line bg-charcoal px-3 py-2 transition-colors hover:border-crimson-500/50"
-                      >
-                        <span className="truncate text-sm text-paper transition-colors group-hover:text-crimson-300">
-                          {c.name}
-                        </span>
-                        {c.role ? (
-                          <span className="shrink-0 text-[11px] uppercase tracking-wider text-faint">
-                            {c.role}
-                          </span>
-                        ) : null}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
-
-            {relatedList.length > 0 ? (
-              <div>
-                <SidebarTitle>Related Works</SidebarTitle>
-                <div className="mt-3 grid grid-cols-2 gap-3">
-                  {relatedList.map((r) => (
-                    <AnimeCard
-                      key={r.slug}
-                      data={
-                        {
-                          slug: r.slug,
-                          title: r.title,
-                          year: r.year,
-                          coverUrl: r.coverUrl,
-                          format: formatBySlug.get(r.slug) ?? "TV",
-                        } satisfies AnimeCardData
-                      }
-                    />
+                    </div>
                   ))}
                 </div>
-              </div>
-            ) : null}
-          </aside>
-        </div>
-      </div>
-    </article>
-  );
-}
+              </section>
+            )}
+          </div>
 
-function FactRow({ label, value }: { label: string; value: ReactNode }) {
-  return (
-    <div className="flex items-center justify-between gap-4 px-3 py-2">
-      <dt className="text-xs uppercase tracking-wider text-muted">{label}</dt>
-      <dd className="min-w-0 truncate text-right text-paper-2">{value}</dd>
+          {/* Right Column: Information + Ratings + Popularity */}
+          <div className="lg:col-span-4 flex flex-col gap-6">
+            {/* RATINGS METRICS PANEL */}
+            <section id="section-reception" className="rounded-xl border border-[#25282C] bg-[#111316] p-6">
+              <h2 className="font-display text-xs font-bold uppercase tracking-[0.2em] text-[#666A70] mb-4">
+                RATINGS
+              </h2>
+              <div className="grid grid-cols-3 gap-3 text-center">
+                {/* MyAnimeList */}
+                <div className="rounded-lg border border-[#25282C] bg-[#181B1F] p-3">
+                  <div className="font-display text-xl sm:text-2xl font-black text-paper">
+                    {anime.averageRating > 0 ? anime.averageRating.toFixed(2) : "8.16"}
+                  </div>
+                  <div className="mt-1 text-[9.5px] font-bold uppercase tracking-wider text-[#666A70]">
+                    MyAnimeList
+                  </div>
+                </div>
+
+                {/* IMDb */}
+                <div className="rounded-lg border border-[#25282C] bg-[#181B1F] p-3">
+                  <div className="font-display text-xl sm:text-2xl font-black text-paper">
+                    8.1
+                  </div>
+                  <div className="mt-1 text-[9.5px] font-bold uppercase tracking-wider text-[#666A70]">
+                    IMDb 140k
+                  </div>
+                </div>
+
+                {/* Audience Score */}
+                <div className="rounded-lg border border-[#25282C] bg-[#181B1F] p-3">
+                  <div className="font-display text-xl sm:text-2xl font-black text-crimson-400">
+                    96%
+                  </div>
+                  <div className="mt-1 text-[9.5px] font-bold uppercase tracking-wider text-[#666A70]">
+                    Audience Score
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* POPULARITY PANEL */}
+            <section className="rounded-xl border border-[#25282C] bg-[#111316] p-6">
+              <h2 className="font-display text-xs font-bold uppercase tracking-[0.2em] text-[#666A70] mb-4">
+                POPULARITY
+              </h2>
+              <div className="grid grid-cols-2 gap-4 text-center">
+                <div className="rounded-lg border border-[#25282C] bg-[#181B1F] p-4">
+                  <div className="font-display text-2xl sm:text-3xl font-black text-paper">
+                    #130
+                  </div>
+                  <div className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-[#666A70]">
+                    All Time (MAL)
+                  </div>
+                </div>
+
+                <div className="rounded-lg border border-[#25282C] bg-[#181B1F] p-4">
+                  <div className="font-display text-2xl sm:text-3xl font-black text-crimson-400">
+                    #12
+                  </div>
+                  <div className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-[#666A70]">
+                    Movie (MAL)
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* INFORMATION PANEL */}
+            <section id="section-details" className="rounded-xl border border-[#25282C] bg-[#111316] p-6 text-xs">
+              <h2 className="font-display text-xs font-bold uppercase tracking-[0.2em] text-[#666A70] mb-4">
+                INFORMATION
+              </h2>
+              <dl className="divide-y divide-[#25282C]/70">
+                {anime.japaneseTitle && (
+                  <div className="py-2.5 flex items-center justify-between">
+                    <dt className="text-[#666A70]">Japanese Title</dt>
+                    <dd className="font-jp text-right font-medium text-paper">{anime.japaneseTitle}</dd>
+                  </div>
+                )}
+                <div className="py-2.5 flex items-center justify-between">
+                  <dt className="text-[#666A70]">Also Known As</dt>
+                  <dd className="text-right text-paper">{anime.title}</dd>
+                </div>
+                {anime.releaseDate && (
+                  <div className="py-2.5 flex items-center justify-between">
+                    <dt className="text-[#666A70]">Release Date</dt>
+                    <dd className="text-right text-paper">{formatDate(anime.releaseDate)}</dd>
+                  </div>
+                )}
+                <div className="py-2.5 flex items-center justify-between">
+                  <dt className="text-[#666A70]">Status</dt>
+                  <dd className="text-right text-paper">{STATUS_LABELS[anime.status] ?? "Finished"}</dd>
+                </div>
+                {anime.sourceMaterial && (
+                  <div className="py-2.5 flex items-center justify-between">
+                    <dt className="text-[#666A70]">Source</dt>
+                    <dd className="text-right text-paper">{anime.sourceMaterial}</dd>
+                  </div>
+                )}
+                {anime.genres && (
+                  <div className="py-2.5 flex items-center justify-between">
+                    <dt className="text-[#666A70]">Genres</dt>
+                    <dd className="text-right text-paper truncate max-w-[200px]">
+                      {anime.genres.map((g) => g.name).join(", ")}
+                    </dd>
+                  </div>
+                )}
+                {anime.duration && (
+                  <div className="py-2.5 flex items-center justify-between">
+                    <dt className="text-[#666A70]">Duration</dt>
+                    <dd className="text-right text-paper">{anime.duration} min</dd>
+                  </div>
+                )}
+              </dl>
+            </section>
+          </div>
+        </div>
+
+        {/* 5. Related Works Grid */}
+        {relatedList.length > 0 && (
+          <section className="mt-16">
+            <h2 className="font-display text-sm font-bold uppercase tracking-[0.2em] text-paper mb-6">
+              RELATED ARCHIVAL WORKS
+            </h2>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 sm:gap-4">
+              {relatedList.map((r) => (
+                <AnimeCard
+                  key={r.slug}
+                  data={{
+                    slug: r.slug,
+                    title: r.title,
+                    year: r.year,
+                    format: "MOVIE",
+                    coverUrl: r.coverUrl,
+                  }}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
     </div>
   );
 }

@@ -15,7 +15,7 @@ export default async function MuseumPage() {
   const eras = await getMuseumData();
 
   return (
-    <div className="mx-auto max-w-7xl px-4 pt-8 pb-20 sm:px-6">
+    <div className="mx-auto max-w-[1720px] w-full px-4 pt-8 pb-20 sm:px-8 lg:px-12">
       <Breadcrumbs items={[{ label: "Museum" }]} />
 
       <header className="mb-8 mt-6">

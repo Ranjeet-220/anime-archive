@@ -56,10 +56,11 @@ export async function POST(req: NextRequest) {
   }
 
   const cleanEmail = email.trim();
+  const redactedEmail = cleanEmail.replace(/^(.).*@(.*)$/, "$1***@***$2");
 
   console.log(
-    `[contact] New message from ${name.trim()} <${cleanEmail}> — subject: ${subject}\n` +
-      `  ${message.trim().replace(/\n/g, "\n  ")}`
+    `[contact] New message from ${name.trim()} <${redactedEmail}> — subject: ${subject}, ` +
+      `${message.trim().length} chars`
   );
 
   return Response.json(

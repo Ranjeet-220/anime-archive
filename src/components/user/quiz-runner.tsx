@@ -40,7 +40,22 @@ interface SavedResultDto {
 
 export function QuizRunner({ quiz }: QuizRunnerProps) {
   const router = useRouter();
-  const total = quiz.questions.length;
+  const safeQuestions = useMemo(
+    () =>
+      quiz.questions
+        .filter(
+          (q): q is QuizRunnerQuestion =>
+            typeof q?.question === "string" &&
+            Array.isArray(q?.options) &&
+            q.options.length >= 2 &&
+            Number.isInteger(q.correctIndex) &&
+            q.correctIndex >= 0 &&
+            q.correctIndex < q.options.length
+        )
+        .map((q) => ({ ...q, options: q.options.filter((o): o is string => typeof o === "string") })),
+    [quiz.questions]
+  );
+  const total = safeQuestions.length;
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<(number | null)[]>(() => Array(total).fill(null));
   const [finished, setFinished] = useState(false);
@@ -68,12 +83,12 @@ export function QuizRunner({ quiz }: QuizRunnerProps) {
   }, [quiz.slug]);
 
   const score = useMemo(
-    () => quiz.questions.reduce((n, q, i) => (answers[i] === q.correctIndex ? n + 1 : n), 0),
-    [answers, quiz.questions]
+    () => safeQuestions.reduce((n, q, i) => (answers[i] === q.correctIndex ? n + 1 : n), 0),
+    [answers, safeQuestions]
   );
   const answeredCount = answers.filter((a) => a !== null).length;
   const progress = total === 0 ? 0 : (answeredCount / total) * 100;
-  const current = quiz.questions[index];
+  const current = safeQuestions[index];
 
   function choose(optionIndex: number) {
     if (answers[index] !== null) return;
@@ -148,7 +163,8 @@ export function QuizRunner({ quiz }: QuizRunnerProps) {
 
       {attempt && !finished ? (
         <p className="mt-6 rounded border border-holo-500/30 bg-holo-500/10 px-4 py-3 text-sm text-holo-300">
-          You have already attempted this quiz — best score {Math.round((attempt.score / attempt.maxScore) * 100)}%.
+          You have already attempted this quiz — best score{" "}
+          {attempt.maxScore > 0 ? `${Math.round((attempt.score / attempt.maxScore) * 100)}%` : "—"}.
           Take it again to improve your record.
         </p>
       ) : null}
@@ -220,7 +236,7 @@ export function QuizRunner({ quiz }: QuizRunnerProps) {
             </div>
 
             <ol className="mt-8 space-y-4">
-              {quiz.questions.map((q, i) => {
+              {safeQuestions.map((q, i) => {
                 const chosen = answers[i];
                 const correct = chosen === q.correctIndex;
                 return (

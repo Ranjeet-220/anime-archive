@@ -172,6 +172,7 @@ model Anime {
   ratings                 Rating[]
   notes                   Note[]
   collectionItems         CollectionItem[]
+  rankingItems            RankingItem[]
 
   @@index([year])
   @@index([decade])
@@ -502,6 +503,35 @@ model Report {
   user        User         @relation(fields: [userId], references: [id])
 
   @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// Curated rankings (editorial archive lists)
+// ---------------------------------------------------------------------------
+
+model Ranking {
+  id          String        @id @default(cuid())
+  slug        String        @unique
+  name        String
+  tagline     String?
+  description String?
+  methodology String?
+  order       Int           @default(0)
+  items       RankingItem[]
+}
+
+model RankingItem {
+  id        String  @id @default(cuid())
+  rankingId String
+  animeId   String
+  rank      Int
+  note      String?
+  ranking   Ranking @relation(fields: [rankingId], references: [id])
+  anime     Anime   @relation(fields: [animeId], references: [id])
+
+  @@unique([rankingId, animeId])
+  @@unique([rankingId, rank])
+  @@index([animeId])
 }
 
 // ---------------------------------------------------------------------------

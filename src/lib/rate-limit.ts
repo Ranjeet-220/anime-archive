@@ -50,13 +50,21 @@ export function checkRateLimit(key: string, max: number, windowMs: number): Rate
   return { limited: false, retryAfterSeconds: 0 };
 }
 
-/** Best-effort client IP from common reverse-proxy headers. */
+/**
+ * Best-effort client IP from common reverse-proxy headers.
+ * X-Forwarded-For is only trusted when the request actually came from a
+ * reverse proxy; otherwise it is spoofable and would let clients bypass
+ * rate limits by rotating the header.
+ */
 export function clientIp(req: NextRequest): string {
-  return (
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    req.headers.get("x-real-ip") ||
-    "unknown"
-  );
+  const viaProxy = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip");
+  if (!viaProxy) return req.headers.get("x-vercel-forwarded-for") ?? "unknown";
+  const trustedProxy = process.env.TRUST_PROXY === "1";
+  if (!trustedProxy) {
+    // Without an explicit trust flag we cannot safely use the header.
+    return "unknown";
+  }
+  return viaProxy.split(",")[0]?.trim() || "unknown";
 }
 
 export const RATE = {

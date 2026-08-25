@@ -1,25 +1,22 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Search } from "lucide-react";
-import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { SectionHeading } from "@/components/ui/section-heading";
 import { AnimeCard } from "@/components/ui/anime-card";
 import { Pagination } from "@/components/ui/pagination";
 import { EmptyState, LoadingGrid } from "@/components/ui/empty-state";
 import { LinkButton } from "@/components/ui/button";
 import { FilterBar, type FilterBarValues } from "@/components/anime/filter-bar";
+import { CatalogSidebar } from "@/components/anime/catalog-sidebar";
 import { getAnimeList, getEras, getGenres, getStudios, type AnimeSort } from "@/lib/data";
 
 export const metadata: Metadata = {
-  title: "Anime Database",
+  title: "Anime Catalog — Explore The History",
   description:
     "Browse the Anime Archive database — search, filter, and sort over a century of Japanese animation by year, decade, genre, studio, era, format, and more.",
   alternates: { canonical: "/anime" },
 };
 
 const SORTS: AnimeSort[] = ["year", "year_desc", "title", "rating", "newest"];
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
 function parseFilters(sp: Record<string, string | string[] | undefined>) {
   const get = (key: string) => {
@@ -70,17 +67,20 @@ function toFilterValues(filters: ReturnType<typeof parseFilters>): FilterBarValu
 }
 
 async function AnimeResults({ filters }: { filters: ReturnType<typeof parseFilters> }) {
-  const data = await getAnimeList({ ...filters, perPage: 24 });
+  const data = await getAnimeList({ ...filters, perPage: 25 });
 
   return (
-    <section className="mt-8">
-      <p className="mb-4 font-display text-xs uppercase tracking-[0.2em] text-muted">
-        {data.total.toLocaleString()} work{data.total === 1 ? "" : "s"} archived
-      </p>
+    <section className="mt-6">
+      <div className="mb-4 flex items-center justify-between">
+        <p className="font-display text-[11px] font-semibold uppercase tracking-[0.2em] text-[#666A70]">
+          SHOWING {data.items.length} OF {data.total.toLocaleString()} ARCHIVED WORKS
+        </p>
+      </div>
+
       {data.items.length === 0 ? (
         <EmptyState
           title="No works match your filters"
-          description="Try removing a filter, widening the year range, or searching for a different title."
+          description="Try clearing some filters or searching for a different title or creator."
           icon={Search}
           action={
             <LinkButton href="/anime" variant="outline" size="sm">
@@ -90,11 +90,13 @@ async function AnimeResults({ filters }: { filters: ReturnType<typeof parseFilte
         />
       ) : (
         <>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+          {/* 5-to-6 column responsive grid matching reference */}
+          <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 sm:gap-4">
             {data.items.map((item) => (
               <AnimeCard key={item.slug} data={item} />
             ))}
           </div>
+
           <div className="mt-10">
             <Pagination page={data.page} pages={data.pages} basePath="/anime" />
           </div>
@@ -104,7 +106,7 @@ async function AnimeResults({ filters }: { filters: ReturnType<typeof parseFilte
   );
 }
 
-export default async function AnimeDatabasePage({
+export default async function AnimeCatalogPage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -112,44 +114,46 @@ export default async function AnimeDatabasePage({
   const sp = await searchParams;
   const filters = parseFilters(sp);
 
-  const [genres, studios, eras] = await Promise.all([getGenres(), getStudios(), getEras()]);
-
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    name: "Anime Database",
-    description: "The Anime Archive database — a searchable index of Japanese animation from 1917 to the present.",
-    url: `${SITE_URL}/anime`,
-    isPartOf: { "@type": "WebSite", name: "Anime Archive", url: SITE_URL },
-  };
+  const [genres, studios, eras] = await Promise.all([
+    getGenres(),
+    getStudios(),
+    getEras(),
+  ]);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      <Breadcrumbs items={[{ label: "Anime Database" }]} />
+    <div className="mx-auto max-w-[1720px] w-full px-4 py-8 sm:px-8 lg:px-12 bg-ink">
+      <div className="flex flex-col lg:flex-row gap-8 lg:gap-10">
+        {/* Left Sidebar on Desktop */}
+        <div className="hidden lg:block">
+          <CatalogSidebar />
+        </div>
 
-      <div className="mt-4">
-        <SectionHeading
-          eyebrow="Archive"
-          title="ANIME DATABASE"
-          description="Search, filter, and sort over a century of Japanese animation — every work, one archive."
-        />
+        {/* Main Catalog Content */}
+        <main className="flex-1 min-w-0">
+          {/* Header */}
+          <div className="mb-6">
+            <h1 className="font-display text-2xl sm:text-4xl font-extrabold uppercase tracking-tight text-paper">
+              ANIME CATALOG
+            </h1>
+            <p className="mt-1.5 text-sm text-[#9A9A9A]">
+              Explore thousands of anime from across the history.
+            </p>
+          </div>
+
+          {/* Search and Filters Bar */}
+          <FilterBar
+            initial={toFilterValues(filters)}
+            genres={genres.map((g) => ({ value: g.slug, label: g.name }))}
+            studios={studios.map((s) => ({ value: s.slug, label: s.name }))}
+            eras={eras.map((e) => ({ value: e.slug, label: e.name }))}
+          />
+
+          {/* Results Grid */}
+          <Suspense fallback={<div className="mt-10"><LoadingGrid count={15} /></div>}>
+            <AnimeResults filters={filters} />
+          </Suspense>
+        </main>
       </div>
-
-      <FilterBar
-        initial={toFilterValues(filters)}
-        genres={genres.map((g) => ({ value: g.slug, label: g.name }))}
-        studios={studios.map((s) => ({ value: s.slug, label: s.name }))}
-        eras={eras.map((e) => ({ value: e.slug, label: e.name }))}
-        className="mt-6"
-      />
-
-      <Suspense fallback={<div className="mt-10"><LoadingGrid count={12} /></div>}>
-        <AnimeResults filters={filters} />
-      </Suspense>
     </div>
   );
 }

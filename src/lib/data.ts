@@ -65,8 +65,14 @@ export async function getAnimeList(params: AnimeListParams = {}) {
       { alternativeTitles: { has: params.q } },
     ];
   }
-  if (params.year) where.year = params.year;
-  if (params.decade) {
+  if (params.year && params.decade) {
+    where.AND = [
+      { year: params.year },
+      { year: { gte: params.decade, lt: params.decade + 10 } },
+    ];
+  } else if (params.year) {
+    where.year = params.year;
+  } else if (params.decade) {
     where.year = { gte: params.decade, lt: params.decade + 10 };
   }
   if (params.genre) where.genres = { some: { slug: params.genre } };
@@ -76,51 +82,52 @@ export async function getAnimeList(params: AnimeListParams = {}) {
   if (params.format) where.format = params.format.toUpperCase();
   if (params.status) where.status = params.status.toUpperCase();
   if (params.era) where.era = { slug: params.era };
-  if (params.isMovie !== undefined) where.isMovie = params.isMovie;
+  if (params.isMovie !== undefined) where.format = "MOVIE";
   if (params.minEpisodes !== undefined) where.episodeCount = { ...(where.episodeCount as object), gte: params.minEpisodes };
   if (params.maxEpisodes !== undefined) where.episodeCount = { ...(where.episodeCount as object), lte: params.maxEpisodes };
 
   const orderBy: Prisma.AnimeOrderByWithRelationInput[] = (() => {
     switch (params.sort) {
+      case "year":
+        return [{ year: "asc" }];
       case "year_desc":
         return [{ year: "desc" }];
       case "title":
         return [{ title: "asc" }];
-      case "rating":
-        return [{ averageRating: "desc" }, { ratingCount: "desc" }];
       case "newest":
         return [{ createdAt: "desc" }];
+      case "rating":
       default:
-        return [{ year: "asc" }];
+        return [{ averageRating: "desc" }, { ratingCount: "desc" }];
     }
   })();
 
   return cached(`anime:list:${JSON.stringify({ ...params, page, perPage })}`, CACHE_TTL_MS, async () => {
-    const [total, items] = await Promise.all([
-      prisma.anime.count({ where: where as never }),
-      prisma.anime.findMany({
-        where: where as never,
-        orderBy,
-        skip: (page - 1) * perPage,
-        take: perPage,
-        select: {
-          id: true,
-          slug: true,
-          title: true,
-          japaneseTitle: true,
-          year: true,
-          format: true,
-          status: true,
-          episodeCount: true,
-          averageRating: true,
-          coverUrl: true,
-          studio: { select: { slug: true, name: true } },
-          genres: { select: { slug: true, name: true } },
-        },
-      }),
-    ]);
+    const total = await prisma.anime.count({ where: where as never });
+    const pages = Math.max(1, Math.ceil(total / perPage));
+    const safePage = Math.min(page, pages);
+    const items = await prisma.anime.findMany({
+      where: where as never,
+      orderBy,
+      skip: (safePage - 1) * perPage,
+      take: perPage,
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        japaneseTitle: true,
+        year: true,
+        format: true,
+        status: true,
+        episodeCount: true,
+        averageRating: true,
+        coverUrl: true,
+        studio: { select: { slug: true, name: true } },
+        genres: { select: { slug: true, name: true } },
+      },
+    });
 
-    return { items, total, page, perPage, pages: Math.max(1, Math.ceil(total / perPage)) };
+    return { items, total, page: safePage, perPage, pages };
   });
 }
 
@@ -836,4 +843,118 @@ export async function getTourBySlug(slug: string) {
       },
     })
   );
+}
+
+export async function getArchiveStats(): Promise<ArchiveStatsDto> {
+  return cached("stats:archive", CACHE_TTL_MS, async () => {
+    const [anime, movies, creators, studios, events, genres, characters] = await Promise.all([
+      prisma.anime.count(),
+      prisma.anime.count({ where: { format: "MOVIE" } }),
+      prisma.person.count(),
+      prisma.studio.count(),
+      prisma.historicalEvent.count(),
+      prisma.genre.count(),
+      prisma.character.count(),
+    ]);
+    return { anime, movies, creators, studios, events, genres, characters };
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Curated rankings
+// ---------------------------------------------------------------------------
+
+export interface RankingItemDto {
+  rank: number;
+  note: string | null;
+  anime: {
+    slug: string;
+    title: string;
+    japaneseTitle: string | null;
+    year: number | null;
+    format: string;
+    averageRating: number;
+    coverUrl: string | null;
+    studio: { slug: string; name: string } | null;
+  };
+}
+
+export interface RankingDto {
+  slug: string;
+  name: string;
+  tagline: string | null;
+  description: string | null;
+  methodology: string | null;
+  itemCount: number;
+  items: RankingItemDto[];
+}
+
+export async function getRankings(): Promise<RankingDto[]> {
+  return cached("ranking:list", CACHE_TTL_MS, async () => {
+    const rankings = await prisma.ranking.findMany({
+      orderBy: { order: "asc" },
+      include: {
+        items: {
+          orderBy: { rank: "asc" },
+          include: {
+            anime: {
+              select: {
+                slug: true,
+                title: true,
+                japaneseTitle: true,
+                year: true,
+                format: true,
+                averageRating: true,
+                coverUrl: true,
+                studio: { select: { slug: true, name: true } },
+              },
+            },
+          },
+        },
+      },
+    });
+    return rankings.map(({ items, ...rest }) => ({
+      ...rest,
+      itemCount: items.length,
+      items: items.map((item) => ({
+        rank: item.rank,
+        note: item.note,
+        anime: item.anime,
+      })),
+    }));
+  });
+}
+
+export async function getRankingBySlug(slug: string): Promise<RankingDto | null> {
+  return cached(`ranking:bySlug:${slug}`, CACHE_TTL_MS, async () => {
+    const ranking = await prisma.ranking.findUnique({
+      where: { slug },
+      include: {
+        items: {
+          orderBy: { rank: "asc" },
+          include: {
+            anime: {
+              select: {
+                slug: true,
+                title: true,
+                japaneseTitle: true,
+                year: true,
+                format: true,
+                averageRating: true,
+                coverUrl: true,
+                studio: { select: { slug: true, name: true } },
+              },
+            },
+          },
+        },
+      },
+    });
+    if (!ranking) return null;
+    const { items, ...rest } = ranking;
+    return {
+      ...rest,
+      itemCount: items.length,
+      items: items.map((item) => ({ rank: item.rank, note: item.note, anime: item.anime })),
+    };
+  });
 }

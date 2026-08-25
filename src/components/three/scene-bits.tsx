@@ -51,6 +51,11 @@ export function ClickableText({
   onClick: () => void;
 }) {
   const [hovered, setHovered] = useState(false);
+  useEffect(() => {
+    return () => {
+      document.body.style.cursor = "auto";
+    };
+  }, []);
   return (
     <SceneText
       position={position}
@@ -127,10 +132,11 @@ export function ParticleField({
     [count, x, y, z]
   );
 
-  useFrame((_, delta) => {
+  useFrame((state, delta) => {
     if (!ref.current) return;
+    const t = state.clock.elapsedTime;
     ref.current.rotation.y += (mode === "PERFORMANCE" ? 0.01 : 0.025) * delta;
-    ref.current.position.y += Math.sin(delta * 0.3) * 0.0005;
+    ref.current.position.y = Math.sin(t * 0.3) * 0.25;
   });
 
   return (
@@ -269,6 +275,12 @@ export function ClickableBox({
   children,
 }: ClickableBoxProps) {
   const [hovered, setHovered] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      document.body.style.cursor = "auto";
+    };
+  }, []);
 
   const handleOver = (e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation();

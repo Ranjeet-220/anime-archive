@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Field, Input } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 
-export function LoginForm() {
+export function LoginForm({ next }: { next?: string }) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,7 +27,9 @@ export function LoginForm() {
         setError(data?.error ?? "Sign in failed. Please try again.");
         return;
       }
-      router.push("/profile");
+      const safeNext =
+        next && next.startsWith("/") && !next.startsWith("//") ? next : "/profile";
+      router.push(safeNext);
       router.refresh();
     } catch {
       setError("Network error. Please try again.");

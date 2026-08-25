@@ -72,6 +72,8 @@ export const ModelName = {
   Collection: 'Collection',
   CollectionItem: 'CollectionItem',
   Report: 'Report',
+  Ranking: 'Ranking',
+  RankingItem: 'RankingItem',
   Quiz: 'Quiz',
   QuizAttempt: 'QuizAttempt',
   Badge: 'Badge',
@@ -416,6 +418,30 @@ export const ReportScalarFieldEnum = {
 } as const
 
 export type ReportScalarFieldEnum = (typeof ReportScalarFieldEnum)[keyof typeof ReportScalarFieldEnum]
+
+
+export const RankingScalarFieldEnum = {
+  id: 'id',
+  slug: 'slug',
+  name: 'name',
+  tagline: 'tagline',
+  description: 'description',
+  methodology: 'methodology',
+  order: 'order'
+} as const
+
+export type RankingScalarFieldEnum = (typeof RankingScalarFieldEnum)[keyof typeof RankingScalarFieldEnum]
+
+
+export const RankingItemScalarFieldEnum = {
+  id: 'id',
+  rankingId: 'rankingId',
+  animeId: 'animeId',
+  rank: 'rank',
+  note: 'note'
+} as const
+
+export type RankingItemScalarFieldEnum = (typeof RankingItemScalarFieldEnum)[keyof typeof RankingItemScalarFieldEnum]
 
 
 export const QuizScalarFieldEnum = {
