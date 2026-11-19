@@ -10,9 +10,21 @@ import { animeCuratedPopular } from "./seed-data/anime-curated-popular";
 import { animeCuratedCinema } from "./seed-data/anime-curated-cinema";
 import { animeCuratedModern } from "./seed-data/anime-curated-modern";
 import { anime60Cards } from "./seed-data/anime-60-cards";
+import { animeUserList } from "./seed-data/anime-user-list";
 import { events } from "./seed-data/events";
 import { quizzes, badges, tours } from "./seed-data/quiz-tours";
 import { rankings } from "./seed-data/rankings";
+import {
+  CURATED_OVERRIDES,
+  ADDITIONAL_CHARACTERS,
+  ADDITIONAL_EPISODES,
+  ADDITIONAL_RELATIONS,
+} from "./seed-data/anime-enrichments";
+import {
+  isekaiAnime,
+  isekaiStudios,
+  isekaiPeople,
+} from "./seed-data/anime-isekai-consolidated";
 
 async function main() {
   console.log("Seeding Anime Archive database…");
@@ -76,14 +88,16 @@ async function main() {
 
   // Studios
   const studioById: Record<string, string> = {};
-  for (const studio of studios) {
+  const allStudios = [...studios, ...isekaiStudios];
+  for (const studio of allStudios) {
     const created = await prisma.studio.create({ data: studio });
     studioById[studio.slug] = created.id;
   }
 
   // People
   const personById: Record<string, string> = {};
-  for (const person of people) {
+  const allPeople = [...people, ...isekaiPeople];
+  for (const person of allPeople) {
     const created = await prisma.person.create({ data: person });
     personById[person.slug] = created.id;
   }
@@ -99,14 +113,23 @@ async function main() {
     ...animeCuratedPopular,
     ...animeCuratedCinema,
     ...animeCuratedModern,
+    ...animeUserList,
+    ...isekaiAnime,
   ];
   const seenSlugs = new Set<string>();
+  const seenCharacterSlugs = new Set<string>();
   const allAnime = rawAnimeList.filter((a) => {
     if (seenSlugs.has(a.slug)) return false;
     seenSlugs.add(a.slug);
     return true;
   });
   for (const a of allAnime) {
+    const override = CURATED_OVERRIDES[a.slug];
+    const directorSlug = a.director ?? override?.director ?? null;
+    const creatorSlug = a.creator ?? override?.creator ?? null;
+    const rawStudio = a.studio === "olim" ? "olm" : a.studio;
+    const studioSlug = rawStudio ?? override?.studio ?? null;
+
     const created = await prisma.anime.create({
       data: {
         slug: a.slug,
@@ -125,10 +148,10 @@ async function main() {
         status: a.status,
         sourceMaterial: a.sourceMaterial,
         officialWebsite: a.officialWebsite ?? null,
-        studioId: a.studio ? studioById[a.studio] : null,
-        creatorId: a.creator ? personById[a.creator] ?? null : null,
-        directorId: a.director ? personById[a.director] ?? null : null,
-        eraId: eraById[a.eraSlug],
+        studioId: studioSlug ? (studioById[studioSlug] ?? studioById["olim"] ?? null) : null,
+        creatorId: creatorSlug ? (personById[creatorSlug] ?? null) : null,
+        directorId: directorSlug ? (personById[directorSlug] ?? null) : null,
+        eraId: a.eraSlug ? (eraById[a.eraSlug] ?? null) : null,
         historicalSignificance: a.historicalSignificance,
         productionHistory: a.productionHistory,
         reception: a.reception,
@@ -136,17 +159,27 @@ async function main() {
         culturalImpact: a.culturalImpact,
         legacy: a.legacy,
         historyTimeline: a.historyTimeline,
-        genres: { connect: a.genreSlugs.map((slug) => ({ id: genreById[slug] })) },
+        genres: {
+          connect: a.genreSlugs
+            .filter((slug) => Boolean(genreById[slug]))
+            .map((slug) => ({ id: genreById[slug] })),
+        },
         isDemoData: true,
       },
     });
     animeIdBySlug[a.slug] = created.id;
 
-    // Characters
-    for (const c of a.characters) {
+    // Characters (including extra characters for core classics)
+    const extraChars = ADDITIONAL_CHARACTERS[a.slug] ?? [];
+    for (const c of [...a.characters, ...extraChars]) {
+      let charSlug = c.slug;
+      if (seenCharacterSlugs.has(charSlug)) {
+        charSlug = `${charSlug}-${a.slug}`;
+      }
+      seenCharacterSlugs.add(charSlug);
       await prisma.character.create({
         data: {
-          slug: c.slug,
+          slug: charSlug,
           name: c.name,
           japaneseName: c.japaneseName,
           role: c.role,
@@ -157,34 +190,47 @@ async function main() {
       });
     }
 
-    // Episodes
-    for (const e of a.episodes) {
+    // Episodes (including landmark episodes for television series)
+    const extraEps = ADDITIONAL_EPISODES[a.slug] ?? [];
+    const episodeList = (a.episodes.length <= 1 && extraEps.length > 0) ? extraEps : a.episodes;
+    for (const e of episodeList) {
+      let validAirDate: Date | null = null;
+      if (e.airDate) {
+        const parsed = new Date(e.airDate);
+        if (!Number.isNaN(parsed.getTime())) {
+          validAirDate = parsed;
+        }
+      }
       await prisma.episode.create({
         data: {
           animeId: created.id,
           number: e.number,
           title: e.title,
-          airDate: e.airDate ? new Date(e.airDate) : null,
+          airDate: validAirDate,
           synopsis: e.synopsis ?? null,
         },
       });
     }
 
     // Director credits
-    if (a.director) {
-      const directorId = personById[a.director];
+    if (directorSlug) {
+      const directorId = personById[directorSlug];
       if (directorId) {
-        await prisma.personCredit.create({
-          data: { animeId: created.id, personId: directorId, role: "Director" },
-        });
+        try {
+          await prisma.personCredit.create({
+            data: { animeId: created.id, personId: directorId, role: "Director" },
+          });
+        } catch {}
       }
     }
-    if (a.creator) {
-      const creatorId = personById[a.creator];
+    if (creatorSlug) {
+      const creatorId = personById[creatorSlug];
       if (creatorId) {
-        await prisma.personCredit.create({
-          data: { animeId: created.id, personId: creatorId, role: "Creator" },
-        });
+        try {
+          await prisma.personCredit.create({
+            data: { animeId: created.id, personId: creatorId, role: "Creator" },
+          });
+        } catch {}
       }
     }
   }
@@ -218,14 +264,30 @@ async function main() {
   for (const a of allAnime) {
     for (const rel of a.related) {
       if (animeIdBySlug[rel.slug] && animeIdBySlug[a.slug]) {
+        try {
+          await prisma.animeRelation.create({
+            data: {
+              animeId: animeIdBySlug[a.slug],
+              relatedId: animeIdBySlug[rel.slug],
+              type: rel.type,
+            },
+          });
+        } catch {}
+      }
+    }
+  }
+
+  for (const rel of ADDITIONAL_RELATIONS) {
+    if (animeIdBySlug[rel.animeSlug] && animeIdBySlug[rel.relatedSlug]) {
+      try {
         await prisma.animeRelation.create({
           data: {
-            animeId: animeIdBySlug[a.slug],
-            relatedId: animeIdBySlug[rel.slug],
+            animeId: animeIdBySlug[rel.animeSlug],
+            relatedId: animeIdBySlug[rel.relatedSlug],
             type: rel.type,
           },
         });
-      }
+      } catch {}
     }
   }
 
@@ -415,19 +477,21 @@ async function main() {
     });
     await prisma.rankingItem.deleteMany({ where: { rankingId: created.id } });
     await prisma.rankingItem.createMany({
-      data: ranking.items.map((item, index) => ({
-        rankingId: created.id,
-        animeId: animeIdBySlug[item.slug],
-        rank: index + 1,
-        note: item.note ?? null,
-      })),
+      data: ranking.items
+        .filter((item) => Boolean(animeIdBySlug[item.slug]))
+        .map((item, index) => ({
+          rankingId: created.id,
+          animeId: animeIdBySlug[item.slug],
+          rank: index + 1,
+          note: item.note ?? null,
+        })),
     });
   }
 
   const stats = {
     anime: allAnime.length,
-    studios: studios.length,
-    people: people.length,
+    studios: allStudios.length,
+    people: allPeople.length,
     characters: allAnime.reduce((n, a) => n + a.characters.length, 0),
     events: events.length,
   };

@@ -233,5 +233,23 @@ export const genres = [
     japaneseName: "少年",
     description: "Action-packed coming-of-age adventures driven by friendship, effort, and victory.",
   },
+  {
+    slug: "military",
+    name: "Military",
+    japaneseName: "ミリタリー",
+    description: "Armed forces, tactical warfare, modern and fantasy weapon systems.",
+  },
+  {
+    slug: "harem",
+    name: "Harem",
+    japaneseName: "ハーレム",
+    description: "Stories centering around a protagonist surrounded by multiple romantic interests.",
+  },
+  {
+    slug: "parody",
+    name: "Parody",
+    japaneseName: "パロディ",
+    description: "Humorous works that satirize and subvert genre conventions and tropes.",
+  },
 ];
 

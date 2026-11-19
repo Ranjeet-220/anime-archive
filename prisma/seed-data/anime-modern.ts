@@ -30,7 +30,9 @@ export const animeModern: AnimeSeed[] = [
         voiceActor: "Atsuko Tanaka",
       },
     ],
-    episodes: [],
+    episodes: [
+      { number: 1, title: "Ghost in the Shell (Theatrical Feature)", airDate: "1995-11-18", synopsis: "The landmark cyberpunk masterwork by Mamoru Oshii." }
+    ],
     historicalSignificance:
       "The most intellectually ambitious anime film of the 1990s. Ghost in the Shell asked serious questions about consciousness and identity, and its vision of the network-defined self anticipated the internet age.",
     productionHistory:
@@ -171,7 +173,9 @@ export const animeModern: AnimeSeed[] = [
         voiceActor: "Junko Iwao",
       },
     ],
-    episodes: [],
+    episodes: [
+      { number: 1, title: "Perfect Blue (Theatrical Feature)", airDate: "1997-07-12", synopsis: "Satoshi Kon's visionary psychological thriller." }
+    ],
     historicalSignificance:
       "Satoshi Kon's directorial debut, and the first anime thriller built on identity disintegration. Its seamless match-cut transitions between fantasy and reality invented techniques now ubiquitous in cinema.",
     productionHistory:
@@ -365,7 +369,9 @@ export const animeModern: AnimeSeed[] = [
         voiceActor: "Akio Nakamura",
       },
     ],
-    episodes: [],
+    episodes: [
+      { number: 1, title: "Spirited Away (Theatrical Feature)", airDate: "2001-07-20", synopsis: "Hayao Miyazaki's Academy Award-winning fantasy masterpiece." }
+    ],
     historicalSignificance:
       "The highest-grossing film in Japanese history for 19 years and the first (and still only) non-English-language film to win the Academy Award for Best Animated Feature. Spirited Away made anime a global cinematic art form.",
     productionHistory:
@@ -588,8 +594,13 @@ export const animeModern: AnimeSeed[] = [
     director: "naoko-yamada",
     genreSlugs: ["slice-of-life", "comedy", "drama"],
     eraSlug: "digital-revolution",
-    characters: [],
-    episodes: [],
+    characters: [
+      { slug: "taki-tachibana", name: "Taki Tachibana", japaneseName: "立花 瀧", role: "Protagonist", biography: "A high school boy in Tokyo who works as a waiter and aspires to be an architect.", voiceActor: "Ryunosuke Kamiki" },
+      { slug: "mitsuha-miyamizu", name: "Mitsuha Miyamizu", japaneseName: "宮水 三葉", role: "Protagonist", biography: "A high school girl and shrine maiden in the mountain town of Itomori.", voiceActor: "Mone Kamishiraishi" }
+    ],
+    episodes: [
+      { number: 1, title: "Your Name (Theatrical Feature)", airDate: "2016-08-26", synopsis: "Makoto Shinkai's historic body-swapping romantic fantasy." }
+    ],
     historicalSignificance:
       "The series that defined 'cute girls doing cute things' — and elevated it to art. K-On!'s delicate character acting and Kyoto Animation's in-house craft made the genre the decade's dominant commercial force.",
     productionHistory:
@@ -700,8 +711,13 @@ export const animeModern: AnimeSeed[] = [
     director: "makoto-shinkai",
     genreSlugs: ["romance", "fantasy", "drama"],
     eraSlug: "streaming-era",
-    characters: [],
-    episodes: [],
+    characters: [
+      { slug: "taki-tachibana", name: "Taki Tachibana", japaneseName: "立花 瀧", role: "Protagonist", biography: "A high school boy in Tokyo who works as a waiter and aspires to be an architect.", voiceActor: "Ryunosuke Kamiki" },
+      { slug: "mitsuha-miyamizu", name: "Mitsuha Miyamizu", japaneseName: "宮水 三葉", role: "Protagonist", biography: "A high school girl and shrine maiden in the mountain town of Itomori.", voiceActor: "Mone Kamishiraishi" }
+    ],
+    episodes: [
+      { number: 1, title: "Your Name (Theatrical Feature)", airDate: "2016-08-26", synopsis: "Makoto Shinkai's historic body-swapping romantic fantasy." }
+    ],
     historicalSignificance:
       "The anime film that transcended anime. Your Name became the first anime not directed by Miyazaki to top the global box office conversation, grossing over $380 million worldwide and making Makoto Shinkai a household name.",
     productionHistory:

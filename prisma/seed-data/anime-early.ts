@@ -52,8 +52,12 @@ export const animeEarly: AnimeSeed[] = [
     studio: null,
     genreSlugs: ["comedy", "historical"],
     eraSlug: "the-beginning",
-    characters: [],
-    episodes: [],
+    characters: [
+      { slug: "namakura-samurai", name: "The Clumsy Samurai", japaneseName: "浪人武士", role: "Protagonist", biography: "A foolish samurai who purchases an extraordinarily dull sword and attempts to test it on innocent passersby with comical results.", voiceActor: "Silent Era" }
+    ],
+    episodes: [
+      { number: 1, title: "Namakura Gatana (The Dull Sword)", airDate: "1917-06-30", synopsis: "The complete surviving 4-minute animated short film by Jun'ichi Kōuchi." }
+    ],
     historicalSignificance:
       "One of the first works of Japanese animation and the earliest surviving of three shorts released in 1917, the year widely credited as the birth of anime. Created by pioneering animator Jun'ichi Kōuchi.",
     productionHistory:
@@ -93,8 +97,12 @@ export const animeEarly: AnimeSeed[] = [
     studio: null,
     genreSlugs: ["adventure", "historical"],
     eraSlug: "the-beginning",
-    characters: [],
-    episodes: [],
+    characters: [
+      { slug: "momotaro-commander", name: "Commander Momotaro", japaneseName: "桃太郎", role: "Protagonist", biography: "The legendary folk hero reimagined as a naval commander.", voiceActor: "Historical Cast" }
+    ],
+    episodes: [
+      { number: 1, title: "Theatrical Feature Film Presentation", airDate: "1945-04-12", synopsis: "The landmark 74-minute animated feature." }
+    ],
     historicalSignificance:
       "Japan's first feature-length animated film, directed by Mitsuyo Seo for the wartime Japan Motion Picture Company (Shōchiku). It demonstrated that Japanese studios could sustain full-length animation production.",
     productionHistory:
@@ -260,7 +268,10 @@ export const animeEarly: AnimeSeed[] = [
     director: "noboru-ishiguro",
     genreSlugs: ["science-fiction", "adventure", "drama"],
     eraSlug: "television-era",
-    characters: [],
+    characters: [
+      { slug: "susumu-kodai", name: "Susumu Kodai", japaneseName: "古代 進", role: "Protagonist", biography: "Tactical officer of the Yamato whose fiery spirit leads humanity's desperate voyage.", voiceActor: "Kei Tomiyama" },
+      { slug: "captain-juzo-okita", name: "Captain Juzo Okita", japaneseName: "沖田 十三", role: "Main Character", biography: "The wise and unwavering commander of the Yamato.", voiceActor: "Goro Naya" }
+    ],
     episodes: [{ number: 1, title: "Save the Earth!" }],
     historicalSignificance:
       "The series that saved anime. In the mid-1970s, TV anime was in decline; Yamato's epic, adult-oriented space opera — with real dramatic stakes and mourning — drew millions of older viewers and revived the industry.",
@@ -398,7 +409,9 @@ export const animeEarly: AnimeSeed[] = [
         voiceActor: "Nozomu Sasaki",
       },
     ],
-    episodes: [],
+    episodes: [
+      { number: 1, title: "AKIRA (Theatrical Feature)", airDate: "1988-07-16", synopsis: "Katsuhiro Otomo's groundbreaking cyberpunk masterwork that introduced anime to the world." }
+    ],
     historicalSignificance:
       "The film that announced Japanese animation to the world. Its $11 million budget, 160,000+ cels, and uncompromising cyberpunk vision stunned international audiences at its 1988 screenings and transformed anime's global image overnight.",
     productionHistory:

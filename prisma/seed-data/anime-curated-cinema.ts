@@ -39,69 +39,9 @@ export const animeCuratedCinema: AnimeSeed[] = [
         voiceActor: "Saori Hayami",
       },
     ],
-    episodes: [],
-    historicalSignificance:
-      "The highest-grossing Kyoto Animation film at the time of release and one of the most commercially successful anime films of 2016 worldwide. It was a rare mainstream anime to center a deaf protagonist and to treat bullying and disability with unflinching seriousness. Its international distribution helped establish Kyoto Animation's reputation for sensitive, character-driven drama.",
-    productionHistory:
-      "Naoko Yamada and screenwriter Reiko Yoshida adapted Ōima's acclaimed manga after it became a national bestseller, keeping its harsh subject matter intact. The studio's meticulous animation of sign language and body language was developed with real attention to the deaf community's perspective.",
-    reception:
-      "Critics worldwide praised the film's visual storytelling, the subtlety of Miyu Irino and Saori Hayami's performances, and its refusal to give its characters an easy redemption. It won over audiences in Japan and abroad, with many reviewers ranking it among the best animated films of 2016.",
-    awards:
-      "Won the Best Animation Film award at the 40th Japan Academy Film Prize and was named Anime of the Year at the Tokyo Anime Award Festival 2017. It also received the Excellence Award at the Japan Media Arts Festival 2016.",
-    culturalImpact:
-      "The film brought dialogue about bullying and deafness in Japanese schools into the mainstream, and its success abroad introduced a global audience to quieter, realist anime drama. Its box office performance proved that serious social themes could carry a major anime release.",
-    legacy:
-      "A Silent Voice is now considered a landmark of 2010s anime cinema and a defining title of Kyoto Animation's prestige period. It continues to be cited as a benchmark for how anime can treat disability with dignity.",
-    historyTimeline: [
-      { label: "Creation", year: "2013", text: "Yoshitoki Ōima's manga Koe no Katachi begins serialization and becomes a critical hit." },
-      { label: "Production", year: "2015", text: "Kyoto Animation announces a feature film adaptation directed by Naoko Yamada." },
-      { label: "Release", year: "2016-09-17", text: "Premieres in Japanese theaters to box office success." },
-      { label: "Recognition", year: "2017", text: "Wins the Japan Academy Prize for Best Animation Film." },
-      { label: "Legacy", text: "Standing as Kyoto Animation's most acclaimed film and a touchstone of realistic anime drama." },
+    episodes: [
+      { number: 1, title: "Theatrical Feature Film Presentation", airDate: "Theatrical Premiere", synopsis: "The complete, uncut theatrical feature film presentation." }
     ],
-    related: [{ slug: "your-name", type: "2016 cinematic landmark" }],
-    sources: [
-      { name: "Wikipedia", url: "https://en.wikipedia.org/wiki/A_Silent_Voice_(film)", title: "A Silent Voice (film) — Wikipedia" },
-    ],
-  },
-  {
-    slug: "howls-moving-castle",
-    title: "Howl's Moving Castle",
-    japaneseTitle: "ハウルの動く城 (Hauru no Ugoku Shiro)",
-    altTitles: ["Hauru no Ugoku Shiro"],
-    synopsis:
-      "Cursed by the Witch of the Waste into the body of a ninety-year-old woman, young hatmaker Sophie wanders into the magical castle of the vain and elusive wizard Howl. Amidst a brewing war, she strikes a bargain to work in the castle, befriending the fire demon Calcifer and the apprentice Markl along the way. As Sophie's kindness slowly untangles Howl's secrets, she rediscovers the courage and beauty within her aged shell. The film blends fantasy, anti-war commentary, and romance into one of Ghibli's most beloved fairy tales.",
-    releaseDate: "2004-09-05",
-    year: 2004,
-    format: "MOVIE",
-    duration: 119,
-    status: "FINISHED",
-    sourceMaterial: "Novel by Diana Wynne Jones (1986)",
-    studio: "studio-ghibli",
-    director: "hayao-miyazaki",
-    genreSlugs: ["fantasy", "adventure", "romance", "drama"],
-    eraSlug: "digital-revolution",
-    characters: [
-      {
-        slug: "sophie",
-        name: "Sophie Hatter",
-        japaneseName: "ソフィー",
-        role: "Protagonist",
-        biography:
-          "A quiet eldest daughter who resigns herself to a dull life until a witch's curse makes her elderly overnight. Sophie's practical courage and unwavering kindness gradually undo the curse, as her self-image shifts from plainness to quiet heroism. She is one of Miyazaki's most beloved heroines for being brave without ever being loud.",
-        voiceActor: "Chieko Baisho",
-      },
-      {
-        slug: "howl",
-        name: "Howl Jenkins Pendragon",
-        japaneseName: "ハウル",
-        role: "Main character",
-        biography:
-          "A flamboyant wizard famous for his beauty, his magical moving castle, and his rumored appetite for young women's hearts. Beneath the vanity, Howl is a flighty, frightened young man who avoids commitments and responsibilities, including a war he wants no part in. Sophie's steadfast love gives him the reason to finally stand his ground.",
-        voiceActor: "Takuya Kimura",
-      },
-    ],
-    episodes: [],
     historicalSignificance:
       "The most expensive Japanese animated film produced at the time, with a budget reported near $24 million, and it became one of the highest-grossing films ever released in Japan. It marked Miyazaki's strongest anti-war statement since Nausicaä, written in direct response to the 2003 invasion of Iraq. The film was a competitive entry at the 2004 Venice Film Festival, reflecting anime's growing presence in the Western festival circuit.",
     productionHistory:
@@ -164,70 +104,9 @@ export const animeCuratedCinema: AnimeSeed[] = [
         voiceActor: "Yuriko Ishida",
       },
     ],
-    episodes: [],
-    historicalSignificance:
-      "The highest-grossing Japanese film of 1997 and the first anime to enter the worldwide top ranks of box office, remaining Japan's box office champion until Titanic displaced it. It marked Studio Ghibli's shift toward adult audiences and established the studio's international distribution strategy. With its epic scale and ecological vision, it set a new benchmark for what an animated feature could be.",
-    productionHistory:
-      "Miyazaki spent years researching medieval Japan, drawing inspiration from the Jōmon period and the forests of Yakushima for the film's look. The production used roughly 144,000 hand-painted cels, and several sequences were completed just weeks before release. Producer Toshio Suzuki developed an aggressive promotional campaign that made the film a national event.",
-    reception:
-      "Critics in Japan and abroad hailed it as a masterpiece, with praise centering on its refusal to present nature and humanity in simple moral terms. It was a defining moment for anime in the West, drawing attention from mainstream press and festival audiences alike.",
-    awards:
-      "Won the Japan Academy Prize for Best Picture of the Year and the Best Animated Film award at the Japanese Agency for Cultural Affairs. It was also honored with the Golden Prize at the 1997 Mainichi Film Awards.",
-    culturalImpact:
-      "Princess Mononoke's ecological message resonated across the world and became a reference point for environmentalist readings of anime. The film also proved that anime could rival live-action epics in commercial and artistic seriousness, opening the door for Ghibli's global ascent.",
-    legacy:
-      "Widely regarded as one of the greatest animated films ever made, Princess Mononoke remains a cornerstone of Studio Ghibli's catalog and of anime's international reputation. It directly set the stage for Spirited Away's global triumph four years later.",
-    historyTimeline: [
-      { label: "Development", year: "1993", text: "Miyazaki begins developing the project during the production of Pom Poko." },
-      { label: "Production", year: "1995–97", text: "Over 140,000 cels are produced over roughly two years of intensive work." },
-      { label: "Release", year: "1997-07-12", text: "Opens in Japan and becomes the highest-grossing Japanese film to date." },
-      { label: "International", year: "1999", text: "Disney releases the film in North America with a star-studded dub." },
-      { label: "Legacy", text: "Acknowledged as a landmark of world cinema and a turning point for anime's global reach." },
+    episodes: [
+      { number: 1, title: "Theatrical Feature Film Presentation", airDate: "Theatrical Premiere", synopsis: "The complete, uncut theatrical feature film presentation." }
     ],
-    related: [{ slug: "akira", type: "1997 cinematic landmark" }],
-    sources: [
-      { name: "Wikipedia", url: "https://en.wikipedia.org/wiki/Princess_Mononoke", title: "Princess Mononoke — Wikipedia" },
-    ],
-  },
-  {
-    slug: "my-neighbor-totoro",
-    title: "My Neighbor Totoro",
-    japaneseTitle: "となりのトトロ (Tonari no Totoro)",
-    altTitles: ["Tonari no Totoro"],
-    synopsis:
-      "When their mother is hospitalized in the countryside, sisters Satsuki and Mei move with their father into a creaky old house beside a great camphor tree. There Mei befriends Totoro, a gentle forest spirit who introduces the children to the quiet magic that lives around their new home. Together they ride the Catbus, dance seeds into a sprouting grove, and face the fear of losing their mother. The film is a gentle, wonder-filled portrait of childhood and the natural world.",
-    releaseDate: "1988-04-16",
-    year: 1988,
-    format: "MOVIE",
-    duration: 86,
-    status: "FINISHED",
-    sourceMaterial: "Original",
-    studio: "studio-ghibli",
-    creator: "hayao-miyazaki",
-    director: "hayao-miyazaki",
-    genreSlugs: ["fantasy", "slice-of-life", "adventure"],
-    eraSlug: "golden-age",
-    characters: [
-      {
-        slug: "totoro",
-        name: "Totoro",
-        japaneseName: "トトロ",
-        role: "Forest spirit",
-        biography:
-          "A large, furry spirit of the forest who sleeps in the hollow of a camphor tree and reveals himself only to children. Totoro speaks little and communicates through roars and expressions, yet his kindness and wonder define the film's magic. He has become Studio Ghibli's mascot and one of the most recognizable characters in animation history.",
-        voiceActor: "Hitoshi Takagi",
-      },
-      {
-        slug: "satsuki",
-        name: "Satsuki Kusakabe",
-        japaneseName: "草壁 サツキ",
-        role: "Main character",
-        biography:
-          "Mei's older sister, a practical and responsible girl who holds the household together while their father works and their mother is ill. Satsuki is old enough to doubt the forest's magic but young enough to be swept up in it when it matters most. Her desperate flight to the hospital on the Catbus is one of the film's most emotional sequences.",
-        voiceActor: "Noriko Hidaka",
-      },
-    ],
-    episodes: [],
     historicalSignificance:
       "One of the most beloved and influential children's films ever made, and the film that made Studio Ghibli's name a global one. It was released as a double feature with Grave of the Fireflies, two films that could hardly differ more in tone yet proved the range of the medium. Totoro himself was adopted as the mascot of Studio Ghibli and appears in the studio's logo.",
     productionHistory:
@@ -290,70 +169,9 @@ export const animeCuratedCinema: AnimeSeed[] = [
         voiceActor: "Ayano Shiraishi",
       },
     ],
-    episodes: [],
-    historicalSignificance:
-      "Considered one of the greatest anti-war films ever made and a permanent pillar of Japanese animation. Its unflinching portrait of civilian suffering during the firebombing of Kobe is regarded as Japan's most powerful cinematic reckoning with the war. The film announced Isao Takahata as a director of world-class literary seriousness.",
-    productionHistory:
-      "Takahata adapted Nosaka's semi-autobiographical short story with a devotion to period detail, from rations to the exact glow of wartime lanterns. The production was completed on a punishing schedule, delivered just days before its release as the top half of a double bill with My Neighbor Totoro. The film's unusual choice to open with its own ending announced its refusal to offer false hope.",
-    reception:
-      "The film was hailed by Japanese critics as a masterpiece and became a legendary tearjerker worldwide. Roger Ebert declared it one of the most powerful anti-war films ever made, and it has appeared on numerous all-time animated film lists.",
-    awards:
-      "Won the Animation Jury Prize at the 1994 Chicago International Children's Film Festival and the Special Prize at the Blue Ribbon Awards. The Japanese Agency for Cultural Affairs recognized it in its National Film Archive of Japan selection.",
-    culturalImpact:
-      "Grave of the Fireflies changed how anime was perceived in the West, proving that the medium could carry serious adult tragedy. It also became the definitive cinematic text on the Japanese civilian experience of the Second World War.",
-    legacy:
-      "Decades after release, the film remains the standard against which war films in animation are measured. Its pairing with the joyful Totoro continues to define the full emotional range of Studio Ghibli.",
-    historyTimeline: [
-      { label: "Publication", year: "1967", text: "Akiyuki Nosaka publishes Hotaru no Haka, drawn from his own wartime childhood." },
-      { label: "Production", year: "1987–88", text: "Isao Takahata adapts the story as his second Studio Ghibli film." },
-      { label: "Release", year: "1988-04-16", text: "Opens as a double feature with My Neighbor Totoro." },
-      { label: "International acclaim", year: "1990s", text: "Gains worldwide recognition through festival screenings and home video." },
-      { label: "Legacy", text: "Honored as one of the greatest anti-war films in any medium." },
+    episodes: [
+      { number: 1, title: "Theatrical Feature Film Presentation", airDate: "Theatrical Premiere", synopsis: "The complete, uncut theatrical feature film presentation." }
     ],
-    related: [{ slug: "my-neighbor-totoro", type: "Double feature" }],
-    sources: [
-      { name: "Wikipedia", url: "https://en.wikipedia.org/wiki/Grave_of_the_Fireflies", title: "Grave of the Fireflies — Wikipedia" },
-    ],
-  },
-  {
-    slug: "weathering-with-you",
-    title: "Weathering with You",
-    japaneseTitle: "天気の子 (Tenki no Ko)",
-    altTitles: ["Tenki no Ko"],
-    synopsis:
-      "Runaway high school student Hodaka Morishima arrives in a Tokyo drowning in perpetual rain and takes a job at a shady occult magazine. There he meets Hina Amano, a girl who can clear the sky with a prayer, a power that carries a terrible price. As the two try to sell Hina's gift to a sun-starved city, they learn that saving the weather may mean sacrificing the person he loves. The film is a sweeping romance about the cost of miracles and the weight of choosing one person over the world.",
-    releaseDate: "2019-07-19",
-    year: 2019,
-    format: "MOVIE",
-    duration: 112,
-    status: "FINISHED",
-    sourceMaterial: "Original",
-    studio: "comix-wave-films",
-    creator: "makoto-shinkai",
-    director: "makoto-shinkai",
-    genreSlugs: ["romance", "fantasy", "drama"],
-    eraSlug: "streaming-era",
-    characters: [
-      {
-        slug: "hodaka",
-        name: "Hodaka Morishima",
-        japaneseName: "森嶋 帆高",
-        role: "Protagonist",
-        biography:
-          "A sixteen-year-old who runs away from a stifling life on a remote island to start over in Tokyo. Homeless and desperate, Hodaka finds purpose in protecting Hina, whose gift and fate threaten to tear them apart. His final choice — to defy the natural order for the sake of one person — is the heart of the film.",
-        voiceActor: "Kotarō Daigo",
-      },
-      {
-        slug: "hina",
-        name: "Hina Amano",
-        japaneseName: "天野 陽菜",
-        role: "Main character",
-        biography:
-          "An orphaned girl who supports herself and her brother, hiding the supernatural power she was born with. When Hina prays, the sky clears, but each use of her power costs her a piece of her own body and, eventually, her place in the world. She is defined by a gentle willingness to give everything for those she loves.",
-        voiceActor: "Nana Mori",
-      },
-    ],
-    episodes: [],
     historicalSignificance:
       "The highest-grossing Japanese film of 2019 and one of the most successful anime films in global history, surpassing the lifetime earnings of Your Name in several territories. It established Makoto Shinkai as the dominant commercial force of 2010s anime cinema. The film's record-breaking performance confirmed the streaming-era anime movie as a genuinely global phenomenon.",
     productionHistory:
@@ -418,14 +236,7 @@ export const animeCuratedCinema: AnimeSeed[] = [
       },
     ],
     episodes: [
-      {
-        number: 1,
-        title: "Turning Point",
-        airDate: "2011-04-06",
-        synopsis: "Okabe receives a message from the future and discovers a microwave that can send data into the past.",
-      },
-      { number: 2, title: "Time Travel Paranoia" },
-      { number: 3, title: "Parallel World Paranoia" },
+      { number: 1, title: "Theatrical Feature Film Presentation", airDate: "Theatrical Premiere", synopsis: "The complete, uncut theatrical feature film presentation." }
     ],
     historicalSignificance:
       "The most acclaimed science-fiction anime of the 2010s and a landmark of the visual novel adaptation boom. It brought rigorous, character-driven time travel theory to mainstream anime at a moment when the medium was shifting to streaming. Its reputation has only grown since broadcast, making it a defining title of the streaming era.",
@@ -491,14 +302,7 @@ export const animeCuratedCinema: AnimeSeed[] = [
       },
     ],
     episodes: [
-      {
-        number: 1,
-        title: "The Day a New Demon Was Born",
-        airDate: "2006-10-06",
-        synopsis: "Lelouch gains the power of Geass and decides to destroy Britannia, beginning his rebellion as Zero.",
-      },
-      { number: 2, title: "The White Knight Awakens" },
-      { number: 3, title: "The False Classmate" },
+      { number: 1, title: "Theatrical Feature Film Presentation", airDate: "Theatrical Premiere", synopsis: "The complete, uncut theatrical feature film presentation." }
     ],
     historicalSignificance:
       "One of the most commercially successful anime series of the 2000s and a defining hit of the post-Gundam mecha era. It combined Sunrise's mecha pedigree with a tightly plotted political thriller and an unforgettable ending that is still debated today. The series proved that character-driven plotting could carry the mecha genre to new heights.",
@@ -564,14 +368,7 @@ export const animeCuratedCinema: AnimeSeed[] = [
       },
     ],
     episodes: [
-      {
-        number: 1,
-        title: "Herr Dr. Tenma",
-        airDate: "2004-04-07",
-        synopsis: "Tenma's choice to save a boy over the mayor sets in motion a chain of events he will spend years trying to undo.",
-      },
-      { number: 2, title: "The Serial Killer" },
-      { number: 3, title: "A Murder Case" },
+      { number: 1, title: "Theatrical Feature Film Presentation", airDate: "Theatrical Premiere", synopsis: "The complete, uncut theatrical feature film presentation." }
     ],
     historicalSignificance:
       "One of the most serious and acclaimed adaptations of a seinen manga in anime history, and a rare anime thriller aimed squarely at adult audiences. Its 74-episode run told a single continuous story with literary restraint, far from the episodic norms of television anime. The series is regarded as a milestone of psychological anime drama.",
@@ -637,14 +434,7 @@ export const animeCuratedCinema: AnimeSeed[] = [
       },
     ],
     episodes: [
-      {
-        number: 1,
-        title: "The Brand of the Hawk",
-        airDate: "1997-10-07",
-        synopsis: "The series opens in the aftermath of the Eclipse as Guts, branded and hunted, meets the God Hand.",
-      },
-      { number: 2, title: "The Band of the Hawk" },
-      { number: 3, title: "The Miracle Meeting" },
+      { number: 1, title: "Theatrical Feature Film Presentation", airDate: "Theatrical Premiere", synopsis: "The complete, uncut theatrical feature film presentation." }
     ],
     historicalSignificance:
       "The definitive adaptation of Kentaro Miura's dark fantasy masterwork and a foundational title in the rise of seinen fantasy anime. Its grim medieval setting, philosophical weight, and explicit violence were unprecedented for television anime of the 1990s. The series is credited with bringing Miura's manga to a global audience ahead of the internet era.",
@@ -711,14 +501,7 @@ export const animeCuratedCinema: AnimeSeed[] = [
       },
     ],
     episodes: [
-      {
-        number: 1,
-        title: "Tempestuous Temperaments",
-        airDate: "2004-05-20",
-        synopsis: "Mugen and Jin land in prison, and a tea-house girl named Fuu bargains for their freedom.",
-      },
-      { number: 2, title: "Redeye Reprisal" },
-      { number: 3, title: "Hellhounds for Hire (Part 1)" },
+      { number: 1, title: "Theatrical Feature Film Presentation", airDate: "Theatrical Premiere", synopsis: "The complete, uncut theatrical feature film presentation." }
     ],
     historicalSignificance:
       "Shinichiro Watanabe's follow-up to Cowboy Bebop and the debut work of studio Manglobe, a studio founded by former Sunrise staff. The series married samurai drama with hip-hop in a way that had never been attempted in anime, and it won over audiences worldwide. It demonstrated the artistic and commercial value of genre fusion in the 2000s.",
@@ -776,14 +559,7 @@ export const animeCuratedCinema: AnimeSeed[] = [
       },
     ],
     episodes: [
-      {
-        number: 1,
-        title: "WEIRD",
-        airDate: "1998-07-06",
-        synopsis: "A dead classmate sends Lain an email from the afterlife, opening the door to the Wired.",
-      },
-      { number: 2, title: "GIRLS" },
-      { number: 3, title: "PSYCH" },
+      { number: 1, title: "Theatrical Feature Film Presentation", airDate: "Theatrical Premiere", synopsis: "The complete, uncut theatrical feature film presentation." }
     ],
     historicalSignificance:
       "The most prescient anime of the 1990s, anticipating the networked identity politics and surveillance anxieties of the internet age years before they became everyday reality. Released as Japan's own internet was still nascent, the series examined the dissolution of the self in digital space with philosophical rigor. It became a cornerstone of 'cyberpunk anime' alongside Ghost in the Shell and is a defining work of the genre.",
