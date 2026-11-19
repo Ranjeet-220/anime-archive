@@ -14,9 +14,10 @@ async function loadSpaceGrotesk(): Promise<ArrayBuffer | Buffer> {
 export async function generateImageMetadata({
   params,
 }: {
-  params?: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  const anime = params?.slug ? await getAnimeBySlug(params.slug) : null;
+  const { slug } = await params;
+  const anime = slug ? await getAnimeBySlug(slug) : null;
   if (!anime) return [];
   return [
     {

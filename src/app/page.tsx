@@ -4,7 +4,6 @@ import { getEras, getHomepageData } from "@/lib/data";
 import { SectionHeading, Stat } from "@/components/ui/section-heading";
 import { AnimeCard, type AnimeCardData } from "@/components/ui/anime-card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Badge } from "@/components/ui/badge";
 import { EVENT_KIND_LABELS } from "@/lib/format";
 import { HeroCinematic } from "@/components/home/hero-cinematic";
 import { ExploreCollections } from "@/components/home/explore-collections";

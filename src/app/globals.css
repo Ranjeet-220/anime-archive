@@ -17,8 +17,8 @@
   /* Text */
   --color-paper: #f2f2f2;
   --color-paper-2: #d8d8d8;
-  --color-muted: #9a9a9a;
-  --color-faint: #666a70;
+  --color-muted: #a3a6af;
+  --color-faint: #818693;
 
   /* Crimson accent */
   --color-crimson-300: #ff525a;
@@ -27,6 +27,11 @@
   --color-crimson-600: #c11b22;
   --color-crimson-700: #8b0e14;
   --color-crimson-900: #4a060a;
+
+  /* Gold / VIP / Founder / Lifetime tokens */
+  --color-gold: #e6af2e;
+  --color-gold-hover: #f5c44f;
+  --color-gold-glow: rgba(230, 175, 46, 0.35);
 
   /* Holographic cyan (secondary) */
   --color-holo-300: #8fd9e4;
@@ -39,10 +44,10 @@
   --color-danger: #ff3038;
 
   /* Fonts */
-  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-sans: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-display: var(--font-space-grotesk), var(--font-inter), sans-serif;
-  --font-serif: var(--font-playfair), Georgia, serif;
-  --font-jp: var(--font-noto-sans-jp), sans-serif;
+  --font-serif: var(--font-playfair), Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-jp: var(--font-noto-sans-jp), "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
 }
 
 @theme inline {
@@ -63,6 +68,9 @@
   --color-crimson-600: var(--color-crimson-600);
   --color-crimson-700: var(--color-crimson-700);
   --color-crimson-900: var(--color-crimson-900);
+  --color-gold: var(--color-gold);
+  --color-gold-hover: var(--color-gold-hover);
+  --color-gold-glow: var(--color-gold-glow);
   --color-holo-300: var(--color-holo-300);
   --color-holo-400: var(--color-holo-400);
   --color-holo-500: var(--color-holo-500);
@@ -176,9 +184,29 @@ body {
   background: radial-gradient(ellipse at center, transparent 55%, rgba(6, 6, 8, 0.85) 100%);
 }
 
-/* Japanese text */
+/* Typography utilities */
+@utility font-sans {
+  font-family: var(--font-sans);
+}
+
+@utility font-display {
+  font-family: var(--font-display);
+}
+
+@utility font-serif {
+  font-family: var(--font-serif);
+}
+
 @utility font-jp {
   font-family: var(--font-jp);
+}
+
+@utility glow-gold {
+  box-shadow: 0 0 25px -5px rgba(230, 175, 46, 0.35);
+}
+
+@utility glow-gold-subtle {
+  box-shadow: 0 0 15px -3px rgba(230, 175, 46, 0.2);
 }
 
 /* Long-form editorial text */

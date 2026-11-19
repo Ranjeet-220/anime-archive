@@ -1,18 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ExternalLink, Star, ShieldCheck, ChevronRight, Play, Award, Tv, Bookmark, Plus } from "lucide-react";
-import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { AnimeCard, CoverArt } from "@/components/ui/anime-card";
+import { ChevronRight, Bookmark, Plus } from "lucide-react";
+import { AnimeCard } from "@/components/ui/anime-card";
 import { HistoryTimeline } from "@/components/anime/history-timeline";
 import { DetailTabs } from "@/components/anime/detail-tabs";
-import { getAnimeBySlug, getAnimeSources } from "@/lib/data";
-import { prisma } from "@/lib/prisma";
+import { getAnimeBySlug } from "@/lib/data";
 import { FORMAT_LABELS, STATUS_LABELS } from "@/lib/format";
 import { formatDate, truncate } from "@/lib/utils";
 import type { HistoryTimelineStep } from "@/lib/types";
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
 export async function generateMetadata({
   params,
@@ -35,8 +31,6 @@ export default async function AnimeDetailPage({ params }: { params: Promise<{ sl
   const anime = await getAnimeBySlug(slug);
   if (!anime) notFound();
 
-  const sources = await getAnimeSources(anime.id);
-
   const timeline = Array.isArray(anime.historyTimeline)
     ? (anime.historyTimeline as unknown as HistoryTimelineStep[])
     : null;
@@ -50,7 +44,7 @@ export default async function AnimeDetailPage({ params }: { params: Promise<{ sl
   });
 
   const isAkira = anime.slug === "akira";
-  const heroImage = isAkira ? "/images/akira-hero.jpg" : anime.backdropUrl ?? anime.coverUrl ?? "/images/museum-hero.jpg";
+  const heroImage = isAkira ? "/images/akira-hero.jpg" : anime.coverUrl ?? anime.backdropUrl ?? "/images/museum-hero.jpg";
 
   // Formatted metadata
   const durationText = anime.duration ? `${anime.duration}m` : anime.episodeCount ? `${anime.episodeCount} eps` : "";
@@ -77,30 +71,30 @@ export default async function AnimeDetailPage({ params }: { params: Promise<{ sl
       {/* 2. Cinematic Hero Section */}
       <div className="mx-auto max-w-[1720px] w-full px-4 pt-8 pb-10 sm:px-8 lg:px-12">
         <div className="grid gap-8 lg:grid-cols-12 lg:gap-10 items-center">
-          {/* Left: Cinematic Hero Artwork with Japanese Kanji on side */}
-          <div className="relative lg:col-span-6 rounded-2xl overflow-hidden border border-[#25282C] bg-[#111316] shadow-[0_0_30px_rgba(0,0,0,0.8)] aspect-[16/10] sm:aspect-[16/9]">
-            {/* Japanese Vertical Kanji Calligraphy on Left Edge */}
-            {anime.japaneseTitle ? (
-              <div
-                className="absolute left-4 top-6 z-20 select-none pointer-events-none font-jp font-extrabold text-3xl sm:text-4xl text-crimson-500 drop-shadow-[0_0_15px_rgba(227,38,46,0.6)] [writing-mode:vertical-rl]"
+          {/* Left: Full Uncut Cinematic Poster Artwork */}
+          <div className="relative lg:col-span-5 xl:col-span-4 flex justify-center items-center">
+            <div className="relative w-full max-w-[380px] aspect-[2/3] sm:aspect-[3/4] rounded-2xl overflow-hidden border border-[#25282C] bg-[#111316] shadow-[0_0_40px_rgba(0,0,0,0.85)] group">
+              {/* Blurred Ambient Background Glow */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={heroImage}
+                alt=""
                 aria-hidden
-              >
-                {anime.japaneseTitle}
-              </div>
-            ) : null}
-
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={heroImage}
-              alt={`${anime.title} cinematic artwork`}
-              className="h-full w-full object-cover object-center"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#050607]/80 via-transparent to-black/30" />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/20" />
+                className="absolute inset-0 h-full w-full object-cover blur-2xl opacity-40 scale-110 pointer-events-none select-none"
+              />
+              {/* Full Sharp Poster (100% visible, object-contain) */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={heroImage}
+                alt={`${anime.title} poster artwork`}
+                className="relative z-10 h-full w-full object-contain object-center transition-transform duration-500 group-hover:scale-[1.02]"
+              />
+              <div className="absolute inset-0 z-20 pointer-events-none bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60" />
+            </div>
           </div>
 
           {/* Right: Anime Details & Actions */}
-          <div className="flex flex-col lg:col-span-6 justify-center">
+          <div className="flex flex-col lg:col-span-7 xl:col-span-8 justify-center">
             {/* Main Title */}
             <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight text-paper">
               {anime.title}
