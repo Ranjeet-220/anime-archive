@@ -15,12 +15,98 @@ function eraForYear(y: number): string {
   return "modern-anime";
 }
 
+// The batch datasets are hand-authored and use slightly different optional
+// field names per file. These structural types document the union so the
+// normalisation below stays type-safe instead of falling back to `any`.
+interface BatchAnimeInput {
+  slug: string;
+  title: string;
+  japaneseTitle?: string;
+  altTitles?: string[];
+  synopsis?: string;
+  coverUrl?: string;
+  releaseDate?: string;
+  endDate?: string;
+  year: number;
+  format?: string;
+  episodeCount?: number;
+  duration?: number;
+  status?: string;
+  sourceMaterial?: string;
+  officialWebsite?: string;
+  studio?: string | null;
+  creator?: string;
+  director?: string;
+  genreSlugs?: string[];
+  eraSlug?: string;
+  characters?: {
+    slug: string;
+    name: string;
+    japaneseName?: string;
+    role?: string;
+    biography?: string;
+    voiceActor?: string;
+  }[];
+  episodes?: {
+    number: number;
+    title: string;
+    airDate?: string;
+    synopsis?: string;
+  }[];
+  historicalSignificance?: string;
+  productionHistory?: string;
+  reception?: string;
+  awards?: string;
+  culturalImpact?: string;
+  legacy?: string;
+  historyTimeline?: { label: string; year?: string; text: string }[];
+  related?: { slug: string; type: string }[];
+  sources?: { name: string; url: string; title: string }[];
+}
+
+interface BatchStudio {
+  slug: string;
+  name: string;
+  japaneseName?: string;
+  establishedYear?: number;
+  about?: string;
+  location?: string;
+  foundedYear?: number;
+  headquarters?: string;
+  founders?: string;
+  history?: string;
+  techniques?: string;
+  significance?: string;
+  status?: string;
+  website?: string;
+  logoUrl?: string;
+}
+
+interface BatchPerson {
+  slug: string;
+  name: string;
+  japaneseName?: string;
+  role?: string;
+  biography?: string;
+  birthYear?: number;
+  bornYear?: number;
+  diedYear?: number;
+  birthplace?: string;
+  career?: string;
+  awards?: string;
+  works?: string[];
+  majorWorks?: string;
+  contribution?: string;
+  website?: string;
+  profileUrl?: string;
+}
+
 // 50 New Isekai Anime conforming strictly to AnimeSeed
 export const isekaiAnime: AnimeSeed[] = [
   ...isekaiBatch1,
   ...isekaiBatch2,
   ...isekaiBatch3,
-].map((raw: any): AnimeSeed => ({
+].map((raw: BatchAnimeInput): AnimeSeed => ({
   slug: raw.slug,
   title: raw.title,
   japaneseTitle: raw.japaneseTitle ?? "",
@@ -30,10 +116,10 @@ export const isekaiAnime: AnimeSeed[] = [
   releaseDate: raw.releaseDate ?? undefined,
   endDate: raw.endDate ?? undefined,
   year: raw.year,
-  format: raw.format ?? "TV",
+  format: (raw.format ?? "TV") as AnimeSeed["format"],
   episodeCount: raw.episodeCount ?? undefined,
   duration: raw.duration ?? 24,
-  status: raw.status ?? "FINISHED",
+  status: (raw.status ?? "FINISHED") as AnimeSeed["status"],
   sourceMaterial: raw.sourceMaterial ?? "Original",
   officialWebsite: raw.officialWebsite ?? undefined,
   studio: raw.studio ?? null,
@@ -41,7 +127,7 @@ export const isekaiAnime: AnimeSeed[] = [
   director: raw.director ?? undefined,
   genreSlugs: raw.genreSlugs ?? ["isekai", "fantasy"],
   eraSlug: raw.eraSlug ?? eraForYear(raw.year),
-  characters: (raw.characters ?? []).map((c: any) => ({
+  characters: (raw.characters ?? []).map((c) => ({
     slug: c.slug,
     name: c.name,
     japaneseName: c.japaneseName ?? "",
@@ -49,7 +135,7 @@ export const isekaiAnime: AnimeSeed[] = [
     biography: c.biography ?? "",
     voiceActor: c.voiceActor ?? "",
   })),
-  episodes: (raw.episodes ?? []).map((e: any) => ({
+  episodes: (raw.episodes ?? []).map((e) => ({
     number: e.number,
     title: e.title,
     airDate: e.airDate ?? undefined,
@@ -61,7 +147,7 @@ export const isekaiAnime: AnimeSeed[] = [
   awards: raw.awards ?? "",
   culturalImpact: raw.culturalImpact ?? "",
   legacy: raw.legacy ?? "",
-  historyTimeline: (raw.historyTimeline ?? []).map((h: any) => ({
+  historyTimeline: (raw.historyTimeline ?? []).map((h) => ({
     label: h.label,
     year: h.year ?? undefined,
     text: h.text,
@@ -73,7 +159,7 @@ export const isekaiAnime: AnimeSeed[] = [
 // Deduplicate and normalize new studios against base studios
 const baseStudioSlugs = new Set(baseStudios.map((s) => s.slug));
 const seenStudios = new Set<string>();
-const allBatchStudios = [
+const allBatchStudios: BatchStudio[] = [
   ...batch1Studios,
   ...batch2Studios,
   ...batch3Studios,
@@ -87,7 +173,7 @@ export const isekaiStudios = allBatchStudios
     seenStudios.add(s.slug);
     return true;
   })
-  .map((s: any) => ({
+  .map((s) => ({
     slug: s.slug,
     name: s.name,
     japaneseName: s.japaneseName ?? null,
@@ -105,7 +191,7 @@ export const isekaiStudios = allBatchStudios
 // Deduplicate and normalize new people against base people
 const basePeopleSlugs = new Set(basePeople.map((p) => p.slug));
 const seenPeople = new Set<string>();
-const allBatchPeople = [
+const allBatchPeople: BatchPerson[] = [
   ...batch1People,
   ...batch2People,
   ...batch3People,
@@ -119,7 +205,7 @@ export const isekaiPeople = allBatchPeople
     seenPeople.add(p.slug);
     return true;
   })
-  .map((p: any) => ({
+  .map((p) => ({
     slug: p.slug,
     name: p.name,
     japaneseName: p.japaneseName ?? null,
