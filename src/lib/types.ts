@@ -57,6 +57,7 @@ export interface SearchResultDto {
   title: string;
   subtitle?: string | null;
   year?: number | null;
+  format?: string | null;
 }
 
 export interface ArchiveStatsDto {

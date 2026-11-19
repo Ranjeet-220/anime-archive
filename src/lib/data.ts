@@ -65,15 +65,17 @@ export async function getAnimeList(params: AnimeListParams = {}) {
       { alternativeTitles: { has: params.q } },
     ];
   }
-  if (params.year && params.decade) {
+  const validYear = params.year !== undefined && !Number.isNaN(params.year) ? params.year : undefined;
+  const validDecade = params.decade !== undefined && !Number.isNaN(params.decade) ? params.decade : undefined;
+  if (validYear && validDecade) {
     where.AND = [
-      { year: params.year },
-      { year: { gte: params.decade, lt: params.decade + 10 } },
+      { year: validYear },
+      { year: { gte: validDecade, lt: validDecade + 10 } },
     ];
-  } else if (params.year) {
-    where.year = params.year;
-  } else if (params.decade) {
-    where.year = { gte: params.decade, lt: params.decade + 10 };
+  } else if (validYear) {
+    where.year = validYear;
+  } else if (validDecade) {
+    where.year = { gte: validDecade, lt: validDecade + 10 };
   }
   if (params.genre) where.genres = { some: { slug: params.genre } };
   if (params.studio) where.studio = { slug: params.studio };
@@ -82,9 +84,15 @@ export async function getAnimeList(params: AnimeListParams = {}) {
   if (params.format) where.format = params.format.toUpperCase();
   if (params.status) where.status = params.status.toUpperCase();
   if (params.era) where.era = { slug: params.era };
-  if (params.isMovie !== undefined) where.format = "MOVIE";
-  if (params.minEpisodes !== undefined) where.episodeCount = { ...(where.episodeCount as object), gte: params.minEpisodes };
-  if (params.maxEpisodes !== undefined) where.episodeCount = { ...(where.episodeCount as object), lte: params.maxEpisodes };
+  if (params.isMovie !== undefined) {
+    where.format = params.isMovie ? "MOVIE" : { not: "MOVIE" };
+  }
+  if (params.minEpisodes !== undefined && !Number.isNaN(params.minEpisodes)) {
+    where.episodeCount = { ...(where.episodeCount as object), gte: params.minEpisodes };
+  }
+  if (params.maxEpisodes !== undefined && !Number.isNaN(params.maxEpisodes)) {
+    where.episodeCount = { ...(where.episodeCount as object), lte: params.maxEpisodes };
+  }
 
   const orderBy: Prisma.AnimeOrderByWithRelationInput[] = (() => {
     switch (params.sort) {
@@ -136,6 +144,7 @@ export async function getAnimeList(params: AnimeListParams = {}) {
 // ---------------------------------------------------------------------------
 
 export async function getAnimeBySlug(slug: string) {
+  if (!slug || typeof slug !== "string") return null;
   return cached(`anime:bySlug:${slug}`, CACHE_TTL_MS, () =>
     prisma.anime.findUnique({
       where: { slug },
@@ -156,6 +165,7 @@ export async function getAnimeBySlug(slug: string) {
 }
 
 export async function getAnimeSources(entityId: string) {
+  if (!entityId || typeof entityId !== "string") return [];
   return cached(`anime:sources:${entityId}`, CACHE_TTL_MS, () =>
     prisma.source.findMany({
       where: { entityType: "anime", entityId },
@@ -190,6 +200,7 @@ export async function getEras(): Promise<EraDto[]> {
 }
 
 export async function getEraBySlug(slug: string) {
+  if (!slug || typeof slug !== "string") return null;
   return cached(`era:bySlug:${slug}`, CACHE_TTL_MS, async () => {
     const era = await prisma.era.findUnique({
       where: { slug },
@@ -225,6 +236,7 @@ export async function getTimelineData(): Promise<EraDto[]> {
   return cached("era:timeline", CACHE_TTL_MS, async () => {
     const eras = await getEras();
     const anime = await prisma.anime.findMany({
+      where: { eraId: { not: null } },
       orderBy: { year: "asc" },
       select: {
         slug: true,
@@ -278,6 +290,7 @@ export async function getStudioArchive(): Promise<MuseumStudioDto[]> {
         foundedYear: true,
         history: true,
         status: true,
+        _count: { select: { anime: true } },
         anime: {
           orderBy: { year: "asc" },
           take: 4,
@@ -292,7 +305,7 @@ export async function getStudioArchive(): Promise<MuseumStudioDto[]> {
       foundedYear: s.foundedYear,
       history: s.history,
       status: s.status,
-      animeCount: s.anime.length,
+      animeCount: s._count.anime,
       majorWorks: s.anime,
     }));
   });
@@ -317,6 +330,7 @@ export async function getStudios() {
 }
 
 export async function getStudioBySlug(slug: string) {
+  if (!slug || typeof slug !== "string") return null;
   return cached(`studio:bySlug:${slug}`, CACHE_TTL_MS, () =>
     prisma.studio.findUnique({
       where: { slug },
@@ -407,6 +421,7 @@ export async function getCreators() {
 }
 
 export async function getPersonBySlug(slug: string) {
+  if (!slug || typeof slug !== "string") return null;
   return cached(`person:bySlug:${slug}`, CACHE_TTL_MS, () =>
     prisma.person.findUnique({
       where: { slug },
@@ -473,6 +488,7 @@ export async function getCharacters(q?: string) {
 }
 
 export async function getCharacterBySlug(slug: string) {
+  if (!slug || typeof slug !== "string") return null;
   return cached(`character:bySlug:${slug}`, CACHE_TTL_MS, () =>
     prisma.character.findUnique({
       where: { slug },
@@ -505,6 +521,7 @@ export async function getGenres(): Promise<GenreDto[]> {
 }
 
 export async function getGenreBySlug(slug: string) {
+  if (!slug || typeof slug !== "string") return null;
   return cached(`genre:bySlug:${slug}`, CACHE_TTL_MS, () =>
     prisma.genre.findUnique({
       where: { slug },
@@ -603,8 +620,9 @@ export async function getRecentEvents(limit = 12) {
 // ---------------------------------------------------------------------------
 
 export async function searchAll(q: string, limit = 8): Promise<SearchResultDto[]> {
-  const term = q.trim();
+  const term = q.trim().slice(0, 100);
   if (!term) return [];
+  const safeLimit = Math.min(50, Math.max(1, limit));
   const results: SearchResultDto[] = [];
 
   const [anime, characters, studios, people, events] = await Promise.all([
@@ -616,7 +634,7 @@ export async function searchAll(q: string, limit = 8): Promise<SearchResultDto[]
           { alternativeTitles: { has: term } },
         ],
       },
-      take: limit,
+      take: safeLimit,
       select: { slug: true, title: true, japaneseTitle: true, year: true, format: true },
     }),
     prisma.character.findMany({
@@ -642,7 +660,7 @@ export async function searchAll(q: string, limit = 8): Promise<SearchResultDto[]
         ],
       },
       take: 4,
-      select: { slug: true, name: true, foundedYear: true },
+      select: { slug: true, name: true, foundedYear: true, japaneseName: true },
     }),
     prisma.person.findMany({
       where: {
@@ -652,7 +670,7 @@ export async function searchAll(q: string, limit = 8): Promise<SearchResultDto[]
         ],
       },
       take: 4,
-      select: { slug: true, name: true, role: true, bornYear: true },
+      select: { slug: true, name: true, role: true, bornYear: true, japaneseName: true },
     }),
     prisma.historicalEvent.findMany({
       where: { title: { contains: term, mode: "insensitive" } },
@@ -662,20 +680,37 @@ export async function searchAll(q: string, limit = 8): Promise<SearchResultDto[]
   ]);
 
   results.push(
-    ...anime.map((a) => ({
-      type: "anime" as const,
-      slug: a.slug,
-      title: a.title,
-      subtitle: [a.japaneseTitle, a.year ? String(a.year) : null].filter(Boolean).join(" · ") || null,
-      year: a.year,
-    }))
+    ...anime.map((a) => {
+      const formatLabel =
+        a.format === "MOVIE"
+          ? "Film"
+          : a.format === "TV"
+          ? "TV Series"
+          : a.format === "OVA"
+          ? "OVA"
+          : a.format === "ONA"
+          ? "ONA"
+          : a.format || "Anime";
+      return {
+        type: "anime" as const,
+        slug: a.slug,
+        title: a.title,
+        subtitle: [a.year ? String(a.year) : null, formatLabel, a.japaneseTitle]
+          .filter(Boolean)
+          .join(" · ") || null,
+        year: a.year,
+        format: a.format,
+      };
+    })
   );
   results.push(
     ...characters.map((c) => ({
       type: "character" as const,
       slug: c.slug,
       title: c.name,
-      subtitle: c.anime?.title ?? null,
+      subtitle: [c.anime?.title ? `from ${c.anime.title}` : null, c.japaneseName]
+        .filter(Boolean)
+        .join(" · ") || null,
     }))
   );
   results.push(
@@ -683,7 +718,9 @@ export async function searchAll(q: string, limit = 8): Promise<SearchResultDto[]
       type: "studio" as const,
       slug: s.slug,
       title: s.name,
-      subtitle: s.foundedYear ? `Founded ${s.foundedYear}` : null,
+      subtitle: [s.foundedYear ? `Founded ${s.foundedYear}` : null, s.japaneseName]
+        .filter(Boolean)
+        .join(" · ") || null,
     }))
   );
   results.push(
@@ -691,7 +728,9 @@ export async function searchAll(q: string, limit = 8): Promise<SearchResultDto[]
       type: "creator" as const,
       slug: p.slug,
       title: p.name,
-      subtitle: [p.role, p.bornYear ? String(p.bornYear) : null].filter(Boolean).join(" · ") || null,
+      subtitle: [p.role, p.bornYear ? `b. ${p.bornYear}` : null, p.japaneseName]
+        .filter(Boolean)
+        .join(" · ") || null,
     }))
   );
   results.push(
@@ -699,11 +738,12 @@ export async function searchAll(q: string, limit = 8): Promise<SearchResultDto[]
       type: "event" as const,
       slug: e.slug,
       title: e.title,
-      subtitle: e.year ? String(e.year) : null,
+      subtitle: [e.year ? String(e.year) : null, "Historical Event"].filter(Boolean).join(" · ") || null,
+      year: e.year,
     }))
   );
 
-  return results.slice(0, limit * 2);
+  return results.slice(0, safeLimit * 2);
 }
 
 // ---------------------------------------------------------------------------
@@ -792,6 +832,7 @@ export async function getQuizzes() {
 }
 
 export async function getQuizBySlug(slug: string) {
+  if (!slug || typeof slug !== "string") return null;
   return cached(`quiz:bySlug:${slug}`, CACHE_TTL_MS, () =>
     prisma.quiz.findUnique({
       where: { slug },
@@ -806,6 +847,45 @@ export async function getQuizBySlug(slug: string) {
       },
     })
   );
+}
+
+export interface QuizLeaderboardEntryDto {
+  username: string;
+  name: string | null;
+  score: number;
+  maxScore: number;
+  passed: boolean;
+  createdAt: Date;
+}
+
+export async function getQuizLeaderboard(
+  quizSlug?: string,
+  limit = 10
+): Promise<QuizLeaderboardEntryDto[]> {
+  const safeLimit = Math.min(50, Math.max(1, limit));
+  const cacheKey = `quiz:leaderboard:${quizSlug ?? "all"}:${safeLimit}`;
+  return cached(cacheKey, CACHE_TTL_MS, async () => {
+    const attempts = await prisma.quizAttempt.findMany({
+      where: quizSlug ? { quiz: { slug: quizSlug } } : undefined,
+      orderBy: [{ score: "desc" }, { createdAt: "asc" }],
+      take: safeLimit,
+      select: {
+        score: true,
+        maxScore: true,
+        passed: true,
+        createdAt: true,
+        user: { select: { username: true, name: true } },
+      },
+    });
+    return attempts.map((a) => ({
+      username: a.user.username,
+      name: a.user.name,
+      score: a.score,
+      maxScore: a.maxScore,
+      passed: a.passed,
+      createdAt: a.createdAt,
+    }));
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -830,6 +910,7 @@ export async function getTours() {
 }
 
 export async function getTourBySlug(slug: string) {
+  if (!slug || typeof slug !== "string") return null;
   return cached(`tour:bySlug:${slug}`, CACHE_TTL_MS, () =>
     prisma.tour.findUnique({
       where: { slug },
@@ -846,18 +927,7 @@ export async function getTourBySlug(slug: string) {
 }
 
 export async function getArchiveStats(): Promise<ArchiveStatsDto> {
-  return cached("stats:archive", CACHE_TTL_MS, async () => {
-    const [anime, movies, creators, studios, events, genres, characters] = await Promise.all([
-      prisma.anime.count(),
-      prisma.anime.count({ where: { format: "MOVIE" } }),
-      prisma.person.count(),
-      prisma.studio.count(),
-      prisma.historicalEvent.count(),
-      prisma.genre.count(),
-      prisma.character.count(),
-    ]);
-    return { anime, movies, creators, studios, events, genres, characters };
-  });
+  return getStats();
 }
 
 // ---------------------------------------------------------------------------
@@ -913,19 +983,23 @@ export async function getRankings(): Promise<RankingDto[]> {
         },
       },
     });
-    return rankings.map(({ items, ...rest }) => ({
-      ...rest,
-      itemCount: items.length,
-      items: items.map((item) => ({
-        rank: item.rank,
-        note: item.note,
-        anime: item.anime,
-      })),
-    }));
+    return rankings.map(({ items, ...rest }) => {
+      const validItems = items.filter((item) => item.anime != null);
+      return {
+        ...rest,
+        itemCount: validItems.length,
+        items: validItems.map((item) => ({
+          rank: item.rank,
+          note: item.note,
+          anime: item.anime,
+        })),
+      };
+    });
   });
 }
 
 export async function getRankingBySlug(slug: string): Promise<RankingDto | null> {
+  if (!slug || typeof slug !== "string") return null;
   return cached(`ranking:bySlug:${slug}`, CACHE_TTL_MS, async () => {
     const ranking = await prisma.ranking.findUnique({
       where: { slug },
@@ -951,10 +1025,11 @@ export async function getRankingBySlug(slug: string): Promise<RankingDto | null>
     });
     if (!ranking) return null;
     const { items, ...rest } = ranking;
+    const validItems = items.filter((item) => item.anime != null);
     return {
       ...rest,
-      itemCount: items.length,
-      items: items.map((item) => ({ rank: item.rank, note: item.note, anime: item.anime })),
+      itemCount: validItems.length,
+      items: validItems.map((item) => ({ rank: item.rank, note: item.note, anime: item.anime })),
     };
   });
 }
