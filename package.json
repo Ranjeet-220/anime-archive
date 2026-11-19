@@ -6,6 +6,7 @@
     "dev": "next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",
+    "test": "vitest run",
     "lint": "eslint",
     "seed": "npx prisma db seed",
     "migrate": "npx prisma migrate deploy",
