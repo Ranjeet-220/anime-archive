@@ -2,8 +2,17 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, DoorOpen } from "lucide-react";
+import { useCallback, useEffect, useState, useRef } from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  DoorOpen,
+  Info,
+  Maximize,
+  Minimize,
+  X,
+  LogOut,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { EraDto } from "@/lib/types";
 import type { TwoDimensionalView } from "./scene-types";
@@ -25,14 +34,17 @@ const clampRoom = (i: number, max: number) => Math.min(max, Math.max(0, i));
 
 /**
  * The /museum page experience: an era strip, the interactive 3D museum
- * with prev/next + keyboard navigation, an always-visible 2D room list,
- * and a persistent "Skip 3D Experience" 2D fallback (era grid).
+ * with HUD controls (prev/next, fullscreen, info, exit), an exhibit info panel,
+ * and a persistent 2D fallback floor plan.
  */
 export function MuseumExperience({ eras }: { eras: EraDto[] }) {
   const { mounted, eligible } = useSceneSupport();
   const [view, setView] = useState<TwoDimensionalView>("2d");
   const [activeRoom, setActiveRoom] = useState(0);
   const [userOpted2d, setUserOpted2d] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showInfoPanel, setShowInfoPanel] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!mounted) return;
@@ -49,6 +61,23 @@ export function MuseumExperience({ eras }: { eras: EraDto[] }) {
     }
     return;
   }, [mounted, eligible, view]);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
+
+  const toggleFullscreen = useCallback(() => {
+    if (!containerRef.current) return;
+    if (!document.fullscreenElement) {
+      containerRef.current.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen().catch(() => {});
+    }
+  }, []);
 
   const skipTo2d = useCallback(() => {
     try {
@@ -84,6 +113,8 @@ export function MuseumExperience({ eras }: { eras: EraDto[] }) {
       } else if (e.key === "ArrowRight") {
         e.preventDefault();
         focusRoom(activeRoom + 1);
+      } else if (e.key === "i" || e.key === "I") {
+        setShowInfoPanel((prev) => !prev);
       }
     };
     window.addEventListener("keydown", onKey);
@@ -96,7 +127,7 @@ export function MuseumExperience({ eras }: { eras: EraDto[] }) {
     <div className="mx-auto max-w-7xl px-4 pb-20 sm:px-6">
       {/* Era strip */}
       <nav aria-label="Era rooms" className="mb-6">
-        <ul className="flex gap-2 overflow-x-auto pb-2">
+        <ul className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
           {eras.map((era, i) => (
             <li key={era.id} className="shrink-0">
               {view === "3d" ? (
@@ -104,22 +135,22 @@ export function MuseumExperience({ eras }: { eras: EraDto[] }) {
                   type="button"
                   onClick={() => focusRoom(i)}
                   className={cn(
-                    "rounded border px-3 py-1.5 font-display text-[11px] uppercase tracking-[0.18em] transition-colors",
+                    "rounded-lg border px-3.5 py-1.5 font-display text-[11px] uppercase tracking-[0.18em] transition-all cursor-pointer",
                     i === activeRoom
-                      ? "border-crimson-500 bg-crimson-500/15 text-crimson-300"
-                      : "border-line-2 text-muted hover:border-crimson-500 hover:text-paper"
+                      ? "border-crimson-500 bg-crimson-500/20 text-crimson-400 font-bold shadow-[0_0_12px_rgba(227,38,46,0.3)]"
+                      : "border-[#25282C] text-[#8E9099] hover:border-crimson-500/50 hover:text-[#F2F2F2]"
                   )}
                 >
                   {era.name}
-                  <span className="ml-2 text-faint">{era.period}</span>
+                  <span className="ml-2 text-[#666A70] text-[10px]">{era.period}</span>
                 </button>
               ) : (
                 <Link
                   href={`/timeline/${era.slug}`}
-                  className="block rounded border border-line-2 px-3 py-1.5 font-display text-[11px] uppercase tracking-[0.18em] text-muted transition-colors hover:border-crimson-500 hover:text-paper"
+                  className="block rounded-lg border border-[#25282C] px-3.5 py-1.5 font-display text-[11px] uppercase tracking-[0.18em] text-[#8E9099] transition-colors hover:border-crimson-500 hover:text-[#F2F2F2]"
                 >
                   {era.name}
-                  <span className="ml-2 text-faint">{era.period}</span>
+                  <span className="ml-2 text-[#666A70] text-[10px]">{era.period}</span>
                 </Link>
               )}
             </li>
@@ -128,7 +159,13 @@ export function MuseumExperience({ eras }: { eras: EraDto[] }) {
       </nav>
 
       {view === "3d" && eligible ? (
-        <div className="relative">
+        <div
+          ref={containerRef}
+          className={cn(
+            "relative rounded-2xl overflow-hidden border border-[#25282C] bg-[#07070a]",
+            isFullscreen ? "fixed inset-0 z-50 rounded-none border-none h-screen w-screen" : "min-h-[580px]"
+          )}
+        >
           <SceneGate label="Loading the museum…">
             {({ mode, mobile }) => (
               <MuseumSceneCanvas
@@ -147,81 +184,179 @@ export function MuseumExperience({ eras }: { eras: EraDto[] }) {
             onSelectRoom={focusRoom}
           />
 
-          {/* Room nav + current room actions */}
-          <div className="absolute inset-x-0 top-4 z-10 flex items-center justify-between gap-2 px-4">
-            <button
-              type="button"
-              onClick={() => focusRoom(activeRoom - 1)}
-              disabled={activeRoom === 0}
-              aria-label="Previous room"
-              className="rounded border border-line-2 bg-charcoal/70 p-2 text-paper backdrop-blur-sm transition-colors hover:border-crimson-500 disabled:opacity-40"
-            >
-              <ChevronLeft className="h-4 w-4" aria-hidden />
-            </button>
-            <p className="rounded border border-line bg-charcoal/70 px-3 py-1.5 font-display text-[11px] uppercase tracking-[0.22em] text-paper backdrop-blur-sm">
-              {activeEra ? (
-                <>
-                  Room {activeRoom + 1} / {eras.length} · {activeEra.name}{" "}
-                  <span className="text-faint">{activeEra.period}</span>
-                </>
-              ) : (
-                "Museum"
-              )}
-            </p>
-            <button
-              type="button"
-              onClick={() => focusRoom(activeRoom + 1)}
-              disabled={activeRoom >= eras.length - 1}
-              aria-label="Next room"
-              className="rounded border border-line-2 bg-charcoal/70 p-2 text-paper backdrop-blur-sm transition-colors hover:border-crimson-500 disabled:opacity-40"
-            >
-              <ChevronRight className="h-4 w-4" aria-hidden />
-            </button>
-          </div>
+          {/* Top Room Header Badge */}
+          <div className="absolute inset-x-0 top-4 z-10 flex items-center justify-between gap-2 px-4 pointer-events-none">
+            <div className="pointer-events-auto flex items-center gap-2">
+              <span className="rounded-lg border border-[#25282C] bg-[#0B0D0F]/80 px-3 py-1.5 font-display text-xs font-bold uppercase tracking-[0.2em] text-[#F2F2F2] backdrop-blur-md shadow-md">
+                {activeEra ? (
+                  <>
+                    Room {activeRoom + 1} / {eras.length} · <span className="text-crimson-400">{activeEra.name}</span>{" "}
+                    <span className="text-[#8E9099] ml-1">({activeEra.period})</span>
+                  </>
+                ) : (
+                  "Museum Hall"
+                )}
+              </span>
+            </div>
 
-          {/* READ FULL HISTORY for the active room */}
-          {activeEra ? (
-            <div className="absolute inset-x-0 bottom-24 z-10 flex justify-center px-4">
-              <Link
-                href={`/timeline/${activeEra.slug}`}
-                className="rounded border border-crimson-500 bg-ink/80 px-4 py-2 font-display text-[11px] uppercase tracking-[0.26em] text-crimson-300 backdrop-blur-sm transition-colors hover:bg-crimson-500/20 hover:text-paper"
+            {/* Quick Actions (Info Toggle & Fullscreen) */}
+            <div className="pointer-events-auto flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setShowInfoPanel((prev) => !prev)}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-bold uppercase tracking-wider backdrop-blur-md transition-all cursor-pointer shadow-md",
+                  showInfoPanel
+                    ? "border-crimson-500 bg-crimson-500 text-white"
+                    : "border-[#25282C] bg-[#0B0D0F]/80 text-[#D8D8D8] hover:border-crimson-500 hover:text-white"
+                )}
               >
-                Read Full History — {activeEra.name}
-              </Link>
-            </div>
-          ) : null}
+                <Info className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Exhibit Info</span>
+              </button>
 
-          {/* Always-visible 2D room list so nobody gets stuck in 3D */}
-          <div className="absolute inset-x-0 bottom-0 z-10 bg-ink/80 backdrop-blur-sm">
-            <div className="mx-auto flex max-w-7xl gap-1.5 overflow-x-auto px-4 py-3">
-              {eras.map((era, i) => (
-                <button
-                  key={era.id}
-                  type="button"
-                  onClick={() => focusRoom(i)}
-                  className={cn(
-                    "shrink-0 rounded border px-2.5 py-1 font-display text-[10px] uppercase tracking-[0.16em] transition-colors",
-                    i === activeRoom
-                      ? "border-crimson-500 bg-crimson-500/15 text-crimson-300"
-                      : "border-line-2 text-faint hover:border-line-2 hover:text-paper"
-                  )}
-                >
-                  {i + 1}. {era.name}
-                </button>
-              ))}
+              <button
+                type="button"
+                onClick={toggleFullscreen}
+                aria-label="Toggle Fullscreen"
+                className="rounded-lg border border-[#25282C] bg-[#0B0D0F]/80 p-2 text-[#D8D8D8] backdrop-blur-md transition-colors hover:border-crimson-500 hover:text-white cursor-pointer shadow-md"
+              >
+                {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
+              </button>
             </div>
           </div>
 
-          <p className="mt-3 text-center text-xs text-faint">
-            Drag to orbit · arrow keys to move between rooms ·{" "}
-            <button
-              type="button"
-              onClick={skipTo2d}
-              className="underline underline-offset-2 transition-colors hover:text-crimson-300"
-            >
-              Skip 3D Experience
-            </button>
-          </p>
+          {/* Exhibit Info Slide-in Drawer */}
+          {showInfoPanel && activeEra && (
+            <aside className="absolute right-4 top-16 bottom-20 z-20 w-80 sm:w-96 rounded-2xl border border-[#25282C] bg-[#0B0D0F]/95 backdrop-blur-xl p-5 shadow-2xl overflow-y-auto no-scrollbar flex flex-col justify-between animate-in slide-in-from-right duration-300">
+              <div>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-crimson-400">
+                      ROOM {activeRoom + 1} EXHIBIT DOSSIER
+                    </span>
+                    <h3 className="mt-1 font-display text-xl font-bold uppercase text-[#F2F2F2]">
+                      {activeEra.name}
+                    </h3>
+                    <p className="text-xs font-medium text-[#8E9099]">{activeEra.period}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowInfoPanel(false)}
+                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#25282C] text-[#8E9099] hover:text-white hover:bg-[#181B1F] cursor-pointer"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+
+                {activeEra.description && (
+                  <p className="mt-4 text-xs leading-relaxed text-[#B0B0B8]">
+                    {activeEra.description}
+                  </p>
+                )}
+
+                {/* Key Exhibits List in Era */}
+                {activeEra.anime && activeEra.anime.length > 0 && (
+                  <div className="mt-5">
+                    <h4 className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#8E9099] mb-2.5">
+                      FEATURED EXHIBITS IN THIS WING ({activeEra.anime.length})
+                    </h4>
+                    <div className="space-y-2 max-h-56 overflow-y-auto no-scrollbar">
+                      {activeEra.anime.map((a) => (
+                        <Link
+                          key={a.slug}
+                          href={`/anime/${a.slug}`}
+                          className="flex items-center justify-between rounded-lg border border-[#25282C] bg-[#111316] p-2.5 hover:border-crimson-500/60 hover:bg-[#16181D] transition-colors group"
+                        >
+                          <div className="truncate mr-2">
+                            <p className="font-display text-xs font-bold text-[#F2F2F2] group-hover:text-crimson-400 truncate">
+                              {a.title}
+                            </p>
+                            <p className="text-[10px] text-[#8E9099]">{a.year ?? "Classic"}</p>
+                          </div>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-crimson-400 shrink-0">
+                            VIEW →
+                          </span>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-6 pt-4 border-t border-[#25282C]">
+                <Link
+                  href={`/timeline/${activeEra.slug}`}
+                  className="block w-full rounded-lg bg-crimson-500 py-2.5 text-center text-xs font-bold uppercase tracking-wider text-white shadow-[0_0_12px_rgba(227,38,46,0.35)] hover:bg-crimson-400 transition-colors"
+                >
+                  READ COMPLETE ERA HISTORY
+                </Link>
+              </div>
+            </aside>
+          )}
+
+          {/* Clean HUD Navigation Bar at Bottom */}
+          <div className="absolute inset-x-0 bottom-4 z-10 flex items-center justify-center px-4 pointer-events-none">
+            <div className="pointer-events-auto flex items-center gap-2 rounded-2xl border border-[#25282C] bg-[#0B0D0F]/90 px-4 py-2.5 backdrop-blur-xl shadow-2xl">
+              {/* Previous Room Button */}
+              <button
+                type="button"
+                onClick={() => focusRoom(activeRoom - 1)}
+                disabled={activeRoom === 0}
+                aria-label="Previous room"
+                className="flex items-center gap-1 rounded-lg border border-[#25282C] bg-[#16181D] px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-[#F2F2F2] transition-colors hover:border-crimson-500 hover:text-crimson-400 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                <span className="hidden sm:inline">Prev</span>
+              </button>
+
+              {/* Room Indicator */}
+              <div className="px-2 text-center">
+                <span className="font-mono text-xs font-bold text-crimson-400">
+                  {activeRoom + 1}
+                </span>
+                <span className="font-mono text-xs text-[#666A70]"> / {eras.length}</span>
+              </div>
+
+              {/* Next Room Button */}
+              <button
+                type="button"
+                onClick={() => focusRoom(activeRoom + 1)}
+                disabled={activeRoom >= eras.length - 1}
+                aria-label="Next room"
+                className="flex items-center gap-1 rounded-lg border border-[#25282C] bg-[#16181D] px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-[#F2F2F2] transition-colors hover:border-crimson-500 hover:text-crimson-400 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
+              >
+                <span className="hidden sm:inline">Next</span>
+                <ChevronRight className="h-4 w-4" />
+              </button>
+
+              <div className="h-4 w-px bg-[#25282C] mx-1" />
+
+              {/* Fullscreen Button */}
+              <button
+                type="button"
+                onClick={toggleFullscreen}
+                title="Toggle Fullscreen"
+                className="flex items-center gap-1 rounded-lg border border-[#25282C] bg-[#16181D] px-2.5 py-1.5 text-xs text-[#D8D8D8] hover:border-crimson-500 hover:text-white transition-colors cursor-pointer"
+              >
+                {isFullscreen ? <Minimize className="h-3.5 w-3.5" /> : <Maximize className="h-3.5 w-3.5" />}
+                <span className="hidden md:inline text-[11px] font-bold uppercase">
+                  {isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+                </span>
+              </button>
+
+              {/* Exit Museum Button */}
+              <button
+                type="button"
+                onClick={skipTo2d}
+                title="Exit 3D Museum"
+                className="flex items-center gap-1 rounded-lg border border-crimson-500/30 bg-crimson-500/10 px-2.5 py-1.5 text-xs text-crimson-300 hover:bg-crimson-500 hover:text-white transition-all cursor-pointer"
+              >
+                <LogOut className="h-3.5 w-3.5" />
+                <span className="hidden md:inline text-[11px] font-bold uppercase">Exit Museum</span>
+              </button>
+            </div>
+          </div>
         </div>
       ) : (
         <TwoDimensionalMuseum

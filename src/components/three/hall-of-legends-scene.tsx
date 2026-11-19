@@ -24,30 +24,50 @@ import { SceneCanvas } from "./scene-shell";
 export function HallOfLegendsScene({ mode, mobile, people }: HallOfLegendsSceneProps) {
   const router = useRouter();
 
-  const rows = useMemo(() => {
-    const perRow = mobile ? 3 : 5;
-    return people.map((p, i) => ({
-      person: p,
-      x: (i % perRow) - (perRow - 1) / 2,
-      y: Math.floor(i / perRow),
-    }));
+  const slots = useMemo(() => {
+    const perRow = mobile ? 2 : 4;
+    return people.map((p, i) => {
+      const row = Math.floor(i / perRow);
+      const col = i % perRow;
+      const centerCol = col - (perRow - 1) / 2;
+      const stagger = row % 2 === 1 ? 0.45 : 0;
+      const x = (centerCol + stagger) * 3.6;
+      const y = row * 0.45;
+      const z = -row * 3.8;
+      const curveZ = Math.pow(centerCol, 2) * 0.22;
+      const rotationY = centerCol * -0.07;
+
+      return {
+        person: p,
+        position: [x, y, z - curveZ] as [number, number, number],
+        rotationY,
+      };
+    });
   }, [people, mobile]);
 
-  const depth = Math.max(1, Math.floor(people.length / (mobile ? 3 : 5)));
-  const defaultLook: [number, number, number] = [0, 1.8, 0];
+  const depth = Math.max(1, Math.ceil(people.length / (mobile ? 2 : 4)));
 
   return (
     <div className="relative h-full min-h-[520px] w-full">
-      <SceneCanvas mode={mode} cameraPosition={[0, 2.1, 6.5 + depth * 1.6]}>
+      <SceneCanvas
+        mode={mode}
+        cameraPosition={[0, 2.8 + depth * 0.4, 6.0 + depth * 2.0]}
+      >
         <color attach="background" args={[COLOR_BG]} />
-        <fog attach="fog" args={[COLOR_BG, 12, 34]} />
+        <fog attach="fog" args={[COLOR_BG, 16, 46]} />
 
-        <ambientLight intensity={mode === "IMMERSIVE" ? 0.5 : 0.35} />
+        <ambientLight intensity={mode === "IMMERSIVE" ? 0.55 : 0.4} />
         <pointLight
-          position={[0, 6, 0]}
+          position={[0, 8, 4]}
           color="#ffffff"
-          intensity={mode === "PERFORMANCE" ? 20 : 40}
-          distance={30}
+          intensity={mode === "PERFORMANCE" ? 22 : 44}
+          distance={45}
+        />
+        <pointLight
+          position={[0, 4, -depth * 2]}
+          color={COLOR_CRIMSON}
+          intensity={mode === "PERFORMANCE" ? 14 : 28}
+          distance={35}
         />
 
         <OrbitControls
@@ -55,31 +75,32 @@ export function HallOfLegendsScene({ mode, mobile, people }: HallOfLegendsSceneP
           enableDamping
           dampingFactor={0.08}
           enablePan={false}
-          minDistance={3}
-          maxDistance={16}
+          minDistance={4}
+          maxDistance={28}
           maxPolarAngle={1.45}
-          minPolarAngle={0.25}
-          target={defaultLook}
+          minPolarAngle={0.2}
+          target={[0, 1.5 + depth * 0.22, -depth * 1.6]}
         />
 
-        <mesh position={[0, -0.02, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[26, 20]} />
+        <mesh position={[0, -0.02, -depth * 1.8]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[44, 44]} />
           <meshStandardMaterial color="#0d0d12" roughness={0.95} />
         </mesh>
 
-        {rows.map(({ person, x, y }) => (
+        {slots.map(({ person, position, rotationY }) => (
           <Pedestal
             key={person.slug}
             mode={mode}
             mobile={mobile}
             person={person}
-            position={[x * 2.6, 0, -y * 3.0]}
+            position={position}
+            rotationY={rotationY}
             onOpen={() => router.push(`/creator/${person.slug}`)}
           />
         ))}
 
         <SceneText
-          position={[0, -0.75, 2]}
+          position={[0, -0.75, 3.2]}
           fontSize={0.18}
           letterSpacing={0.34}
           color="#56565f"
@@ -104,19 +125,26 @@ function Pedestal({
   mobile,
   person,
   position,
+  rotationY,
   onOpen,
 }: {
   mode: HallOfLegendsSceneProps["mode"];
   mobile: boolean;
   person: HallOfLegendsSceneProps["people"][number];
   position: [number, number, number];
+  rotationY: number;
   onOpen: () => void;
 }) {
   const [hovered, setHovered] = useState(false);
-  const years = [person.bornYear, person.diedYear].filter((y): y is number => y != null);
+  const lifeSpan =
+    person.bornYear && person.diedYear
+      ? `${person.bornYear}–${person.diedYear}`
+      : person.bornYear
+      ? `b. ${person.bornYear}`
+      : person.role ?? "CREATOR";
 
   return (
-    <group position={position}>
+    <group position={position} rotation={[0, rotationY, 0]}>
       <group
         onClick={(e) => {
           e.stopPropagation();
@@ -132,12 +160,15 @@ function Pedestal({
           document.body.style.cursor = "auto";
         }}
       >
-        <mesh position={[0, 0.09, 0]}>
-          <cylinderGeometry args={[0.6, 0.75, 0.18, 24]} />
+        {/* Base */}
+        <mesh position={[0, 0.1, 0]}>
+          <cylinderGeometry args={[0.7, 0.85, 0.2, 24]} />
           <meshStandardMaterial color="#18181e" roughness={0.8} />
         </mesh>
-        <mesh position={[0, 0.85, 0]} scale={hovered ? 1.04 : 1}>
-          <boxGeometry args={[0.95, 1.35, 0.6]} />
+
+        {/* Main Column */}
+        <mesh position={[0, 0.95, 0]} scale={hovered ? 1.03 : 1}>
+          <boxGeometry args={[1.3, 1.5, 0.65]} />
           <meshStandardMaterial
             color={hovered ? "#26202a" : "#1a1a20"}
             emissive={COLOR_CRIMSON}
@@ -146,16 +177,68 @@ function Pedestal({
             metalness={0.2}
           />
         </mesh>
-        <mesh position={[0, 1.62, 0]}>
-          <boxGeometry args={[1.15, 0.08, 0.8]} />
+
+        {/* Top Cap */}
+        <mesh position={[0, 1.74, 0]}>
+          <boxGeometry args={[1.45, 0.08, 0.8]} />
           <meshStandardMaterial color="#22222a" roughness={0.7} />
         </mesh>
+
+        {/* Front Plaque plate */}
+        <mesh position={[0, 0.95, 0.33]}>
+          <boxGeometry args={[1.15, 1.0, 0.02]} />
+          <meshStandardMaterial
+            color={hovered ? "#2d2432" : "#121218"}
+            roughness={0.5}
+            metalness={0.3}
+          />
+        </mesh>
+
+        {/* Plaque text details */}
+        {person.japaneseName ? (
+          <SceneText
+            position={[0, 1.25, 0.35]}
+            fontSize={0.12}
+            letterSpacing={0.1}
+            color={hovered ? COLOR_HOLO : "#8e8e9c"}
+            anchorX="center"
+            anchorY="middle"
+          >
+            {person.japaneseName}
+          </SceneText>
+        ) : null}
+
         <SceneText
-          position={[0, 1.95, 0]}
-          fontSize={mobile ? 0.24 : 0.2}
-          letterSpacing={0.1}
+          position={[0, 0.98, 0.35]}
+          fontSize={0.11}
+          letterSpacing={0.12}
           color={COLOR_PAPER}
-          maxWidth={2.4}
+          maxWidth={1.05}
+          anchorX="center"
+          anchorY="middle"
+          textAlign="center"
+        >
+          {person.role ?? "DIRECTOR"}
+        </SceneText>
+
+        <SceneText
+          position={[0, 0.68, 0.35]}
+          fontSize={0.1}
+          letterSpacing={0.2}
+          color={hovered ? COLOR_CRIMSON_SOFT : "#71717a"}
+          anchorX="center"
+          anchorY="middle"
+        >
+          EXPLORE CREATOR
+        </SceneText>
+
+        {/* Floating Holographic Title & Lifespan */}
+        <SceneText
+          position={[0, 2.15, 0]}
+          fontSize={mobile ? 0.2 : 0.18}
+          letterSpacing={0.08}
+          color={COLOR_PAPER}
+          maxWidth={2.8}
           anchorX="center"
           anchorY="middle"
           textAlign="center"
@@ -163,26 +246,16 @@ function Pedestal({
           {person.name.toUpperCase()}
         </SceneText>
         <SceneText
-          position={[0, 1.55, 0]}
-          fontSize={0.14}
-          letterSpacing={0.16}
+          position={[0, 1.88, 0]}
+          fontSize={0.12}
+          letterSpacing={0.14}
           color={hovered ? COLOR_HOLO : COLOR_MUTED}
           anchorX="center"
           anchorY="middle"
         >
-          {years.length ? years.join(" – ") : person.role ?? "DIRECTOR"}
+          {lifeSpan}
         </SceneText>
       </group>
-      <SceneText
-        position={[0, 0.14, 0.55]}
-        fontSize={0.13}
-        letterSpacing={0.24}
-        color={hovered ? COLOR_CRIMSON_SOFT : "#56565f"}
-        anchorX="center"
-        anchorY="middle"
-      >
-        EXPLORE CREATOR
-      </SceneText>
     </group>
   );
 }

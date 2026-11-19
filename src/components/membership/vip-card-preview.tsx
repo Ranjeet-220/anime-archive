@@ -2,7 +2,6 @@
 
 import { useState, useRef } from "react";
 import { Sparkles, ShieldCheck, QrCode } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 export function VipCardPreview({
   memberName = "MASTER CURATOR",

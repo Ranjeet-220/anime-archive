@@ -24,7 +24,7 @@ export function StudioArchiveScene({ mode, mobile, studios }: StudioArchiveScene
   const router = useRouter();
 
   const slots = useMemo(() => {
-    const perRow = mobile ? 3 : 5;
+    const perRow = mobile ? 2 : 4;
     return studios.map((s, i) => ({
       studio: s,
       x: (i % perRow) - (perRow - 1) / 2,
@@ -32,20 +32,20 @@ export function StudioArchiveScene({ mode, mobile, studios }: StudioArchiveScene
     }));
   }, [studios, mobile]);
 
-  const rows = Math.max(1, Math.ceil(studios.length / (mobile ? 3 : 5)));
+  const rows = Math.max(1, Math.ceil(studios.length / (mobile ? 2 : 4)));
 
   return (
     <div className="relative h-full min-h-[520px] w-full">
-      <SceneCanvas mode={mode} cameraPosition={[0, 2.4 + rows * 1.1, 11.5 + rows * 0.8]}>
+      <SceneCanvas mode={mode} cameraPosition={[0, 2.0 + rows * 1.1, 9.5 + rows * 1.3]}>
         <color attach="background" args={[COLOR_BG]} />
-        <fog attach="fog" args={[COLOR_BG, 14, 38]} />
+        <fog attach="fog" args={[COLOR_BG, 16, 42]} />
 
-        <ambientLight intensity={mode === "IMMERSIVE" ? 0.5 : 0.35} />
+        <ambientLight intensity={mode === "IMMERSIVE" ? 0.55 : 0.4} />
         <pointLight
-          position={[0, 5, 4]}
+          position={[0, 6, 5]}
           color={COLOR_CRIMSON}
-          intensity={mode === "PERFORMANCE" ? 16 : 32}
-          distance={34}
+          intensity={mode === "PERFORMANCE" ? 18 : 36}
+          distance={40}
         />
 
         <OrbitControls
@@ -53,15 +53,15 @@ export function StudioArchiveScene({ mode, mobile, studios }: StudioArchiveScene
           enableDamping
           dampingFactor={0.08}
           enablePan={false}
-          minDistance={3}
-          maxDistance={18}
+          minDistance={4}
+          maxDistance={25}
           maxPolarAngle={1.45}
           minPolarAngle={0.2}
-          target={[0, 1.6 + rows * 0.6, 0]}
+          target={[0, 1.4 + rows * 0.75, 0]}
         />
 
         <mesh position={[0, -0.02, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[30, 22]} />
+          <planeGeometry args={[40, 30]} />
           <meshStandardMaterial color="#0d0d12" roughness={0.95} />
         </mesh>
 
@@ -71,13 +71,13 @@ export function StudioArchiveScene({ mode, mobile, studios }: StudioArchiveScene
             mode={mode}
             mobile={mobile}
             studio={studio}
-            position={[x * 3.4, 1.2 + y * 2.4, 0]}
+            position={[x * 3.8, 1.4 + y * 2.8, 0]}
             onOpen={() => router.push(`/studio/${studio.slug}`)}
           />
         ))}
 
         <SceneText
-          position={[0, -0.8, 2]}
+          position={[0, -0.8, 2.5]}
           fontSize={0.18}
           letterSpacing={0.34}
           color="#56565f"
@@ -112,6 +112,8 @@ function StudioSlab({
 }) {
   const [hovered, setHovered] = useState(false);
   const label = studio.name.toUpperCase();
+  const slabWidth = mobile ? 2.8 : 3.0;
+  const slabHeight = 1.4;
 
   return (
     <group position={position}>
@@ -131,7 +133,7 @@ function StudioSlab({
         }}
       >
         <mesh scale={hovered ? 1.03 : 1}>
-          <boxGeometry args={[mobile ? 2.9 : 2.6, 1.05, 0.14]} />
+          <boxGeometry args={[slabWidth, slabHeight, 0.15]} />
           <meshStandardMaterial
             color={hovered ? "#26202a" : "#1a1a20"}
             emissive={COLOR_CRIMSON}
@@ -140,26 +142,26 @@ function StudioSlab({
             metalness={0.2}
           />
         </mesh>
-        <mesh position={[0, 0, 0.09]}>
-          <boxGeometry args={[mobile ? 2.95 : 2.65, 0.06, 0.02]} />
+        <mesh position={[0, 0.16, 0.08]}>
+          <boxGeometry args={[mobile ? 2.5 : 2.7, 0.02, 0.01]} />
           <meshBasicMaterial color={hovered ? COLOR_HOLO : "#33333d"} />
         </mesh>
         <SceneText
-          position={[0, 0.26, 0.12]}
-          fontSize={mobile ? 0.2 : 0.18}
-          letterSpacing={0.08}
+          position={[0, 0.4, 0.09]}
+          fontSize={mobile ? 0.17 : 0.16}
+          letterSpacing={0.06}
           color={COLOR_PAPER}
-          maxWidth={2.5}
+          maxWidth={mobile ? 2.5 : 2.7}
           anchorX="center"
           anchorY="middle"
           textAlign="center"
         >
-          {truncate(label, mobile ? 24 : 28)}
+          {truncate(label, mobile ? 22 : 26)}
         </SceneText>
         <SceneText
-          position={[0, -0.02, 0.12]}
-          fontSize={0.13}
-          letterSpacing={0.14}
+          position={[0, -0.02, 0.09]}
+          fontSize={0.12}
+          letterSpacing={0.12}
           color={COLOR_MUTED}
           anchorX="center"
           anchorY="middle"
@@ -167,20 +169,20 @@ function StudioSlab({
           {studio.foundedYear ? `EST. ${studio.foundedYear}` : "EST. UNKNOWN"}
         </SceneText>
         <SceneText
-          position={[0, -0.32, 0.12]}
-          fontSize={0.13}
-          letterSpacing={0.18}
-          color={hovered ? COLOR_HOLO : "#56565f"}
+          position={[0, -0.22, 0.09]}
+          fontSize={0.12}
+          letterSpacing={0.14}
+          color={hovered ? COLOR_HOLO : "#8a8a98"}
           anchorX="center"
           anchorY="middle"
         >
           {`${studio.animeCount} WORKS`}
         </SceneText>
         <SceneText
-          position={[0, -0.62, 0.12]}
-          fontSize={0.14}
-          letterSpacing={0.26}
-          color={hovered ? "#e88a8f" : COLOR_CRIMSON}
+          position={[0, -0.46, 0.09]}
+          fontSize={0.11}
+          letterSpacing={0.22}
+          color={hovered ? "#ff858d" : COLOR_CRIMSON}
           anchorX="center"
           anchorY="middle"
         >

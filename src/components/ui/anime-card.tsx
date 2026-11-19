@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Star } from "lucide-react";
 import { FORMAT_LABELS } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { AnimePoster } from "@/components/ui/anime-poster";
@@ -70,11 +71,12 @@ export function CoverArt({
 
 export function AnimeCard({ data }: { data: AnimeCardData }) {
   const formatStr = FORMAT_LABELS[data.format as keyof typeof FORMAT_LABELS] ?? data.format;
-  const metaText = data.year ? `${data.year}` : formatStr;
+  const metaText = data.year ? `${data.year} · ${formatStr}` : formatStr;
+  const hasRating = typeof data.averageRating === "number" && data.averageRating > 0;
 
   return (
-    <article className="group relative flex flex-col overflow-hidden rounded-xl border border-[#25282C] bg-[#111316] transition-all duration-300 hover:-translate-y-1 hover:border-crimson-500/70 hover:shadow-[0_0_20px_rgba(227,38,46,0.22)]">
-      {/* Poster Container */}
+    <article className="group relative flex flex-col overflow-hidden rounded-xl border border-[#25282C] bg-[#111316] transition-all duration-300 hover:-translate-y-1 hover:border-crimson-500/70 hover:shadow-[0_0_20px_rgba(227,38,46,0.25)]">
+      {/* Poster Container with subtle zoom */}
       <div className="relative aspect-[3/4] overflow-hidden bg-[#0A0C0E]">
         <Link href={`/anime/${data.slug}`} className="block h-full w-full relative" aria-label={data.title}>
           <CoverArt
@@ -87,8 +89,18 @@ export function AnimeCard({ data }: { data: AnimeCardData }) {
             className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
           />
           {/* Subtle bottom gradient shadow */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#111316] via-transparent to-black/20 opacity-80 group-hover:opacity-60 transition-opacity" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#111316] via-transparent to-black/25 opacity-80 group-hover:opacity-60 transition-opacity" />
         </Link>
+
+        {/* Rating Score Badge on Poster */}
+        {hasRating && (
+          <div className="absolute top-2.5 left-2.5 z-10">
+            <span className="inline-flex items-center gap-1 rounded-md bg-black/75 px-2 py-0.5 text-[11px] font-bold text-amber-400 border border-amber-500/30 backdrop-blur-md shadow-sm">
+              <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+              <span>{data.averageRating?.toFixed(1)}</span>
+            </span>
+          </div>
+        )}
 
         {/* Bookmark Action */}
         <div className="absolute top-2.5 right-2.5 z-10">
@@ -100,15 +112,15 @@ export function AnimeCard({ data }: { data: AnimeCardData }) {
       <div className="flex flex-1 flex-col justify-between p-3.5 pt-2.5">
         <div>
           <Link href={`/anime/${data.slug}`} className="block">
-            <h3 className="font-display text-sm font-bold tracking-tight text-paper transition-colors group-hover:text-crimson-400 line-clamp-1">
+            <h3 className="font-display text-sm font-bold tracking-tight text-[#F2F2F2] transition-colors group-hover:text-crimson-400 line-clamp-1">
               {data.title}
             </h3>
           </Link>
 
-          <div className="mt-1 flex items-center justify-between text-xs text-muted">
-            <span className="font-medium text-[#9A9A9A]">{metaText}</span>
+          <div className="mt-1 flex items-center justify-between text-xs text-[#B0B0B8]">
+            <span className="font-medium text-[#B0B0B8] truncate">{metaText}</span>
             {data.studio ? (
-              <span className="truncate max-w-[110px] text-[11px] text-[#666A70]">
+              <span className="truncate max-w-[110px] text-[11px] text-[#8E9099] font-medium ml-1">
                 {data.studio.name}
               </span>
             ) : null}
@@ -120,7 +132,7 @@ export function AnimeCard({ data }: { data: AnimeCardData }) {
               {data.genres.slice(0, 2).map((g) => (
                 <span
                   key={g.slug}
-                  className="rounded-md bg-[#181B1F] border border-[#25282C] px-2 py-0.5 text-[10px] font-medium text-[#9A9A9A] transition-colors group-hover:border-red-950/60"
+                  className="rounded-md bg-[#181B1F] border border-[#25282C] px-2 py-0.5 text-[10px] font-medium text-[#B0B0B8] transition-colors group-hover:border-crimson-500/30"
                 >
                   {g.name}
                 </span>

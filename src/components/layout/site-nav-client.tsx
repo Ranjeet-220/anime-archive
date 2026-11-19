@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { SessionUser } from "@/lib/auth";
+import { CommandPalette } from "@/components/layout/command-palette";
 
 const CENTER_NAV = [
   { href: "/", label: "HOME" },
@@ -57,6 +58,7 @@ function isActive(pathname: string, href: string): boolean {
 export function SiteNavClient({ session }: { session: SessionUser | null }) {
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [prevPathname, setPrevPathname] = useState(pathname);
 
   if (prevPathname !== pathname) {
@@ -66,7 +68,10 @@ export function SiteNavClient({ session }: { session: SessionUser | null }) {
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-line bg-ink/90 backdrop-blur-md transition-colors">
+      <header
+        role="banner"
+        className="sticky top-0 z-50 border-b border-line bg-ink/90 backdrop-blur-md transition-colors"
+      >
         <div className="mx-auto flex h-16 max-w-[1720px] w-full items-center justify-between px-4 sm:px-8 lg:px-12">
           {/* Left: Brand / Logo */}
           <Link
@@ -104,6 +109,7 @@ export function SiteNavClient({ session }: { session: SessionUser | null }) {
                 <Link
                   key={item.href}
                   href={item.href}
+                  aria-current={active ? "page" : undefined}
                   className={cn(
                     "relative py-1 text-[11px] font-semibold uppercase tracking-[0.22em] transition-all duration-200",
                     active
@@ -122,14 +128,22 @@ export function SiteNavClient({ session }: { session: SessionUser | null }) {
 
           {/* Right Action Icons */}
           <div className="flex items-center gap-2 sm:gap-2.5">
-            {/* Search */}
-            <Link
-              href="/search"
-              aria-label="Search the archive"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-line bg-charcoal/50 text-muted transition-colors hover:border-line-2 hover:bg-charcoal hover:text-paper"
+            {/* Command Palette Search Button */}
+            <button
+              type="button"
+              onClick={() => setCommandPaletteOpen(true)}
+              aria-label="Search the archive (Cmd+K)"
+              aria-keyshortcuts="Control+K Meta+K"
+              className="group inline-flex h-9 items-center gap-2 rounded-md border border-line bg-charcoal/50 px-2.5 text-muted transition-colors hover:border-line-2 hover:bg-charcoal hover:text-paper"
             >
-              <Search className="h-4 w-4" />
-            </Link>
+              <Search className="h-4 w-4" aria-hidden />
+              <span className="hidden sm:inline-block text-xs font-normal text-faint group-hover:text-muted">
+                Search...
+              </span>
+              <kbd className="hidden md:inline-flex items-center rounded border border-line-2 bg-charcoal-2 px-1.5 py-0.5 text-[10px] font-mono text-faint">
+                ⌘K
+              </kbd>
+            </button>
 
             {/* Bookmarks / Saved */}
             <Link
@@ -160,8 +174,9 @@ export function SiteNavClient({ session }: { session: SessionUser | null }) {
               type="button"
               onClick={() => setDrawerOpen((v) => !v)}
               aria-expanded={drawerOpen}
+              aria-controls="mobile-drawer-menu"
               aria-label={drawerOpen ? "Close menu" : "Open menu"}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-line bg-charcoal/50 text-muted transition-colors hover:text-paper lg:hidden"
+              className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md border border-line bg-charcoal/50 text-muted transition-colors hover:text-paper lg:hidden"
             >
               {drawerOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
             </button>
@@ -170,7 +185,10 @@ export function SiteNavClient({ session }: { session: SessionUser | null }) {
 
         {/* Mobile Slide-down Drawer */}
         {drawerOpen ? (
-          <div className="border-t border-line bg-ink-2/95 px-4 py-4 backdrop-blur-xl lg:hidden">
+          <div
+            id="mobile-drawer-menu"
+            className="border-t border-line bg-ink-2/95 px-4 py-4 backdrop-blur-xl lg:hidden animate-in slide-in-from-top-2 duration-200"
+          >
             <div className="grid grid-cols-2 gap-2">
               {DRAWER_NAV.map((item) => {
                 const active = isActive(pathname, item.href);
@@ -178,30 +196,45 @@ export function SiteNavClient({ session }: { session: SessionUser | null }) {
                   <Link
                     key={item.href}
                     href={item.href}
+                    aria-current={active ? "page" : undefined}
                     className={cn(
-                      "flex items-center gap-2.5 rounded-lg border px-3 py-2.5 text-xs font-medium transition-all",
+                      "flex min-h-[44px] items-center gap-2.5 rounded-lg border px-3.5 py-2.5 text-xs font-medium transition-all",
                       active
                         ? "border-crimson-500/50 bg-crimson-500/10 text-crimson-300 font-semibold"
                         : "border-line/60 bg-charcoal/40 text-muted hover:border-line hover:text-paper"
                     )}
                   >
-                    <item.icon className="h-4 w-4 text-crimson-400" />
-                    {item.label}
+                    <item.icon className="h-4 w-4 text-crimson-400 shrink-0" />
+                    <span className="truncate">{item.label}</span>
                   </Link>
                 );
               })}
             </div>
             <div className="mt-3 pt-3 border-t border-line/60 flex items-center justify-between text-xs text-muted">
-              <Link href="/museum" className="text-crimson-400 hover:underline">
-                Enter 3D Digital Museum →
-              </Link>
-              <Link href="/rankings" className="hover:text-paper">
+              <button
+                type="button"
+                onClick={() => {
+                  setDrawerOpen(false);
+                  setCommandPaletteOpen(true);
+                }}
+                className="flex items-center gap-1.5 text-crimson-400 hover:underline min-h-[44px] py-1 text-left"
+              >
+                <Search className="h-3.5 w-3.5" />
+                Quick Search (Cmd+K)
+              </button>
+              <Link
+                href="/rankings"
+                className="hover:text-paper min-h-[44px] py-2 flex items-center"
+              >
                 Top 60 Rankings
               </Link>
             </div>
           </div>
         ) : null}
       </header>
+
+      {/* Global Command Palette Search Modal */}
+      <CommandPalette open={commandPaletteOpen} onOpenChange={setCommandPaletteOpen} />
 
       {/* Mobile Bottom Navigation Bar */}
       <nav
@@ -219,8 +252,9 @@ export function SiteNavClient({ session }: { session: SessionUser | null }) {
             <Link
               key={tab.href}
               href={tab.href}
+              aria-current={isActive(pathname, tab.href) ? "page" : undefined}
               className={cn(
-                "flex flex-col items-center gap-1 py-2 text-[10px] font-medium transition-colors",
+                "flex min-h-[48px] flex-col items-center justify-center gap-1 py-1.5 text-[10px] font-medium transition-colors",
                 isActive(pathname, tab.href)
                   ? "text-crimson-400 font-semibold"
                   : "text-muted hover:text-paper"

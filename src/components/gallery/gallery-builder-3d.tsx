@@ -1,26 +1,28 @@
 "use client";
 
-import React, { useState, useEffect, Suspense, useRef } from "react";
+import React, { useState, useSyncExternalStore } from "react";
 import dynamic from "next/dynamic";
-import * as THREE from "three";
 import {
-  Palette,
-  Layers,
   Sparkles,
   Share2,
   Save,
-  Eye,
   Check,
   Search,
-  ChevronRight,
   Move,
-  Maximize2,
-  Sliders,
-  RotateCcw,
   LayoutGrid,
   Box,
+  Eye,
+  EyeOff,
+  Sun,
+  Palette,
+  Image as ImageIcon,
+  Building,
+  Copy,
+  X,
+  Sliders,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { GalleryTheme, LightingPreset } from "./gallery-canvas-scene";
 
 export interface GallerySlot {
   id: number;
@@ -31,7 +33,7 @@ export interface GallerySlot {
   animeSlug: string;
   animeTitle: string;
   posterUrl: string;
-  frameStyle: "gold" | "crimson" | "black" | "hologram";
+  frameStyle: "gold" | "crimson" | "black" | "hologram" | "bamboo";
 }
 
 const DEFAULT_SLOTS: GallerySlot[] = [
@@ -107,13 +109,37 @@ const AVAILABLE_ARTWORKS = [
   { slug: "one-piece", title: "One Piece", year: 1999, url: "/anime/one-piece.webp" },
 ];
 
+const THEME_OPTIONS: { id: GalleryTheme; label: string; icon: string; desc: string }[] = [
+  { id: "zen", label: "Zen Temple", icon: "🏮", desc: "Warm cedar wood & shoji serenity" },
+  { id: "cyberpunk", label: "Cyberpunk", icon: "🌆", desc: "Neo-Tokyo reflective dark matrix" },
+  { id: "classic", label: "Archival Hall", icon: "🏛️", desc: "Classic marble preservation wing" },
+  { id: "synthwave", label: "Synthwave", icon: "⚡", desc: "Retro 80s neon purple horizon" },
+  { id: "loft", label: "Modern Loft", icon: "🖼️", desc: "Contemporary slate minimalism" },
+];
+
+const LIGHTING_OPTIONS: { id: LightingPreset; label: string; icon: string; color: string }[] = [
+  { id: "warm", label: "Warm Archival", icon: "🕯️", color: "text-amber-400" },
+  { id: "neon", label: "Cyber Neon", icon: "⚡", color: "text-crimson-400" },
+  { id: "daylight", label: "Daylight Studio", icon: "☀️", color: "text-sky-300" },
+  { id: "dramatic", label: "Dramatic Spotlight", icon: "🔦", color: "text-purple-300" },
+  { id: "midnight", label: "Midnight Blue", icon: "🌌", color: "text-blue-400" },
+];
+
+const FRAME_OPTIONS: { id: GallerySlot["frameStyle"]; label: string; previewColor: string }[] = [
+  { id: "gold", label: "Gold Gilded", previewColor: "bg-[#E6AF2E]" },
+  { id: "crimson", label: "Crimson Lacquer", previewColor: "bg-[#E3262E]" },
+  { id: "black", label: "Obsidian Black", previewColor: "bg-[#181A1E]" },
+  { id: "hologram", label: "Hologram Glow", previewColor: "bg-[#38bdf8]" },
+  { id: "bamboo", label: "Bamboo Wood", previewColor: "bg-[#bfa163]" },
+];
+
 // Client-only dynamic import of the Three.js Canvas Scene
 const DynamicGalleryScene = dynamic(
   () => import("./gallery-canvas-scene").then((m) => m.GalleryCanvasScene),
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-full w-full flex-col items-center justify-center bg-[#050607] text-[#9A9A9A]">
+      <div className="flex h-full w-full flex-col items-center justify-center bg-[#050607] text-[#8E9099]">
         <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-crimson-500 border-t-transparent animate-spin" />
         <p className="mt-4 font-display text-xs uppercase tracking-[0.2em] text-crimson-400">
           INITIALIZING 3D EXHIBITION CHAMBER…
@@ -123,24 +149,33 @@ const DynamicGalleryScene = dynamic(
   }
 );
 
+const emptySubscribe = () => () => {};
+
 export function GalleryBuilder3D() {
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
   const [slots, setSlots] = useState<GallerySlot[]>(DEFAULT_SLOTS);
   const [selectedSlotId, setSelectedSlotId] = useState<number>(1);
-  const [theme, setTheme] = useState<"zen" | "cyberpunk" | "classic">("zen");
+  const [theme, setTheme] = useState<GalleryTheme>("zen");
+  const [lighting, setLighting] = useState<LightingPreset>("warm");
   const [viewMode, setViewMode] = useState<"3d" | "grid">("3d");
   const [galleryTitle, setGalleryTitle] = useState("Master Curator's Exhibition");
+  const [curatorName, setCuratorName] = useState("MASTER CURATOR");
   const [isSaved, setIsSaved] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
+  const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const [activeCategory, setActiveCategory] = useState<
+    "details" | "environment" | "lighting" | "frames" | "exhibits"
+  >("exhibits");
 
   const activeSlot = slots.find((s) => s.id === selectedSlotId) ?? slots[0];
 
-  const updateActiveSlotArtwork = (art: typeof AVAILABLE_ARTWORKS[0]) => {
+  const updateActiveSlotArtwork = (art: (typeof AVAILABLE_ARTWORKS)[0]) => {
     setSlots((prev) =>
       prev.map((s) =>
         s.id === selectedSlotId
@@ -155,7 +190,7 @@ export function GalleryBuilder3D() {
     );
   };
 
-  const updateActiveSlotFrame = (frame: "gold" | "crimson" | "black" | "hologram") => {
+  const updateActiveSlotFrame = (frame: GallerySlot["frameStyle"]) => {
     setSlots((prev) =>
       prev.map((s) => (s.id === selectedSlotId ? { ...s, frameStyle: frame } : s))
     );
@@ -165,229 +200,411 @@ export function GalleryBuilder3D() {
     a.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const handleCopyShareLink = () => {
+    navigator.clipboard?.writeText?.("https://animearchive.com/gallery/master-curator-exhibit");
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2500);
+  };
+
   return (
     <div className="flex flex-col lg:flex-row h-[calc(100vh-4rem)] min-h-[650px] w-full bg-[#050607] text-paper overflow-hidden">
-      {/* 1. Left Controls & Curator Studio */}
-      <aside className="w-full lg:w-[420px] shrink-0 border-r border-[#25282C] bg-[#0B0D0F] flex flex-col justify-between overflow-y-auto no-scrollbar p-5">
-        <div className="space-y-6">
-          {/* Top Title & View Switcher */}
-          <div className="flex items-center justify-between">
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-crimson-500/40 bg-crimson-500/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-crimson-400">
-              <Sparkles className="h-3 w-3" />
-              <span>3D CURATOR STUDIO</span>
-            </div>
+      {/* 1. Left Controls & Curator Studio (Hideable in preview mode) */}
+      {!isPreviewMode && (
+        <aside className="w-full lg:w-[440px] shrink-0 border-r border-[#25282C] bg-[#0B0D0F] flex flex-col justify-between overflow-y-auto no-scrollbar p-5 z-20 shadow-2xl">
+          <div className="space-y-5">
+            {/* Top Title & View Switcher */}
+            <div className="flex items-center justify-between pb-3 border-b border-[#25282C]">
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-crimson-500/40 bg-crimson-500/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-crimson-400">
+                <Sparkles className="h-3 w-3" />
+                <span>3D CURATOR STUDIO</span>
+              </div>
 
-            <div className="flex items-center rounded-lg border border-[#25282C] bg-[#111316] p-0.5 text-[10px] font-bold">
-              <button
-                type="button"
-                onClick={() => setViewMode("3d")}
-                className={cn(
-                  "flex items-center gap-1 rounded px-2.5 py-1 uppercase transition-colors cursor-pointer",
-                  viewMode === "3d" ? "bg-crimson-500 text-white" : "text-[#9A9A9A] hover:text-paper"
-                )}
-              >
-                <Box className="h-3 w-3" />
-                <span>3D ROOM</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setViewMode("grid")}
-                className={cn(
-                  "flex items-center gap-1 rounded px-2.5 py-1 uppercase transition-colors cursor-pointer",
-                  viewMode === "grid" ? "bg-crimson-500 text-white" : "text-[#9A9A9A] hover:text-paper"
-                )}
-              >
-                <LayoutGrid className="h-3 w-3" />
-                <span>GALLERY GRID</span>
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#666A70]">
-              EXHIBITION TITLE
-            </label>
-            <input
-              type="text"
-              value={galleryTitle}
-              onChange={(e) => setGalleryTitle(e.target.value)}
-              className="mt-1.5 w-full rounded-lg border border-[#25282C] bg-[#111316] px-3.5 py-2.5 font-display text-sm font-bold text-paper focus:border-crimson-500 focus:outline-none"
-              placeholder="Exhibition Title"
-            />
-          </div>
-
-          {/* Theme Preset */}
-          <div>
-            <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#666A70]">
-              ARCHITECTURAL ENVIRONMENT
-            </label>
-            <div className="mt-2 grid grid-cols-3 gap-2 text-xs">
-              <button
-                type="button"
-                onClick={() => setTheme("zen")}
-                className={cn(
-                  "rounded-lg border p-2 text-center font-semibold uppercase transition-all cursor-pointer",
-                  theme === "zen"
-                    ? "border-crimson-500 bg-crimson-500/10 text-crimson-400"
-                    : "border-[#25282C] bg-[#111316] text-[#9A9A9A] hover:border-line-2"
-                )}
-              >
-                🏮 Zen
-              </button>
-              <button
-                type="button"
-                onClick={() => setTheme("cyberpunk")}
-                className={cn(
-                  "rounded-lg border p-2 text-center font-semibold uppercase transition-all cursor-pointer",
-                  theme === "cyberpunk"
-                    ? "border-crimson-500 bg-crimson-500/10 text-crimson-400"
-                    : "border-[#25282C] bg-[#111316] text-[#9A9A9A] hover:border-line-2"
-                )}
-              >
-                🌆 Cyberpunk
-              </button>
-              <button
-                type="button"
-                onClick={() => setTheme("classic")}
-                className={cn(
-                  "rounded-lg border p-2 text-center font-semibold uppercase transition-all cursor-pointer",
-                  theme === "classic"
-                    ? "border-crimson-500 bg-crimson-500/10 text-crimson-400"
-                    : "border-[#25282C] bg-[#111316] text-[#9A9A9A] hover:border-line-2"
-                )}
-              >
-                🏛️ Archival
-              </button>
-            </div>
-          </div>
-
-          {/* Slot Selection */}
-          <div>
-            <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#666A70]">
-              EXHIBIT WALL POSITIONS
-            </label>
-            <div className="mt-2 flex flex-col gap-1.5">
-              {slots.map((s) => (
+              <div className="flex items-center rounded-lg border border-[#25282C] bg-[#111316] p-0.5 text-[10px] font-bold">
                 <button
-                  key={s.id}
                   type="button"
-                  onClick={() => setSelectedSlotId(s.id)}
+                  onClick={() => setViewMode("3d")}
                   className={cn(
-                    "flex items-center justify-between rounded-lg border px-3 py-2 text-xs transition-all cursor-pointer",
-                    s.id === selectedSlotId
-                      ? "border-crimson-500 bg-crimson-500/15 text-paper font-bold shadow-[0_0_12px_rgba(227,38,46,0.35)]"
-                      : "border-[#25282C] bg-[#111316] text-[#9A9A9A] hover:bg-[#181B1F] hover:text-paper"
+                    "flex items-center gap-1 rounded px-2.5 py-1 uppercase transition-colors cursor-pointer",
+                    viewMode === "3d" ? "bg-crimson-500 text-white" : "text-[#8E9099] hover:text-[#F2F2F2]"
                   )}
                 >
-                  <div className="flex items-center gap-2 truncate">
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-black/50 text-[10px] font-bold text-crimson-400 border border-crimson-500/30">
-                      {s.id}
-                    </span>
-                    <span className="truncate">{s.animeTitle}</span>
+                  <Box className="h-3 w-3" />
+                  <span>3D Room</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode("grid")}
+                  className={cn(
+                    "flex items-center gap-1 rounded px-2.5 py-1 uppercase transition-colors cursor-pointer",
+                    viewMode === "grid" ? "bg-crimson-500 text-white" : "text-[#8E9099] hover:text-[#F2F2F2]"
+                  )}
+                >
+                  <LayoutGrid className="h-3 w-3" />
+                  <span>Grid</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Categorized Tab Pills */}
+            <div className="flex items-center gap-1 overflow-x-auto pb-1 no-scrollbar text-[11px] font-bold">
+              <button
+                type="button"
+                onClick={() => setActiveCategory("exhibits")}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-lg px-3 py-1.5 whitespace-nowrap transition-all cursor-pointer",
+                  activeCategory === "exhibits"
+                    ? "bg-crimson-500 text-white shadow-sm"
+                    : "bg-[#111316] border border-[#25282C] text-[#8E9099] hover:text-white"
+                )}
+              >
+                <ImageIcon className="h-3 w-3" />
+                <span>Exhibits</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveCategory("frames")}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-lg px-3 py-1.5 whitespace-nowrap transition-all cursor-pointer",
+                  activeCategory === "frames"
+                    ? "bg-crimson-500 text-white shadow-sm"
+                    : "bg-[#111316] border border-[#25282C] text-[#8E9099] hover:text-white"
+                )}
+              >
+                <Palette className="h-3 w-3" />
+                <span>Frames</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveCategory("environment")}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-lg px-3 py-1.5 whitespace-nowrap transition-all cursor-pointer",
+                  activeCategory === "environment"
+                    ? "bg-crimson-500 text-white shadow-sm"
+                    : "bg-[#111316] border border-[#25282C] text-[#8E9099] hover:text-white"
+                )}
+              >
+                <Building className="h-3 w-3" />
+                <span>Environment</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveCategory("lighting")}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-lg px-3 py-1.5 whitespace-nowrap transition-all cursor-pointer",
+                  activeCategory === "lighting"
+                    ? "bg-crimson-500 text-white shadow-sm"
+                    : "bg-[#111316] border border-[#25282C] text-[#8E9099] hover:text-white"
+                )}
+              >
+                <Sun className="h-3 w-3" />
+                <span>Lighting</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveCategory("details")}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-lg px-3 py-1.5 whitespace-nowrap transition-all cursor-pointer",
+                  activeCategory === "details"
+                    ? "bg-crimson-500 text-white shadow-sm"
+                    : "bg-[#111316] border border-[#25282C] text-[#8E9099] hover:text-white"
+                )}
+              >
+                <Sliders className="h-3 w-3" />
+                <span>Title</span>
+              </button>
+            </div>
+
+            {/* Category 1: EXHIBITS SELECTION */}
+            {activeCategory === "exhibits" && (
+              <div className="space-y-4 animate-in fade-in duration-200">
+                <div>
+                  <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8E9099]">
+                    SELECT WALL MOUNTING SLOT
+                  </label>
+                  <div className="mt-2 flex flex-col gap-1.5">
+                    {slots.map((s) => (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onClick={() => setSelectedSlotId(s.id)}
+                        className={cn(
+                          "flex items-center justify-between rounded-lg border px-3 py-2 text-xs transition-all cursor-pointer",
+                          s.id === selectedSlotId
+                            ? "border-crimson-500 bg-crimson-500/15 text-[#F2F2F2] font-bold shadow-[0_0_12px_rgba(227,38,46,0.3)]"
+                            : "border-[#25282C] bg-[#111316] text-[#8E9099] hover:bg-[#16181D] hover:text-white"
+                        )}
+                      >
+                        <div className="flex items-center gap-2 truncate">
+                          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-black/60 text-[10px] font-bold text-crimson-400 border border-crimson-500/40">
+                            {s.id}
+                          </span>
+                          <span className="truncate text-xs font-semibold">{s.animeTitle}</span>
+                        </div>
+                        <span className="text-[10px] uppercase tracking-wider text-[#666A70] shrink-0 ml-1">
+                          {s.label}
+                        </span>
+                      </button>
+                    ))}
                   </div>
-                  <ChevronRight className="h-3.5 w-3.5 text-[#666A70]" />
-                </button>
-              ))}
-            </div>
-          </div>
+                </div>
 
-          {/* Artwork Selector Modal/List for Active Slot */}
-          <div>
-            <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#666A70]">
-              FRAME MATERIAL FOR SLOT {selectedSlotId}
-            </label>
+                {/* Artwork Search & Select for Active Slot */}
+                <div>
+                  <div className="flex items-center justify-between">
+                    <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8E9099]">
+                      ASSIGN ARTWORK TO SLOT {selectedSlotId}
+                    </label>
+                    <span className="text-[10px] font-bold text-crimson-400">
+                      {activeSlot.label}
+                    </span>
+                  </div>
 
-            {/* Frame Style Picker */}
-            <div className="mt-2 flex gap-2 text-[10px] font-bold">
-              {(["gold", "crimson", "black", "hologram"] as const).map((style) => (
+                  <div className="mt-2 relative">
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search archival masterworks..."
+                      className="w-full rounded-lg border border-[#25282C] bg-[#111316] pl-8 pr-3 py-2 text-xs text-[#F2F2F2] placeholder:text-[#666A70] focus:border-crimson-500 focus:outline-none"
+                    />
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#666A70]" />
+                  </div>
+
+                  <div className="mt-2 grid grid-cols-4 gap-2 max-h-52 overflow-y-auto no-scrollbar border border-[#25282C] rounded-lg p-2 bg-[#111316]">
+                    {filteredArtworks.map((art) => {
+                      const isSelected = activeSlot.animeSlug === art.slug;
+                      return (
+                        <button
+                          key={art.slug}
+                          type="button"
+                          onClick={() => updateActiveSlotArtwork(art)}
+                          className={cn(
+                            "group relative aspect-[3/4] overflow-hidden rounded-lg border transition-all cursor-pointer",
+                            isSelected
+                              ? "border-crimson-500 ring-2 ring-crimson-500 shadow-md"
+                              : "border-[#25282C] hover:border-crimson-500/60"
+                          )}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={art.url} alt={art.title} className="h-full w-full object-cover" />
+                          <div className="absolute inset-0 bg-black/75 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-1 text-[8.5px] text-center font-bold text-white leading-tight">
+                            {art.title}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Category 2: FRAME STYLE */}
+            {activeCategory === "frames" && (
+              <div className="space-y-4 animate-in fade-in duration-200">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8E9099]">
+                    FRAME MATERIAL FOR SLOT {selectedSlotId}
+                  </label>
+                  <span className="text-[10px] font-bold text-crimson-400">
+                    {activeSlot.animeTitle}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 gap-2">
+                  {FRAME_OPTIONS.map((frame) => (
+                    <button
+                      key={frame.id}
+                      type="button"
+                      onClick={() => updateActiveSlotFrame(frame.id)}
+                      className={cn(
+                        "flex items-center justify-between rounded-xl border p-3 text-xs transition-all cursor-pointer",
+                        activeSlot.frameStyle === frame.id
+                          ? "border-crimson-500 bg-crimson-500/15 text-[#F2F2F2] font-bold shadow-[0_0_12px_rgba(227,38,46,0.3)]"
+                          : "border-[#25282C] bg-[#111316] text-[#8E9099] hover:text-white"
+                      )}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className={cn("h-4 w-4 rounded-full border border-white/20", frame.previewColor)} />
+                        <span className="font-semibold text-xs">{frame.label}</span>
+                      </div>
+                      {activeSlot.frameStyle === frame.id && (
+                        <Check className="h-4 w-4 text-crimson-400" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Apply Frame to All Slots button */}
                 <button
-                  key={style}
                   type="button"
-                  onClick={() => updateActiveSlotFrame(style)}
-                  className={cn(
-                    "flex-1 rounded-md border py-1.5 uppercase text-center cursor-pointer transition-all",
-                    activeSlot.frameStyle === style
-                      ? "border-crimson-500 bg-crimson-500 text-white font-bold shadow-sm"
-                      : "border-[#25282C] bg-[#111316] text-[#9A9A9A] hover:text-paper"
-                  )}
+                  onClick={() => {
+                    const currentStyle = activeSlot.frameStyle;
+                    setSlots((prev) => prev.map((s) => ({ ...s, frameStyle: currentStyle })));
+                  }}
+                  className="w-full rounded-lg border border-[#25282C] bg-[#16181D] py-2 text-center text-[10px] font-bold uppercase tracking-wider text-[#A0A5AE] hover:text-white hover:border-crimson-500/50 transition-colors cursor-pointer"
                 >
-                  {style}
+                  Apply Current Frame to All Exhibits
                 </button>
-              ))}
-            </div>
+              </div>
+            )}
 
-            {/* Artwork Search */}
-            <div className="mt-4 relative">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search artworks to mount..."
-                className="w-full rounded-lg border border-[#25282C] bg-[#111316] pl-8 pr-3 py-2 text-xs text-paper focus:border-crimson-500 focus:outline-none"
-              />
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#666A70]" />
-            </div>
+            {/* Category 3: ENVIRONMENT SELECTION */}
+            {activeCategory === "environment" && (
+              <div className="space-y-4 animate-in fade-in duration-200">
+                <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8E9099]">
+                  ARCHITECTURAL ENVIRONMENT
+                </label>
+                <div className="grid gap-2">
+                  {THEME_OPTIONS.map((t) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => setTheme(t.id)}
+                      className={cn(
+                        "flex items-start gap-3 rounded-xl border p-3 text-left transition-all cursor-pointer",
+                        theme === t.id
+                          ? "border-crimson-500 bg-crimson-500/15 text-[#F2F2F2] shadow-[0_0_15px_rgba(227,38,46,0.25)]"
+                          : "border-[#25282C] bg-[#111316] text-[#8E9099] hover:text-white"
+                      )}
+                    >
+                      <span className="text-xl">{t.icon}</span>
+                      <div>
+                        <p className="font-display text-xs font-bold text-[#F2F2F2]">{t.label}</p>
+                        <p className="text-[10px] text-[#8E9099] mt-0.5">{t.desc}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
-            {/* Artwork Grid List */}
-            <div className="mt-2 grid grid-cols-4 gap-2 max-h-48 overflow-y-auto no-scrollbar border border-[#25282C] rounded-lg p-2 bg-[#111316]">
-              {filteredArtworks.map((art) => {
-                const isSelected = activeSlot.animeSlug === art.slug;
-                return (
-                  <button
-                    key={art.slug}
-                    type="button"
-                    onClick={() => updateActiveSlotArtwork(art)}
-                    className={cn(
-                      "group relative aspect-[3/4] overflow-hidden rounded border transition-all cursor-pointer",
-                      isSelected
-                        ? "border-crimson-500 ring-2 ring-crimson-500 shadow-md"
-                        : "border-[#25282C] hover:border-crimson-500/50"
-                    )}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={art.url} alt={art.title} className="h-full w-full object-cover" />
-                    <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-1 text-[8.5px] text-center font-bold text-white leading-tight">
-                      {art.title}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
+            {/* Category 4: LIGHTING PRESETS */}
+            {activeCategory === "lighting" && (
+              <div className="space-y-4 animate-in fade-in duration-200">
+                <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8E9099]">
+                  EXHIBITION LIGHTING ATMOSPHERE
+                </label>
+                <div className="grid gap-2">
+                  {LIGHTING_OPTIONS.map((l) => (
+                    <button
+                      key={l.id}
+                      type="button"
+                      onClick={() => setLighting(l.id)}
+                      className={cn(
+                        "flex items-center justify-between rounded-xl border p-3 text-xs transition-all cursor-pointer",
+                        lighting === l.id
+                          ? "border-crimson-500 bg-crimson-500/15 text-[#F2F2F2] font-bold shadow-[0_0_15px_rgba(227,38,46,0.25)]"
+                          : "border-[#25282C] bg-[#111316] text-[#8E9099] hover:text-white"
+                      )}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-lg">{l.icon}</span>
+                        <span className="font-semibold">{l.label}</span>
+                      </div>
+                      {lighting === l.id && <Check className="h-4 w-4 text-crimson-400" />}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Category 5: EXHIBITION TITLE & DETAILS */}
+            {activeCategory === "details" && (
+              <div className="space-y-4 animate-in fade-in duration-200">
+                <div>
+                  <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8E9099]">
+                    EXHIBITION TITLE
+                  </label>
+                  <input
+                    type="text"
+                    value={galleryTitle}
+                    onChange={(e) => setGalleryTitle(e.target.value)}
+                    className="mt-1.5 w-full rounded-lg border border-[#25282C] bg-[#111316] px-3.5 py-2.5 font-display text-sm font-bold text-[#F2F2F2] focus:border-crimson-500 focus:outline-none"
+                    placeholder="Exhibition Title"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8E9099]">
+                    CURATOR NAME
+                  </label>
+                  <input
+                    type="text"
+                    value={curatorName}
+                    onChange={(e) => setCuratorName(e.target.value.toUpperCase())}
+                    className="mt-1.5 w-full rounded-lg border border-[#25282C] bg-[#111316] px-3.5 py-2.5 font-display text-sm font-bold text-[#F2F2F2] focus:border-crimson-500 focus:outline-none"
+                    placeholder="CURATOR NAME"
+                  />
+                </div>
+              </div>
+            )}
           </div>
-        </div>
 
-        {/* Bottom Actions */}
-        <div className="mt-6 pt-4 border-t border-[#25282C] flex gap-3">
-          <button
-            type="button"
-            onClick={() => {
-              setIsSaved(true);
-              setTimeout(() => setIsSaved(false), 2500);
-            }}
-            className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-crimson-500 py-3 text-xs font-bold uppercase tracking-wider text-white shadow-[0_0_15px_rgba(227,38,46,0.4)] hover:bg-crimson-400 transition-all cursor-pointer"
-          >
-            {isSaved ? <Check className="h-4 w-4" /> : <Save className="h-4 w-4" />}
-            <span>{isSaved ? "SAVED TO ARCHIVE" : "SAVE ROOM"}</span>
-          </button>
+          {/* Bottom Action Buttons: Save, Preview, Share */}
+          <div className="mt-6 pt-4 border-t border-[#25282C] flex items-center gap-2">
+            {/* Save Button */}
+            <button
+              type="button"
+              onClick={() => {
+                setIsSaved(true);
+                setTimeout(() => setIsSaved(false), 2500);
+              }}
+              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg bg-crimson-500 py-3 text-xs font-bold uppercase tracking-wider text-white shadow-[0_0_15px_rgba(227,38,46,0.4)] hover:bg-crimson-400 transition-all cursor-pointer"
+            >
+              {isSaved ? <Check className="h-4 w-4" /> : <Save className="h-4 w-4" />}
+              <span>{isSaved ? "SAVED!" : "SAVE ROOM"}</span>
+            </button>
 
-          <button
-            type="button"
-            onClick={() => setShowShareModal(true)}
-            className="inline-flex items-center justify-center rounded-lg border border-[#25282C] bg-[#181B1F] px-4 py-3 text-xs font-bold uppercase text-paper hover:bg-[#20242a] transition-colors cursor-pointer"
-          >
-            <Share2 className="h-4 w-4 text-crimson-400" />
-          </button>
-        </div>
-      </aside>
+            {/* Preview Button */}
+            <button
+              type="button"
+              onClick={() => setIsPreviewMode(true)}
+              title="Full Clean Preview"
+              className="inline-flex items-center justify-center gap-1 rounded-lg border border-[#25282C] bg-[#16181D] px-3.5 py-3 text-xs font-bold uppercase text-[#D8D8D8] hover:border-crimson-500 hover:text-white transition-colors cursor-pointer"
+            >
+              <Eye className="h-4 w-4 text-[#8E9099]" />
+              <span className="hidden sm:inline">PREVIEW</span>
+            </button>
+
+            {/* Share Button */}
+            <button
+              type="button"
+              onClick={() => setShowShareModal(true)}
+              title="Share Exhibition"
+              className="inline-flex items-center justify-center rounded-lg border border-[#25282C] bg-[#16181D] px-3.5 py-3 text-xs font-bold uppercase text-paper hover:border-crimson-500 hover:text-crimson-400 transition-colors cursor-pointer"
+            >
+              <Share2 className="h-4 w-4 text-crimson-400" />
+            </button>
+          </div>
+        </aside>
+      )}
 
       {/* 2. Main Gallery Presentation Area */}
       <main className="flex-1 relative h-full w-full bg-[#050607] overflow-hidden">
+        {/* Floating Toggle to Exit Preview Mode if active */}
+        {isPreviewMode && (
+          <div className="absolute top-4 left-4 z-30 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setIsPreviewMode(false)}
+              className="flex items-center gap-1.5 rounded-full border border-crimson-500 bg-crimson-500/90 backdrop-blur-md px-4 py-2 text-xs font-bold uppercase tracking-wider text-white shadow-xl hover:bg-crimson-400 transition-all cursor-pointer"
+            >
+              <EyeOff className="h-3.5 w-3.5" />
+              <span>EXIT PREVIEW (EDIT CONTROLS)</span>
+            </button>
+          </div>
+        )}
+
         {viewMode === "3d" ? (
           <>
             {/* Top Floating Helper Overlay */}
-            <div className="absolute top-4 left-4 z-10 flex items-center gap-3 rounded-full border border-white/10 bg-black/75 px-4 py-1.5 text-xs text-[#D8D8D8] backdrop-blur-md shadow-lg">
+            <div className="absolute top-4 right-4 z-10 hidden sm:flex items-center gap-2.5 rounded-full border border-white/10 bg-black/75 px-4 py-1.5 text-xs text-[#D8D8D8] backdrop-blur-md shadow-lg pointer-events-none">
               <Move className="h-3.5 w-3.5 text-crimson-400 animate-pulse" />
-              <span>Click & drag to look around 360° • Click any frame to select</span>
+              <span>Drag to orbit 360° • Click frame to mount artwork</span>
             </div>
 
             {/* 3D Canvas Chamber */}
@@ -396,7 +613,11 @@ export function GalleryBuilder3D() {
                 slots={slots}
                 selectedSlotId={selectedSlotId}
                 theme={theme}
-                onSelectSlot={(id) => setSelectedSlotId(id)}
+                lighting={lighting}
+                onSelectSlot={(id) => {
+                  setSelectedSlotId(id);
+                  setActiveCategory("exhibits");
+                }}
               />
             ) : null}
           </>
@@ -407,16 +628,20 @@ export function GalleryBuilder3D() {
               <span className="text-xs font-bold uppercase tracking-[0.2em] text-crimson-400">
                 EXHIBITION CURATION VIEW
               </span>
-              <h2 className="text-2xl font-display font-extrabold uppercase text-paper mt-1">
+              <h2 className="text-2xl font-display font-extrabold uppercase text-[#F2F2F2] mt-1">
                 {galleryTitle}
               </h2>
+              <p className="text-xs text-[#8E9099] mt-0.5 font-medium">Curated by {curatorName}</p>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
               {slots.map((s) => (
                 <div
                   key={s.id}
-                  onClick={() => setSelectedSlotId(s.id)}
+                  onClick={() => {
+                    setSelectedSlotId(s.id);
+                    setActiveCategory("exhibits");
+                  }}
                   className={cn(
                     "rounded-xl border bg-[#111316] p-4 transition-all cursor-pointer flex flex-col justify-between",
                     s.id === selectedSlotId
@@ -433,9 +658,9 @@ export function GalleryBuilder3D() {
                   </div>
 
                   <div className="mt-3">
-                    <h4 className="font-display text-sm font-bold text-paper line-clamp-1">{s.animeTitle}</h4>
-                    <div className="mt-1 flex items-center justify-between text-xs text-[#9A9A9A]">
-                      <span>Frame: <strong className="capitalize text-paper">{s.frameStyle}</strong></span>
+                    <h4 className="font-display text-sm font-bold text-[#F2F2F2] line-clamp-1">{s.animeTitle}</h4>
+                    <div className="mt-1 flex items-center justify-between text-xs text-[#8E9099]">
+                      <span>Frame: <strong className="capitalize text-[#F2F2F2]">{s.frameStyle}</strong></span>
                       <span className="text-crimson-400 font-bold">{s.label}</span>
                     </div>
                   </div>
@@ -448,12 +673,22 @@ export function GalleryBuilder3D() {
 
       {/* Share Modal Dialog */}
       {showShareModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-in fade-in duration-200">
           <div className="w-full max-w-md rounded-2xl border border-[#25282C] bg-[#111316] p-6 shadow-2xl">
-            <h3 className="font-display text-lg font-bold uppercase text-paper">
-              SHARE YOUR 3D EXHIBITION
-            </h3>
-            <p className="mt-2 text-xs text-[#9A9A9A]">
+            <div className="flex items-center justify-between">
+              <h3 className="font-display text-lg font-bold uppercase text-[#F2F2F2]">
+                SHARE YOUR 3D EXHIBITION
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowShareModal(false)}
+                className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#25282C] text-[#8E9099] hover:text-white"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <p className="mt-2 text-xs text-[#8E9099] leading-relaxed">
               Anyone with this link can walk through your personal 3D virtual anime gallery room.
             </p>
 
@@ -462,14 +697,15 @@ export function GalleryBuilder3D() {
                 type="text"
                 readOnly
                 value="https://animearchive.com/gallery/master-curator-exhibit"
-                className="w-full bg-transparent text-paper outline-none font-mono text-[11px]"
+                className="w-full bg-transparent text-[#F2F2F2] outline-none font-mono text-[11px]"
               />
               <button
                 type="button"
-                onClick={() => alert("Link copied to clipboard!")}
-                className="shrink-0 rounded bg-crimson-500 px-3 py-1 text-[11px] font-bold text-white"
+                onClick={handleCopyShareLink}
+                className="shrink-0 flex items-center gap-1 rounded bg-crimson-500 px-3 py-1.5 text-[11px] font-bold text-white hover:bg-crimson-400 transition-colors cursor-pointer"
               >
-                COPY
+                {isCopied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                <span>{isCopied ? "COPIED" : "COPY"}</span>
               </button>
             </div>
 
@@ -477,7 +713,7 @@ export function GalleryBuilder3D() {
               <button
                 type="button"
                 onClick={() => setShowShareModal(false)}
-                className="rounded-lg border border-[#25282C] bg-[#181B1F] px-5 py-2 text-xs font-bold uppercase text-paper hover:bg-[#20242a]"
+                className="rounded-lg border border-[#25282C] bg-[#181B1F] px-5 py-2 text-xs font-bold uppercase text-[#F2F2F2] hover:bg-[#20242a] cursor-pointer"
               >
                 CLOSE
               </button>
