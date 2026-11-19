@@ -5,12 +5,15 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PG_BIN="${PG_BIN:-/usr/bin}"
-PGDATA="${PG_DATA_DIR:-$HOME/.local/share/anime_pgdata}"
+PGDATA="${PG_DATA_DIR:-$HOME/.local/share/anime_pgdata_v2}"
 PGPORT="${PG_PORT:-5432}"
 PGSOCK="${PG_SOCKET_DIR:-/tmp}"
 PGLOG="$PGDATA/server.log"
 
 require_bin() {
+  if [ ! -x "$PG_BIN/pg_ctl" ] && command -v pg_ctl >/dev/null 2>&1; then
+    PG_BIN="$(dirname "$(command -v pg_ctl)")"
+  fi
   if [ ! -x "$PG_BIN/pg_ctl" ]; then
     echo "PostgreSQL binaries not found at $PG_BIN" >&2
     echo "Set PG_BIN to your PostgreSQL 15+ install (e.g. the zonkyio embedded binaries)." >&2
@@ -51,13 +54,28 @@ seed() {
   # Create the database if missing and verify connectivity (no psql in the
   # embedded binaries, so use node).
   node -e "
-    const { Client } = require(process.cwd() + '/node_modules/pg');
+    let Client;
+    try {
+      Client = require('pg').Client;
+    } catch {
+      Client = require(process.cwd() + '/node_modules/pg').Client;
+    }
     const url = new URL(process.env.DATABASE_URL);
-    const db = url.pathname.slice(1);
-    const admin = new Client({ host: url.hostname, port: url.port || 5432, user: url.username || 'postgres' });
+    const db = url.pathname.slice(1) || 'animearchive';
+    const admin = new Client({
+      host: url.hostname || 'localhost',
+      port: Number(url.port) || 5432,
+      user: url.username || 'postgres',
+      password: url.password ? decodeURIComponent(url.password) : undefined,
+      database: 'postgres',
+    });
     admin.connect().then(async () => {
       const r = await admin.query('SELECT 1 FROM pg_database WHERE datname = \$1', [db]);
-      if (r.rowCount === 0) { await admin.query('CREATE DATABASE \"' + db + '\"'); console.log('created database ' + db); }
+      if (r.rowCount === 0) {
+        const cleanDb = db.replace(/\"/g, '\"\"');
+        await admin.query('CREATE DATABASE \"' + cleanDb + '\"');
+        console.log('created database ' + cleanDb);
+      }
       await admin.end();
     }).catch((e) => { console.error(e.message); process.exit(1); });
   "
@@ -71,6 +89,13 @@ case "${1:-}" in
   stop)   stop ;;
   status) status ;;
   seed)   seed ;;
-  reset)  stop; rm -rf "$PGDATA"; start; seed ;;
+  reset)
+    stop
+    if [ -n "$PGDATA" ] && [ "$PGDATA" != "/" ] && [ "$PGDATA" != "$HOME" ]; then
+      rm -rf "$PGDATA"
+    fi
+    start
+    seed
+    ;;
   *) echo "Usage: $0 {start|stop|status|seed|reset}" >&2; exit 1 ;;
 esac
