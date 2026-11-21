@@ -6,8 +6,8 @@ import { Pagination } from "@/components/ui/pagination";
 import { EmptyState, LoadingGrid } from "@/components/ui/empty-state";
 import { LinkButton } from "@/components/ui/button";
 import { FilterBar, type FilterBarValues } from "@/components/anime/filter-bar";
-import { CatalogSidebar } from "@/components/anime/catalog-sidebar";
-import { getAnimeList, getEras, getGenres, getStudios, type AnimeSort } from "@/lib/data";
+import { getAnimeList, getEras, getGenres, getStudios } from "@/lib/data";
+import { parseFilters } from "@/lib/catalog-filters";
 
 export const metadata: Metadata = {
   title: "Anime Catalog — Explore The History",
@@ -15,38 +15,6 @@ export const metadata: Metadata = {
     "Browse the Anime Archive database — search, filter, and sort over a century of Japanese animation by year, decade, genre, studio, era, format, and more.",
   alternates: { canonical: "/anime" },
 };
-
-const SORTS: AnimeSort[] = ["year", "year_desc", "title", "rating", "newest"];
-
-function parseFilters(sp: Record<string, string | string[] | undefined>) {
-  const get = (key: string) => {
-    const v = sp[key];
-    return typeof v === "string" ? v : undefined;
-  };
-  const num = (key: string) => {
-    const v = get(key);
-    if (!v) return undefined;
-    const n = Number(v);
-    return Number.isFinite(n) ? n : undefined;
-  };
-  const sort = get("sort");
-  return {
-    q: get("q") || undefined,
-    year: num("year"),
-    decade: num("decade"),
-    genre: get("genre") || undefined,
-    studio: get("studio") || undefined,
-    director: get("director") || undefined,
-    creator: get("creator") || undefined,
-    format: get("format") || undefined,
-    status: get("status") || undefined,
-    era: get("era") || undefined,
-    minEpisodes: num("minEpisodes"),
-    maxEpisodes: num("maxEpisodes"),
-    sort: SORTS.includes(sort as AnimeSort) ? (sort as AnimeSort) : undefined,
-    page: num("page"),
-  };
-}
 
 function toFilterValues(filters: ReturnType<typeof parseFilters>): FilterBarValues {
   return {
@@ -72,8 +40,8 @@ async function AnimeResults({ filters }: { filters: ReturnType<typeof parseFilte
   return (
     <section className="mt-6">
       <div className="mb-4 flex items-center justify-between">
-        <p className="font-display text-[11px] font-semibold uppercase tracking-[0.2em] text-[#666A70]">
-          SHOWING {data.items.length} OF {data.total.toLocaleString()} ARCHIVED WORKS
+        <p className="font-display text-sm text-muted">
+          {data.total.toLocaleString()} titles · {data.items.length} shown
         </p>
       </div>
 
@@ -123,21 +91,13 @@ export default async function AnimeCatalogPage({
   return (
     <div className="mx-auto max-w-[1720px] w-full px-4 py-8 sm:px-8 lg:px-12 bg-ink">
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-10">
-        {/* Left Sidebar on Desktop */}
-        <div className="hidden lg:block">
-          <CatalogSidebar />
-        </div>
-
         {/* Main Catalog Content */}
-        <main className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0">
           {/* Header */}
           <div className="mb-6">
-            <h1 className="font-display text-2xl sm:text-4xl font-extrabold uppercase tracking-tight text-paper">
-              ANIME CATALOG
+            <h1 className="font-display text-2xl sm:text-4xl font-semibold tracking-tight text-paper">
+              Anime catalog
             </h1>
-            <p className="mt-1.5 text-sm text-[#9A9A9A]">
-              Explore thousands of anime from across the history.
-            </p>
           </div>
 
           {/* Search and Filters Bar */}
@@ -152,7 +112,7 @@ export default async function AnimeCatalogPage({
           <Suspense fallback={<div className="mt-10"><LoadingGrid count={15} /></div>}>
             <AnimeResults filters={filters} />
           </Suspense>
-        </main>
+        </div>
       </div>
     </div>
   );

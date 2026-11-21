@@ -157,17 +157,16 @@ export function MemberExperience() {
   return (
     <section id="member-experience" className="mx-auto w-full max-w-[1720px] space-y-12 px-4 py-12 sm:px-8 lg:px-12">
       <div>
-        <p className="font-display text-xs uppercase tracking-widest text-crimson-400">Explore the pass</p>
-        <h2 className="mt-2 font-display text-3xl text-paper">A new perspective on your favourite worlds</h2>
-        <p className="mt-3 max-w-2xl text-muted">Three English guided exhibits with read-aloud audio, a short quiz, and collectible passport stamps. The featured exhibit rotates each month across this collection.</p>
+        <h2 className="mt-2 font-display text-3xl text-paper">Guided exhibits</h2>
+        <p className="mt-3 max-w-2xl text-muted">Read or listen, then take a short quiz to earn a stamp.</p>
       </div>
       <div className="grid gap-4 md:grid-cols-3">
         {EXHIBITS.map((item, index) => (
           <article key={item.id} className="rounded-lg border border-line bg-charcoal p-6">
-            <p className="text-xs uppercase tracking-widest text-crimson-300">{ready && featured === index ? "Featured exhibit" : "Exhibit library"}</p>
+            {ready && featured === index && <p className="text-sm text-crimson-300">This month’s pick</p>}
             <h3 className="mt-3 font-display text-xl">{item.title}</h3>
             <p className="mb-6 mt-2 text-sm text-muted">{item.subtitle}</p>
-            <Button variant="outline" onClick={() => openExhibit(index)}>{stamps.includes(item.id) ? "Revisit exhibit" : "Preview exhibit"}</Button>
+            <Button variant="outline" onClick={() => openExhibit(index)}>{stamps.includes(item.id) ? "Revisit exhibit" : "Open exhibit"}</Button>
           </article>
         ))}
       </div>
@@ -185,7 +184,7 @@ export function MemberExperience() {
             <Button variant="outline" disabled={chapter === 0} onClick={() => { stopAudio(); setChapter(chapter - 1); setAnswer(null); }}>Previous chapter</Button>
             <Button disabled={chapter === exhibit.chapters.length - 1} onClick={() => { stopAudio(); setChapter(chapter + 1); }}>Next chapter</Button>
           </div>
-          <p className="mt-3 text-xs text-muted">Audio uses your device’s English speech voice. The chapter text is the full transcript.</p>
+          <p className="mt-3 text-xs text-muted">Audio uses your device’s English voice.</p>
           {exhibit.id === "neo-tokyo" && chapter === 1 && (
             <div className="mt-8 max-w-xl">
               <div aria-hidden="true" className="flex h-36 items-end gap-3 overflow-hidden rounded bg-ink p-4">
@@ -216,17 +215,17 @@ export function MemberExperience() {
       <div className="grid gap-8 lg:grid-cols-2">
         <section id="passport" className="rounded-lg border border-line bg-charcoal p-6">
           <h3 className="font-display text-2xl">Your Museum Passport</h3>
-          <p className="mt-2 text-sm text-muted">Complete each exhibit’s quiz to collect a stamp. Progress is saved in this browser. Download a portrait image to share your journey.</p>
+          <p className="mt-2 text-sm text-muted">Your stamps are saved in this browser.</p>
           <p className="mt-4 text-holo-300">{ready ? `${stamps.length} / ${EXHIBITS.length} stamps earned` : "Loading your passport…"}</p>
           <div className="my-5 space-y-3">
             {EXHIBITS.map((item) => <div key={item.id} className={`rounded border p-3 font-display text-sm ${stamps.includes(item.id) ? "border-crimson-500 text-crimson-300" : "border-line text-muted"}`}>{item.stamp} · {stamps.includes(item.id) ? "Earned" : "Explore to unlock"}</div>)}
           </div>
-          <Button onClick={downloadPassport} disabled={!ready || stamps.length === 0}>Download passport image</Button>
+          <Button onClick={downloadPassport} disabled={!ready || stamps.length === 0}>Download passport</Button>
           <p role="status" className="mt-3 text-sm text-muted">{message}</p>
         </section>
         <section className="rounded-lg border border-line bg-charcoal p-6">
           <h3 className="font-display text-2xl">Your anime recap</h3>
-          <p className="mt-2 text-sm text-muted">Based on titles marked Completed in your watchlist. Ties are sorted alphabetically. Titles with missing metadata are excluded from that category.</p>
+          <p className="mt-2 text-sm text-muted">Based on completed titles in your watchlist.</p>
           {recapStatus ? <div className="mt-5"><p role="status" className="text-muted">{recapStatus}</p><div className="mt-4">{signedOut ? <LinkButton href="/login">Sign in</LinkButton> : <Button variant="outline" onClick={() => setRefresh(refresh + 1)}>Refresh recap</Button>}</div></div> : recap && (
             <>
               <p className="mt-6 font-display text-3xl">{recap.completed} completed titles</p>

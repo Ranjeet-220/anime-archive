@@ -3,7 +3,6 @@ import { Inter, Noto_Sans_JP, Space_Grotesk, Playfair_Display } from "next/font/
 import { SiteNav } from "@/components/layout/site-nav";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SkipLink } from "@/components/layout/skip-link";
-import { AnimatedBackground } from "@/components/layout/animated-background";
 import "./globals.css";
 
 const inter = Inter({
@@ -90,7 +89,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col bg-ink text-paper selection:bg-crimson-500 selection:text-white">
         <SkipLink />
-        <AnimatedBackground />
         <SiteNav />
         <main id="main" className="flex-1 relative z-10">
           {children}

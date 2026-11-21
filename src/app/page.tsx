@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getEras, getHomepageData } from "@/lib/data";
-import { SectionHeading, Stat } from "@/components/ui/section-heading";
+import { SectionHeading } from "@/components/ui/section-heading";
 import { AnimeCard, type AnimeCardData } from "@/components/ui/anime-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { EVENT_KIND_LABELS } from "@/lib/format";
 import { HeroCinematic } from "@/components/home/hero-cinematic";
 import { ExploreCollections } from "@/components/home/explore-collections";
-import { ArrowRight, Sparkles } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Anime Archive — Walk Through the History of Anime",
@@ -59,10 +58,10 @@ function toCard(
 export default async function HomePage() {
   const [home, eras] = await Promise.all([getHomepageData(), getEras()]);
   const eraByEventId = new Map(eras.map((e) => [e.id, e]));
-  const { stats, onThisDay, latest, landmark } = home;
+  const { onThisDay, latest, landmark } = home;
 
   return (
-    <div className="flex flex-col gap-16 sm:gap-20 pb-24 bg-ink">
+    <div className="flex flex-col gap-10 sm:gap-12 pb-16 bg-ink">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(WEBSITE_SCHEMA) }}
@@ -71,7 +70,7 @@ export default async function HomePage() {
       {/* Cinematic Hero matching reference image */}
       <HeroCinematic />
 
-      <div className="mx-auto w-full max-w-[1720px] px-4 sm:px-8 lg:px-12 flex flex-col gap-20">
+      <div className="mx-auto w-full max-w-[1720px] px-4 sm:px-8 lg:px-12 flex flex-col gap-12 sm:gap-16">
         {/* Explore The Collections: 6 Cards */}
         <ExploreCollections />
 
@@ -79,22 +78,18 @@ export default async function HomePage() {
         <section aria-labelledby="landmark-heading">
           <div className="flex items-end justify-between mb-6">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-crimson-400">
-                Landmarks of Animation
-              </p>
               <h2
                 id="landmark-heading"
-                className="font-display text-2xl font-extrabold uppercase tracking-tight text-paper sm:text-3xl"
+                className="font-display text-2xl font-semibold tracking-tight text-paper sm:text-3xl"
               >
-                Iconic Anime Masterpieces
+                Landmark anime
               </h2>
             </div>
             <Link
               href="/rankings"
-              className="text-xs font-semibold uppercase tracking-wider text-crimson-400 hover:text-crimson-300 transition-colors hidden sm:inline-flex items-center gap-1"
+              className="text-sm font-medium text-crimson-400 hover:text-crimson-300 transition-colors inline-flex items-center gap-1"
             >
-              <span>Top 60 Hall of Fame</span>
-              <ArrowRight className="h-3.5 w-3.5" />
+              <span>View rankings</span>
             </Link>
           </div>
 
@@ -113,60 +108,10 @@ export default async function HomePage() {
           )}
         </section>
 
-        {/* 3D Museum Interactive Banner */}
-        <section className="relative overflow-hidden rounded-2xl border border-[#25282C] bg-[#111316] p-6 sm:p-10">
-          <div className="absolute right-0 top-0 bottom-0 w-1/2 opacity-20 pointer-events-none bg-[radial-gradient(ellipse_at_center,rgba(227,38,46,0.6),transparent_70%)]" />
-          <div className="relative z-10 max-w-2xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-crimson-500/40 bg-crimson-500/10 px-3 py-1 text-xs font-semibold text-crimson-400">
-              <Sparkles className="h-3.5 w-3.5" />
-              <span>INTERACTIVE EXPERIENCE</span>
-            </div>
-            <h3 className="mt-4 font-serif text-2xl sm:text-4xl font-bold uppercase tracking-tight text-paper">
-              WALK THROUGH THE 3D MUSEUM
-            </h3>
-            <p className="mt-3 text-sm leading-relaxed text-[#9A9A9A]">
-              Immerse yourself in our real-time 3D museum chambers. Walk through distinct historical eras, explore floating exhibits, inspect archival cel artwork, and interact with the physical history of anime.
-            </p>
-            <div className="mt-6 flex flex-wrap gap-4">
-              <Link
-                href="/museum"
-                className="inline-flex items-center gap-2 rounded-full bg-crimson-500 px-6 py-3 text-xs font-bold uppercase tracking-[0.16em] text-white shadow-[0_0_16px_rgba(227,38,46,0.4)] transition-all hover:bg-crimson-400 hover:scale-[1.02]"
-              >
-                <span>LAUNCH 3D SPACE</span>
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                href="/tours"
-                className="inline-flex items-center gap-2 rounded-full border border-line bg-charcoal px-6 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-paper transition-colors hover:border-line-2 hover:bg-charcoal-2"
-              >
-                <span>GUIDED TOURS</span>
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* Archive Statistics */}
-        <section aria-labelledby="stats-heading">
-          <SectionHeading
-            eyebrow="The archive in numbers"
-            title="A Century of Japanese Animation"
-            align="center"
-          />
-          <dl className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-            <Stat value={stats.anime} label="Anime Archived" />
-            <Stat value={stats.studios} label="Studios Documented" />
-            <Stat value={stats.creators} label="Creators Documented" />
-            <Stat value={stats.movies} label="Movies Archived" />
-            <Stat value={stats.events} label="Historical Events" />
-            <Stat value={stats.genres} label="Genres" />
-          </dl>
-        </section>
-
         {/* On this day in history */}
         <section aria-labelledby="on-this-day-heading">
           <SectionHeading
-            eyebrow="Chronicle of milestones"
-            title="On This Day in Anime History"
+            title="On this day"
           />
           {onThisDay.length ? (
             <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -220,21 +165,18 @@ export default async function HomePage() {
         <section aria-labelledby="recent-heading">
           <div className="flex items-end justify-between mb-6">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-crimson-400">
-                Fresh from the archive
-              </p>
               <h2
                 id="recent-heading"
-                className="font-display text-2xl font-extrabold uppercase tracking-tight text-paper sm:text-3xl"
+                className="font-display text-2xl font-semibold tracking-tight text-paper sm:text-3xl"
               >
-                Recently Documented
+                Recently added
               </h2>
             </div>
             <Link
               href="/anime"
-              className="text-xs font-semibold uppercase tracking-wider text-crimson-400 hover:text-crimson-300 transition-colors"
+              className="text-sm font-medium text-crimson-400 hover:text-crimson-300 transition-colors"
             >
-              Browse All →
+              View all anime
             </Link>
           </div>
           {latest.length ? (

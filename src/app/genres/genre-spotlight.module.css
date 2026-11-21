@@ -1,0 +1,86 @@
+.strip {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line-2) var(--color-ink);
+  padding: 3px 3px 10px;
+  margin: 0 -3px 2rem;
+}
+
+.panel {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: flex-end;
+  min-width: 0;
+  height: clamp(20rem, 34vw, 30rem);
+  flex: 0 0 min(77%, 18rem);
+  scroll-snap-align: start;
+  overflow: hidden;
+  border-radius: 5px;
+  color: white;
+  background: var(--color-charcoal);
+}
+
+.art { object-fit: cover; object-position: center 35%; }
+.shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgb(0 0 0 / .52), transparent 26%, transparent 40%, rgb(5 6 7 / .94) 100%);
+}
+
+.credit {
+  position: absolute;
+  inset: 1rem 1rem auto;
+  font-size: .75rem;
+  font-weight: 600;
+  text-shadow: 0 1px 5px black;
+}
+
+.caption { position: relative; width: 100%; padding: clamp(1rem, 1.7vw, 1.8rem); }
+.japanese { display: block; font-family: var(--font-jp); font-size: .82rem; text-shadow: 0 1px 4px black; }
+.title {
+  display: block;
+  margin: .3rem 0 .8rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 2.4vw, 2.8rem);
+  line-height: 1.02;
+  letter-spacing: -.045em;
+  font-weight: 650;
+  overflow-wrap: break-word;
+  text-shadow: 0 1px 6px rgb(0 0 0 / .5);
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid rgb(255 255 255 / .38);
+  padding-top: .6rem;
+  font-size: .85rem;
+}
+
+.panel:focus-visible { outline: 2px solid var(--color-holo-300); outline-offset: 1px; }
+@media (min-width: 64rem) {
+  .panel { flex: 1 1 0; }
+  .panel:first-child { flex-grow: 1.6; }
+  .strip:has(.panel:focus-visible) .panel { flex-grow: 1; }
+  .strip .panel:focus-visible { flex-grow: 1.8; }
+}
+
+@media (min-width: 64rem) and (hover: hover) {
+  .strip:has(.panel:hover) .panel { flex-grow: 1; }
+  .strip:has(.panel:hover) .panel:hover { flex-grow: 1.8; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .panel { transition: flex-grow 450ms cubic-bezier(.2,.7,.25,1); }
+  .art, .meta svg { transition: transform 450ms ease; }
+  .panel:focus-visible .art { transform: scale(1.035); }
+  @media (hover: hover) {
+    .panel:hover .art { transform: scale(1.035); }
+    .panel:hover .meta svg { transform: translate(2px, -2px); }
+  }
+}

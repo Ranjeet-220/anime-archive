@@ -228,6 +228,7 @@ describe("src/lib/data.ts", () => {
       mockPrisma.person.findMany.mockResolvedValue([]);
       mockPrisma.historicalEvent.findMany.mockResolvedValue([]);
 
+      mockPrisma.$queryRaw.mockResolvedValue([{ id: "alias-match" }]);
       const longQ = "a".repeat(300);
       await searchAll(longQ, 10);
 
@@ -236,6 +237,7 @@ describe("src/lib/data.ts", () => {
           where: expect.objectContaining({
             OR: expect.arrayContaining([
               { title: { contains: "a".repeat(100), mode: "insensitive" } },
+              { id: { in: ["alias-match"] } },
             ]),
           }),
           take: 10,

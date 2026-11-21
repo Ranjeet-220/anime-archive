@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { AnimeCard } from "@/components/ui/anime-card";
-import { getAnimeList } from "@/lib/data";
+import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
   title: "Collections",
@@ -121,9 +122,49 @@ const COLLECTIONS: { id: string; title: string; description: string; slugs: stri
   },
 ];
 
+const NETFLIX_HIGHLIGHTS = [
+  {
+    title: "Baki-Dou: The Invincible Samurai",
+    edition: "Season 1",
+    views: "8 million",
+    href: "https://www.netflix.com/tudum/baki-dou-the-invincible-samurai",
+  },
+  {
+    title: "Steel Ball Run: JoJo’s Bizarre Adventure",
+    edition: "Series",
+    views: "8 million",
+    href: "https://www.netflix.com/tudum/steel-ball-run-jo-jos-bizarre-adventure",
+    related: "jojos-bizarre-adventure",
+  },
+  {
+    title: "Cosmic Princess Kaguya!",
+    edition: "Film",
+    views: "8 million",
+    href: "https://www.netflix.com/tudum/articles/cosmic-princess-kaguya-release-date-news",
+  },
+];
+
 export default async function CollectionsPage() {
-  const all = await getAnimeList({ perPage: 48 });
-  const bySlug = new Map(all.items.map((i) => [i.slug, i]));
+  const slugs = new Set(COLLECTIONS.flatMap((collection) => collection.slugs));
+  for (const item of NETFLIX_HIGHLIGHTS) {
+    if (item.related) slugs.add(item.related);
+  }
+  const titles = await prisma.anime.findMany({
+    where: { slug: { in: [...slugs] } },
+    select: {
+      slug: true,
+      title: true,
+      japaneseTitle: true,
+      year: true,
+      format: true,
+      coverUrl: true,
+      averageRating: true,
+      episodeCount: true,
+      studio: { select: { name: true, slug: true } },
+      genres: { select: { name: true, slug: true } },
+    },
+  });
+  const bySlug = new Map(titles.map((title) => [title.slug, title]));
   const collections = COLLECTIONS.map((c) => ({
     ...c,
     items: c.slugs
@@ -146,10 +187,27 @@ export default async function CollectionsPage() {
       <Breadcrumbs items={[{ label: "Collections" }]} />
 
       <SectionHeading
-        eyebrow="Archive Editorial Selection"
         title="Collections"
-        description="All collections are Archive Editorial Selections — curated opinions, not objective rankings."
+        description="Explore viewing trends and editorial selections from the archive."
       />
+
+      <section id="netflix-2026-h1" className="space-y-4">
+        <h2 className="font-display text-xl text-paper">Anime on Netflix · January–June 2026</h2>
+        <p className="text-sm text-muted">Three titles Netflix highlighted in its global engagement report. Figures are rounded views across the six-month period.</p>
+        <ul className="grid gap-3 sm:grid-cols-3">
+          {NETFLIX_HIGHLIGHTS.map((item) => (
+            <li key={item.title} className="space-y-2 rounded-lg border border-line p-4">
+              <p className="text-xs text-muted">{item.edition}</p>
+              <a className="font-display text-paper underline" href={item.href}>{item.title}</a>
+              <p>{item.views} views</p>
+              {item.related && bySlug.has(item.related) && (
+                <Link className="text-sm text-crimson-300 underline" href={`/anime/${item.related}`}>Explore the JoJo series in the archive</Link>
+              )}
+            </li>
+          ))}
+        </ul>
+        <a className="text-sm text-crimson-300 underline" href="https://about.netflix.com/en/news/what-we-watched-the-first-half-of-2026">Netflix engagement report · July 16, 2026</a>
+      </section>
 
       {collections.map((collection) => (
         <section key={collection.id} className="space-y-4">

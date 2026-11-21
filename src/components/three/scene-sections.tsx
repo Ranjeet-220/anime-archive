@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { cn, pluralize } from "@/lib/utils";
 import { SceneGate, SceneUnavailable, SceneLoading } from "./scene-shell";
-import type { MuseumPersonDto, MuseumStudioDto, GenreDto } from "@/lib/types";
+import type { MuseumPersonDto, MuseumStudioDto } from "@/lib/types";
 
 const HallOfLegendsCanvas = dynamic(
   () => import("./hall-of-legends-scene").then((m) => m.HallOfLegendsScene),
@@ -32,14 +32,6 @@ const StudioArchiveCanvas = dynamic(
   {
     ssr: false,
     loading: () => <SceneLoading label="Opening the Studio Archive…" />,
-  }
-);
-
-const GenreWorldCanvas = dynamic(
-  () => import("./genre-world-scene").then((m) => m.GenreWorldScene),
-  {
-    ssr: false,
-    loading: () => <SceneLoading label="Mapping the Genre World…" />,
   }
 );
 
@@ -86,30 +78,6 @@ export function StudioArchiveSection({ studios }: { studios: MuseumStudioDto[] }
     >
       {({ mode, mobile }) => (
         <StudioArchiveCanvas mode={mode} mobile={mobile} studios={studios} />
-      )}
-    </SceneGate>
-  );
-}
-
-/**
- * 3D section for the genre index: a constellation of genre markers,
- * leading to genre pages.
- */
-export function GenreWorldSection({ genres }: { genres: GenreDto[] }) {
-  return (
-    <SceneGate
-      label="Mapping the Genre World…"
-      fallback={
-        <SceneUnavailable
-          title="Genre World unavailable"
-          description="The interactive genre map needs WebGL or reduced-motion support to be off. The full genre index is below."
-          actionLabel="Browse genres"
-          actionHref="#genres"
-        />
-      }
-    >
-      {({ mode, mobile }) => (
-        <GenreWorldCanvas mode={mode} mobile={mobile} genres={genres} />
       )}
     </SceneGate>
   );

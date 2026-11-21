@@ -2,12 +2,12 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { Tags } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { SectionHeading, Stat } from "@/components/ui/section-heading";
+import { SectionHeading } from "@/components/ui/section-heading";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { getGenres } from "@/lib/data";
 import { pluralize } from "@/lib/utils";
-import { GenreWorldSection } from "@/components/three/scene-sections";
+import { GenreSpotlight } from "./genre-spotlight";
 
 export const metadata: Metadata = {
   title: "Genres",
@@ -43,22 +43,15 @@ export default async function GenresPage() {
       <Breadcrumbs items={[{ label: "Genres" }]} />
 
       <SectionHeading
-        eyebrow="Classification"
         title="Genres"
-        description="An editorial classification of the archive. A work may belong to multiple genres."
+        description="Explore anime through its genres, from action to quiet character dramas."
       />
 
-      {genres.length > 1 ? (
-        <section aria-label="Genre World 3D" className="mb-10">
-          <div className="rounded-lg border border-line bg-charcoal/40 p-1">
-            <GenreWorldSection genres={genres} />
-          </div>
-        </section>
-      ) : null}
+      <GenreSpotlight genres={genres} />
 
-      <div id="genres" className="mb-6">
-        <Stat value={genres.length} label={pluralize(genres.length, "genre classified")} />
-      </div>
+      <h2 id="genres" className="mb-6 font-display text-xl text-paper">
+        All genres <span className="ml-2 text-base text-muted">{genres.length}</span>
+      </h2>
 
       {genres.length === 0 ? (
         <EmptyState

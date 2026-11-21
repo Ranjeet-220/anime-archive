@@ -1,7 +1,6 @@
 import type { DeviceMode } from "@/lib/device-mode";
 import type {
   EraDto,
-  GenreDto,
   MuseumPersonDto,
   MuseumStudioDto,
 } from "@/lib/types";
@@ -36,10 +35,6 @@ export interface HallOfLegendsSceneProps extends SceneBaseProps {
 
 export interface StudioArchiveSceneProps extends SceneBaseProps {
   studios: MuseumStudioDto[];
-}
-
-export interface GenreWorldSceneProps extends SceneBaseProps {
-  genres: GenreDto[];
 }
 
 export const SCENE_FONT = "/fonts/SpaceGrotesk.ttf";

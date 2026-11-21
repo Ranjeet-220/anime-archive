@@ -42,29 +42,15 @@ export const animeCuratedCinema: AnimeSeed[] = [
     episodes: [
       { number: 1, title: "Theatrical Feature Film Presentation", airDate: "Theatrical Premiere", synopsis: "The complete, uncut theatrical feature film presentation." }
     ],
-    historicalSignificance:
-      "The most expensive Japanese animated film produced at the time, with a budget reported near $24 million, and it became one of the highest-grossing films ever released in Japan. It marked Miyazaki's strongest anti-war statement since Nausicaä, written in direct response to the 2003 invasion of Iraq. The film was a competitive entry at the 2004 Venice Film Festival, reflecting anime's growing presence in the Western festival circuit.",
-    productionHistory:
-      "Miyazaki wrote the screenplay during the early months of the Iraq War, deliberately reshaping Diana Wynne Jones's novel into a pacifist allegory. Production involved a massive hand-drawn effort alongside new digital compositing techniques, and the project experienced a late start that pushed the schedule into overtime. Goro Miyazaki's debut feature was briefly planned in its place before Hayao Miyazaki took over.",
-    reception:
-      "The film was a record-breaking box office success in Japan, and it earned widespread praise abroad for its imagination, themes, and the chemistry between its leads. Some critics found the war subplot crowded, but the film's emotional core won nearly universal affection.",
-    awards:
-      "Nominated for the Academy Award for Best Animated Feature at the 78th Academy Awards, a first for a non-English-language film. It also won the Golden Osella at the Venice Film Festival and was named Best Animation Film at the Tokyo Anime Award.",
-    culturalImpact:
-      "Howl's Moving Castle broadened Ghibli's Western audience ahead of the Studio Ghibli deal with Disney, and its imagery — the walking castle, Calcifer, the war-torn skies — became iconic. The film is frequently cited among the most beloved anime romances ever made.",
-    legacy:
-      "As one of Ghibli's biggest worldwide successes, the film cemented Miyazaki's international stature and remains a staple of anime cinema retrospectives. It also marked the beginning of a digital-production era for the studio.",
-    historyTimeline: [
-      { label: "Publication", year: "1986", text: "Diana Wynne Jones publishes the original novel in the UK." },
-      { label: "Production", year: "2003", text: "Miyazaki begins work amid strong opposition to the Iraq War, reshaping the story into an anti-war allegory." },
-      { label: "Release", year: "2004-09-05", text: "Opens at the Venice Film Festival and later dominates the Japanese box office." },
-      { label: "Recognition", year: "2006", text: "Receives an Academy Award nomination for Best Animated Feature." },
-      { label: "Legacy", text: "Remains one of Studio Ghibli's most successful and beloved films worldwide." },
-    ],
-    related: [{ slug: "spirited-away", type: "Ghibli successor" }],
-    sources: [
-      { name: "Wikipedia", url: "https://en.wikipedia.org/wiki/Howl%27s_Moving_Castle_(film)", title: "Howl's Moving Castle (film) — Wikipedia" },
-    ],
+    historicalSignificance: "",
+    productionHistory: "",
+    reception: "",
+    awards: "",
+    culturalImpact: "",
+    legacy: "",
+    historyTimeline: [],
+    related: [],
+    sources: [],
   },
   {
     slug: "princess-mononoke",
@@ -107,29 +93,15 @@ export const animeCuratedCinema: AnimeSeed[] = [
     episodes: [
       { number: 1, title: "Theatrical Feature Film Presentation", airDate: "Theatrical Premiere", synopsis: "The complete, uncut theatrical feature film presentation." }
     ],
-    historicalSignificance:
-      "One of the most beloved and influential children's films ever made, and the film that made Studio Ghibli's name a global one. It was released as a double feature with Grave of the Fireflies, two films that could hardly differ more in tone yet proved the range of the medium. Totoro himself was adopted as the mascot of Studio Ghibli and appears in the studio's logo.",
-    productionHistory:
-      "Miyazaki set the story in the Japan of the mid-1950s, a countryside world of his own childhood memories, and designed the film around the wonder of small discoveries. The production was famously pressed, with animators working under intense deadline pressure as the movie was completed nearly on the day of its release.",
-    reception:
-      "While initially a modest box office performer, the film became a word-of-mouth phenomenon and a perennial favorite in Japan, where it has been rebroadcast annually. International critics have consistently ranked it among the greatest animated films of all time.",
-    awards:
-      "Named Best Film at the Mainichi Film Awards and the Kinema Junpo Awards for 1988, a rare honor for an animated work. The Totoro character has been cited by the British Film Institute among the greatest characters in cinema.",
-    culturalImpact:
-      "Totoro transformed the depiction of childhood in animation, replacing conflict with quiet wonder, and became a symbol of environmental gentleness. The character has been used to promote everything from forest conservation to UNESCO world heritage campaigns.",
-    legacy:
-      "My Neighbor Totoro remains the most iconic Ghibli film for young audiences worldwide and a template for slice-of-life fantasy. Its 25th and 30th anniversary celebrations drew massive audiences, proving the film's timeless appeal.",
-    historyTimeline: [
-      { label: "Production", year: "1987", text: "Miyazaki develops the story during the production of Nausicaä's successor at Studio Ghibli." },
-      { label: "Release", year: "1988-04-16", text: "Opens as a double feature with Grave of the Fireflies." },
-      { label: "VHS release", year: "1989", text: "Home video release makes the film a lasting fixture of Japanese family viewing." },
-      { label: "International", year: "1990s", text: "Fox releases an English dub; the film wins international acclaim." },
-      { label: "Legacy", text: "Totoro becomes Studio Ghibli's mascot and a global symbol of gentle childhood wonder." },
-    ],
-    related: [{ slug: "grave-of-the-fireflies", type: "Double feature" }],
-    sources: [
-      { name: "Wikipedia", url: "https://en.wikipedia.org/wiki/My_Neighbor_Totoro", title: "My Neighbor Totoro — Wikipedia" },
-    ],
+    historicalSignificance: "",
+    productionHistory: "",
+    reception: "",
+    awards: "",
+    culturalImpact: "",
+    legacy: "",
+    historyTimeline: [],
+    related: [],
+    sources: [],
   },
   {
     slug: "grave-of-the-fireflies",
@@ -172,29 +144,15 @@ export const animeCuratedCinema: AnimeSeed[] = [
     episodes: [
       { number: 1, title: "Theatrical Feature Film Presentation", airDate: "Theatrical Premiere", synopsis: "The complete, uncut theatrical feature film presentation." }
     ],
-    historicalSignificance:
-      "The highest-grossing Japanese film of 2019 and one of the most successful anime films in global history, surpassing the lifetime earnings of Your Name in several territories. It established Makoto Shinkai as the dominant commercial force of 2010s anime cinema. The film's record-breaking performance confirmed the streaming-era anime movie as a genuinely global phenomenon.",
-    productionHistory:
-      "Shinkai wrote the film as an environmental and spiritual companion to Your Name, crafting the story around Tokyo's record-breaking rainfall of the summer of 2018. CoMix Wave Films deployed its most ambitious production to date, with hundreds of staff and highly detailed digital backgrounds of a flooded Tokyo.",
-    reception:
-      "Japanese audiences flocked to the film in record numbers, and international critics praised its technical beauty and emotional sincerity. Some reviewers found its themes of climate and sacrifice contentious, but the film's romance and imagery won near-universal admiration.",
-    awards:
-      "Nominated for Japan's Academy Prize for Best Animation and won the Best Animated Feature award at the Asian Film Awards 2020. It also took the Audience Award at the 2019 Sitges Film Festival.",
-    culturalImpact:
-      "The film's sunlit moments amid rain became a social media phenomenon, and its climactic choice about climate resonated with audiences living through an age of environmental anxiety. It proved that anime romance films could command worldwide theatrical releases on the scale of blockbuster animation.",
-    legacy:
-      "Weathering with You cemented the ten-year run that made Shinkai the most watched anime director of his generation. It stands alongside Your Name as the defining romantic anime films of the streaming era.",
-    historyTimeline: [
-      { label: "Development", year: "2017", text: "Shinkai begins writing the story while completing Your Name's global rollout." },
-      { label: "Production", year: "2018", text: "Heavy summer rainfall in Tokyo shapes the film's setting and themes." },
-      { label: "Release", year: "2019-07-19", text: "Opens in Japan and dominates the box office, becoming the year's highest-grossing Japanese film." },
-      { label: "International", year: "2019–20", text: "Rolls out worldwide, becoming a global box office phenomenon." },
-      { label: "Legacy", text: "Confirms Makoto Shinkai as the defining director of streaming-era anime cinema." },
-    ],
-    related: [{ slug: "your-name", type: "Spiritual successor" }],
-    sources: [
-      { name: "Wikipedia", url: "https://en.wikipedia.org/wiki/Weathering_with_You", title: "Weathering with You — Wikipedia" },
-    ],
+    historicalSignificance: "",
+    productionHistory: "",
+    reception: "",
+    awards: "",
+    culturalImpact: "",
+    legacy: "",
+    historyTimeline: [],
+    related: [],
+    sources: [],
   },
   {
     slug: "steins-gate",

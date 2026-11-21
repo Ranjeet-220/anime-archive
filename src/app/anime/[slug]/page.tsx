@@ -5,9 +5,9 @@ import { ChevronRight, Bookmark, Plus } from "lucide-react";
 import { AnimeCard } from "@/components/ui/anime-card";
 import { HistoryTimeline } from "@/components/anime/history-timeline";
 import { DetailTabs } from "@/components/anime/detail-tabs";
-import { getAnimeBySlug } from "@/lib/data";
+import { getAnimeBySlug, getAnimeSources } from "@/lib/data";
 import { FORMAT_LABELS, STATUS_LABELS } from "@/lib/format";
-import { formatDate, truncate } from "@/lib/utils";
+import { formatDate, isValidUrl, truncate } from "@/lib/utils";
 import type { HistoryTimelineStep } from "@/lib/types";
 
 export async function generateMetadata({
@@ -31,6 +31,9 @@ export default async function AnimeDetailPage({ params }: { params: Promise<{ sl
   const anime = await getAnimeBySlug(slug);
   if (!anime) notFound();
 
+  const references = (await getAnimeSources(anime.id)).filter(
+    (source) => source.verificationStatus === "VERIFIED" && isValidUrl(source.sourceUrl)
+  );
   const timeline = Array.isArray(anime.historyTimeline)
     ? (anime.historyTimeline as unknown as HistoryTimelineStep[])
     : null;
@@ -265,64 +268,26 @@ export default async function AnimeDetailPage({ params }: { params: Promise<{ sl
               <h2 className="font-display text-xs font-bold uppercase tracking-[0.2em] text-[#666A70] mb-4">
                 RATINGS
               </h2>
-              <div className="grid grid-cols-3 gap-3 text-center">
-                {/* MyAnimeList */}
-                <div className="rounded-lg border border-[#25282C] bg-[#181B1F] p-3">
-                  <div className="font-display text-xl sm:text-2xl font-black text-paper">
-                    {anime.averageRating > 0 ? anime.averageRating.toFixed(2) : "8.16"}
-                  </div>
-                  <div className="mt-1 text-[9.5px] font-bold uppercase tracking-wider text-[#666A70]">
-                    MyAnimeList
-                  </div>
-                </div>
-
-                {/* IMDb */}
-                <div className="rounded-lg border border-[#25282C] bg-[#181B1F] p-3">
-                  <div className="font-display text-xl sm:text-2xl font-black text-paper">
-                    8.1
-                  </div>
-                  <div className="mt-1 text-[9.5px] font-bold uppercase tracking-wider text-[#666A70]">
-                    IMDb 140k
-                  </div>
-                </div>
-
-                {/* Audience Score */}
-                <div className="rounded-lg border border-[#25282C] bg-[#181B1F] p-3">
-                  <div className="font-display text-xl sm:text-2xl font-black text-crimson-400">
-                    96%
-                  </div>
-                  <div className="mt-1 text-[9.5px] font-bold uppercase tracking-wider text-[#666A70]">
-                    Audience Score
-                  </div>
-                </div>
-              </div>
+              <p className="font-display text-lg text-paper">
+                {anime.ratingCount > 0
+                  ? `${anime.averageRating.toFixed(1)} / 10 · ${anime.ratingCount.toLocaleString("en-US")} archive ${anime.ratingCount === 1 ? "vote" : "votes"}`
+                  : "No archive ratings yet."}
+              </p>
             </section>
 
-            {/* POPULARITY PANEL */}
-            <section className="rounded-xl border border-[#25282C] bg-[#111316] p-6">
-              <h2 className="font-display text-xs font-bold uppercase tracking-[0.2em] text-[#666A70] mb-4">
-                POPULARITY
-              </h2>
-              <div className="grid grid-cols-2 gap-4 text-center">
-                <div className="rounded-lg border border-[#25282C] bg-[#181B1F] p-4">
-                  <div className="font-display text-2xl sm:text-3xl font-black text-paper">
-                    #130
-                  </div>
-                  <div className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-[#666A70]">
-                    All Time (MAL)
-                  </div>
-                </div>
-
-                <div className="rounded-lg border border-[#25282C] bg-[#181B1F] p-4">
-                  <div className="font-display text-2xl sm:text-3xl font-black text-crimson-400">
-                    #12
-                  </div>
-                  <div className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-[#666A70]">
-                    Movie (MAL)
-                  </div>
-                </div>
-              </div>
-            </section>
+            {references.length > 0 && (
+              <section className="rounded-xl border border-line bg-charcoal p-6">
+                <h2 className="font-display text-lg text-paper">Verified references</h2>
+                <ul className="mt-3 space-y-3 text-sm">
+                  {references.map((source) => (
+                    <li key={source.id}>
+                      <p>{source.sourceTitle}</p>
+                      <a className="text-crimson-300 underline" href={source.sourceUrl}>{source.sourceName}</a>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
 
             {/* INFORMATION PANEL */}
             <section id="section-details" className="rounded-xl border border-[#25282C] bg-[#111316] p-6 text-xs">
@@ -336,10 +301,10 @@ export default async function AnimeDetailPage({ params }: { params: Promise<{ sl
                     <dd className="font-jp text-right font-medium text-paper">{anime.japaneseTitle}</dd>
                   </div>
                 )}
-                <div className="py-2.5 flex items-center justify-between">
+                {anime.alternativeTitles.length > 0 && (<div className="py-2.5 flex items-center justify-between">
                   <dt className="text-[#666A70]">Also Known As</dt>
-                  <dd className="text-right text-paper">{anime.title}</dd>
-                </div>
+                  <dd className="text-right text-paper">{anime.alternativeTitles.join(" · ")}</dd>
+                </div>)}
                 {anime.releaseDate && (
                   <div className="py-2.5 flex items-center justify-between">
                     <dt className="text-[#666A70]">Release Date</dt>

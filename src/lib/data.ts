@@ -58,13 +58,6 @@ export async function getAnimeList(params: AnimeListParams = {}) {
   const perPage = Math.min(48, Math.max(1, params.perPage ?? 24));
 
   const where: Record<string, unknown> = {};
-  if (params.q) {
-    where.OR = [
-      { title: { contains: params.q, mode: "insensitive" } },
-      { japaneseTitle: { contains: params.q, mode: "insensitive" } },
-      { alternativeTitles: { has: params.q } },
-    ];
-  }
   const validYear = params.year !== undefined && !Number.isNaN(params.year) ? params.year : undefined;
   const validDecade = params.decade !== undefined && !Number.isNaN(params.decade) ? params.decade : undefined;
   if (validYear && validDecade) {
@@ -111,6 +104,7 @@ export async function getAnimeList(params: AnimeListParams = {}) {
   })();
 
   return cached(`anime:list:${JSON.stringify({ ...params, page, perPage })}`, CACHE_TTL_MS, async () => {
+    if (params.q) Object.assign(where, await animeTitleFilter(params.q));
     const total = await prisma.anime.count({ where: where as never });
     const pages = Math.max(1, Math.ceil(total / perPage));
     const safePage = Math.min(page, pages);
@@ -619,6 +613,23 @@ export async function getRecentEvents(limit = 12) {
 // Search
 // ---------------------------------------------------------------------------
 
+async function animeTitleFilter(term: string): Promise<Prisma.AnimeWhereInput> {
+  // Prisma's string-list filter only supports whole, case-sensitive elements.
+  const aliases = await prisma.$queryRaw<{ id: string }[]>`
+    SELECT id FROM "Anime"
+    WHERE EXISTS (
+      SELECT 1 FROM unnest("alternativeTitles") AS alias(title)
+      WHERE strpos(lower(alias.title), lower(${term}::text)) > 0
+    )
+  `;
+  const literal = term.replace(/[\\%_]/g, "\\$&");
+  return { OR: [
+    { title: { contains: literal, mode: "insensitive" } },
+    { japaneseTitle: { contains: literal, mode: "insensitive" } },
+    { id: { in: aliases.map((row) => row.id) } },
+  ] };
+}
+
 export async function searchAll(q: string, limit = 8): Promise<SearchResultDto[]> {
   const term = q.trim().slice(0, 100);
   if (!term) return [];
@@ -626,17 +637,11 @@ export async function searchAll(q: string, limit = 8): Promise<SearchResultDto[]
   const results: SearchResultDto[] = [];
 
   const [anime, characters, studios, people, events] = await Promise.all([
-    prisma.anime.findMany({
-      where: {
-        OR: [
-          { title: { contains: term, mode: "insensitive" } },
-          { japaneseTitle: { contains: term, mode: "insensitive" } },
-          { alternativeTitles: { has: term } },
-        ],
-      },
+    animeTitleFilter(term).then((where) => prisma.anime.findMany({
+      where,
       take: safeLimit,
       select: { slug: true, title: true, japaneseTitle: true, year: true, format: true },
-    }),
+    })),
     prisma.character.findMany({
       where: {
         OR: [

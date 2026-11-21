@@ -1,4 +1,5 @@
 import { prisma } from "../src/lib/prisma";
+import reviewedFilmSources from "./seed-data/reviewed-film-sources.json";
 import bcrypt from "bcryptjs";
 import { eras, genres } from "./seed-data/eras-genres";
 import { studios } from "./seed-data/studios";
@@ -357,11 +358,14 @@ async function main() {
       sourceTitle: `${e.title} — Wikipedia`,
     });
   }
+  await prisma.source.createMany({ data: sourceRows });
   await prisma.source.createMany({
-    data: sourceRows.map((s) => ({
-      ...s,
+    data: reviewedFilmSources.map(({ slug, ...reference }) => ({
+      ...reference,
+      entityType: "anime",
+      entityId: animeIdBySlug[slug],
       verificationStatus: "VERIFIED",
-      verificationDate: new Date("2026-08-01"),
+      verificationDate: new Date("2026-11-22"),
     })),
   });
 
