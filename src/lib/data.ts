@@ -1033,3 +1033,30 @@ export async function getRankingBySlug(slug: string): Promise<RankingDto | null>
     };
   });
 }
+// Personal watchlist reads stay request-scoped so accounts never share cached data.
+export async function getWatchlistRecap(userId: string) {
+  const items = await prisma.watchlistItem.findMany({
+    where: { userId, status: "COMPLETED" },
+    select: {
+      anime: {
+        select: {
+          year: true,
+          studio: { select: { name: true } },
+          genres: { select: { name: true } },
+        },
+      },
+    },
+  });
+  function mostFrequent(values: string[]) {
+    const counts = new Map<string, number>();
+    for (const value of values) counts.set(value, (counts.get(value) ?? 0) + 1);
+    const entries = [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+    return entries[0] ? { name: entries[0][0], count: entries[0][1] } : null;
+  }
+  return {
+    completed: items.length,
+    decade: mostFrequent(items.flatMap(({ anime }) => anime.year == null ? [] : [`${Math.floor(anime.year / 10) * 10}s`])),
+    studio: mostFrequent(items.flatMap(({ anime }) => anime.studio ? [anime.studio.name] : [])),
+    genre: mostFrequent(items.flatMap(({ anime }) => anime.genres.map((genre) => genre.name))),
+  };
+}
