@@ -1,5 +1,6 @@
 import { prisma } from "../src/lib/prisma";
 import reviewedFilmSources from "./seed-data/reviewed-film-sources.json";
+import { addNovemberReleases } from "./seed-data/november-2026";
 import bcrypt from "bcryptjs";
 import { eras, genres } from "./seed-data/eras-genres";
 import { studios } from "./seed-data/studios";
@@ -492,8 +493,9 @@ async function main() {
     });
   }
 
+  const newReleases = await addNovemberReleases();
   const stats = {
-    anime: allAnime.length,
+    anime: allAnime.length + newReleases,
     studios: allStudios.length,
     people: allPeople.length,
     characters: allAnime.reduce((n, a) => n + a.characters.length, 0),

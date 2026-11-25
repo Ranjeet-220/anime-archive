@@ -6,8 +6,8 @@ export function HeroCinematic() {
       <div className="absolute inset-0" aria-hidden="true">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/images/museum-hero.jpg" alt="" className="h-full w-full object-cover" loading="eager" fetchPriority="high" />
-        <div className="absolute inset-0 bg-gradient-to-r from-ink via-ink/70 to-ink/20" />
-        <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-ink to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-r from-ink/80 via-ink/60 to-ink/45 lg:from-ink/90 lg:via-ink/40 lg:via-50% lg:to-ink/5" />
+        <div className="absolute inset-x-0 bottom-0 h-20 bg-linear-to-t from-ink to-transparent" />
       </div>
       <div className="relative mx-auto w-full max-w-[1720px] px-4 py-20 sm:px-8 lg:px-12">
         <div className="max-w-xl">

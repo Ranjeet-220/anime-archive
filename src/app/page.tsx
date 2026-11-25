@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getEras, getHomepageData } from "@/lib/data";
-import { SectionHeading } from "@/components/ui/section-heading";
+import { getEras, getHomepageData, getOnThisDay } from "@/lib/data";
 import { AnimeCard, type AnimeCardData } from "@/components/ui/anime-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { EVENT_KIND_LABELS } from "@/lib/format";
@@ -55,10 +54,18 @@ function toCard(
   };
 }
 
+const historyDayFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "long", day: "numeric", timeZone: "UTC",
+});
+
+const storyDateFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "long", day: "numeric", year: "numeric", timeZone: "UTC",
+});
+
 export default async function HomePage() {
-  const [home, eras] = await Promise.all([getHomepageData(), getEras()]);
-  const eraByEventId = new Map(eras.map((e) => [e.id, e]));
-  const { onThisDay, latest, landmark } = home;
+  const [home, eras, history] = await Promise.all([getHomepageData(), getEras(), getOnThisDay()]);
+  const eraById = new Map(eras.map((e) => [e.id, e]));
+  const { latest, landmark } = home;
 
   return (
     <div className="flex flex-col gap-10 sm:gap-12 pb-16 bg-ink">
@@ -108,57 +115,46 @@ export default async function HomePage() {
           )}
         </section>
 
-        {/* On this day in history */}
         <section aria-labelledby="on-this-day-heading">
-          <SectionHeading
-            title="On this day"
-          />
-          {onThisDay.length ? (
-            <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {onThisDay.map((event) => {
-                const era = event.eraId ? eraByEventId.get(event.eraId) : undefined;
-                const date =
-                  event.month && event.day
-                    ? `${String(event.month).padStart(2, "0")}/${String(event.day).padStart(2, "0")}`
-                    : null;
-                const body = (
-                  <>
-                    <span className="font-display text-[11px] uppercase tracking-[0.2em] text-crimson-400 tabular-nums font-semibold">
-                      {date ? `${date} · ` : ""}
-                      {event.year ?? ""}
-                    </span>
-                    <span className="mt-1 block text-sm font-semibold text-paper">
-                      {EVENT_KIND_LABELS[event.kind] ?? "Event"} — {event.title}
-                    </span>
-                    {event.description ? (
-                      <span className="mt-1 block text-xs leading-relaxed text-muted line-clamp-2">
-                        {event.description}
-                      </span>
-                    ) : null}
-                  </>
-                );
-                return (
-                  <li key={event.id} className="surface-card p-4 transition-all hover:border-crimson-500/50 hover:bg-[#181B1F]">
-                    {era ? (
-                      <Link href={`/timeline/${era.slug}`} className="block transition-colors hover:text-crimson-300">
-                        {body}
-                        <span className="mt-2 inline-block font-display text-[10px] uppercase tracking-[0.22em] text-faint">
-                          {era.name} →
-                        </span>
+          <div className="mb-6">
+            <h2 id="on-this-day-heading" className="font-display text-2xl font-semibold tracking-tight text-paper sm:text-3xl">
+              On this day in anime history
+            </h2>
+            <p className="mt-2 text-sm text-muted">
+              <time dateTime={history.today.toISOString().slice(0, 10)}>{historyDayFormatter.format(history.today)}</time>
+              {history.isSpotlight ? " · Daily archive spotlight" : ""}
+            </p>
+          </div>
+
+          <ul className={history.stories.length === 1 ? "max-w-3xl" : "grid gap-4 sm:grid-cols-2 lg:grid-cols-3"}>
+            {history.stories.map((story) => {
+              const era = story.eraId ? eraById.get(story.eraId) : undefined;
+              const href = story.href ?? (era ? `/timeline/${era.slug}` : "/timeline");
+              return (
+                <li key={story.id} className="surface-card p-5">
+                  <p className="flex flex-wrap gap-x-2 gap-y-1 text-xs font-semibold text-crimson-300">
+                    <time dateTime={story.date}>{storyDateFormatter.format(new Date(story.date))}</time>
+                    <span aria-hidden="true">·</span>
+                    <span>{EVENT_KIND_LABELS[story.kind]}</span>
+                  </p>
+                  <h3 className="mt-2 font-display text-lg font-semibold text-paper">{story.title}</h3>
+                  {story.description && <p className="mt-2 text-sm leading-relaxed text-paper-2">{story.description}</p>}
+                  <div className="mt-3 flex flex-wrap gap-x-5">
+                    {(story.href || !story.source) && (
+                      <Link href={href} className="inline-flex min-h-11 items-center text-sm font-semibold text-holo-400 hover:underline">
+                        {story.href ? "View anime entry" : era ? "Explore this era" : "Explore the timeline"}
                       </Link>
-                    ) : (
-                      body
                     )}
-                  </li>
-                );
-              })}
-            </ul>
-          ) : (
-            <EmptyState
-              title="No events for today"
-              description="Nothing is archived for this date yet — check back tomorrow."
-            />
-          )}
+                    {story.source && (
+                      <a href={story.source.href} className="inline-flex min-h-11 items-center text-sm font-semibold text-holo-400 hover:underline">
+                        {story.source.name} source
+                      </a>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
         </section>
 
         {/* Recently added */}

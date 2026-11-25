@@ -39,7 +39,7 @@ function resultHref(r: SearchResultDto): string {
   }
 }
 
-export function SearchPage() {
+export function SearchPage({ globalSearchEnabled }: { globalSearchEnabled: boolean }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResultDto[]>([]);
   const [loading, setLoading] = useState(false);
@@ -119,6 +119,16 @@ export function SearchPage() {
           </button>
         ) : null}
       </div>
+
+      {globalSearchEnabled && (
+        <Link
+          href={{ pathname: "/search/global", query: q ? { q } : undefined }}
+          prefetch={false}
+          className="mt-3 inline-flex min-h-11 items-center text-sm text-holo-400 hover:underline"
+        >
+          Search the global anime catalog
+        </Link>
+      )}
 
       {loading ? (
         <p className="mt-6 flex items-center gap-2 text-sm text-faint">

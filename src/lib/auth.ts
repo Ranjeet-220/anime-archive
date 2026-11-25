@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { SignJWT, jwtVerify } from "jose";
 import bcrypt from "bcryptjs";
 import { cache } from "react";
-import { prisma } from "@/lib/prisma";
+import { isDatabaseConnectionError, prisma } from "@/lib/prisma";
 import type { Role } from "@/generated/prisma/client";
 
 const SESSION_COOKIE = "aa_session";
@@ -95,11 +95,16 @@ export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
   if (!token) return null;
   const user = await verifySessionToken(token);
   if (!user) return null;
-  const dbUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: { id: true, email: true, username: true, role: true, name: true },
-  });
-  return dbUser;
+  try {
+    return await prisma.user.findUnique({
+      where: { id: user.id },
+      select: PUBLIC_USER_FIELDS,
+    });
+  } catch (error) {
+    if (!isDatabaseConnectionError(error)) throw error;
+    console.warn("Session verification temporarily unavailable because PostgreSQL could not be reached.");
+    return null;
+  }
 });
 
 export async function requireUser(): Promise<SessionUser> {

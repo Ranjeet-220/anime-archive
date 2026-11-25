@@ -75,6 +75,7 @@ vi.mock("@/lib/cache", () => ({
 import {
   getAnimeList,
   getAnimeBySlug,
+  getOnThisDay,
   getStudioArchive,
   getRankings,
   getRankingBySlug,
@@ -85,6 +86,54 @@ import {
 describe("src/lib/data.ts", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  describe("daily anime history", () => {
+    it("uses the archive’s local day and includes the sourced November 24 story", async () => {
+      mockPrisma.historicalEvent.findMany.mockResolvedValue([]);
+      mockPrisma.$queryRaw.mockResolvedValue([]);
+
+      const history = await getOnThisDay(new Date("2026-11-23T19:00:00Z"));
+
+      expect(history.today.toISOString()).toBe("2026-11-24T00:00:00.000Z");
+      expect(history.isSpotlight).toBe(false);
+      expect(history.stories).toEqual([
+        expect.objectContaining({
+          date: "2023-11-24",
+          source: expect.objectContaining({ name: "Bandai Namco" }),
+        }),
+      ]);
+    });
+
+    it("combines milestone and catalog records without repeating a linked release", async () => {
+      mockPrisma.historicalEvent.findMany.mockResolvedValue([
+        { slug: "studio-founded", title: "Studio opens", kind: "FOUNDING", year: 1980, month: 5, day: 2 },
+        { slug: "film-premiere", title: "Film premieres", kind: "PREMIERE", year: 1990, month: 5, day: 2, animeId: "film" },
+      ]);
+      mockPrisma.$queryRaw.mockResolvedValue([
+        { id: "film", slug: "film", releaseDate: new Date("1990-05-02") },
+        { id: "other", slug: "other", title: "Another release", releaseDate: new Date("2000-05-02"), description: "Archive context" },
+      ]);
+
+      const history = await getOnThisDay(new Date("2026-05-02T12:00:00Z"));
+
+      expect(history.isSpotlight).toBe(false);
+      expect(history.stories.map((story) => story.id)).toEqual(["studio-founded", "film-premiere", "release:other"]);
+      expect(history.stories[2]).toMatchObject({ href: "/anime/other", description: "Archive context" });
+    });
+
+    it("rotates a sourced spotlight across consecutive dates with no matches", async () => {
+      mockPrisma.historicalEvent.findMany.mockResolvedValue([]);
+      mockPrisma.$queryRaw.mockResolvedValue([]);
+
+      const first = await getOnThisDay(new Date("2026-02-02T12:00:00Z"));
+      const second = await getOnThisDay(new Date("2026-02-03T12:00:00Z"));
+
+      expect(first.isSpotlight).toBe(true);
+      expect(second.isSpotlight).toBe(true);
+      expect(first.stories[0].source).toBeDefined();
+      expect(second.stories[0].id).not.toBe(first.stories[0].id);
+    });
   });
 
   describe("getAnimeList query building", () => {

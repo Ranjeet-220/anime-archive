@@ -95,6 +95,8 @@ Anime Archive blends an **interactive 3D spatial museum** (built with React Thre
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+`npm run dev` checks PostgreSQL using the same environment settings as Next.js. If the default local cluster already exists and its port is closed, the command starts it before launching Next.js. Set `PG_DATA_DIR`, `PG_BIN`, or `PG_PORT` for a custom local cluster. For a separately managed database, start that service before running the app.
+
 ---
 
 ## 🔐 Demo Accounts

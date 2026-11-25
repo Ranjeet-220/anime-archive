@@ -2,6 +2,7 @@ import "server-only";
 import { prisma } from "@/lib/prisma";
 import { cached, CACHE_TTL_MS } from "@/lib/cache";
 import { decadeOf } from "@/lib/utils";
+import { getArchiveHistoryDate, SOURCED_ANIME_HISTORY, type AnimeHistoryStory } from "@/lib/anime-history";
 import type { Prisma } from "@/generated/prisma/client";
 import type {
   ArchiveStatsDto,
@@ -137,6 +138,8 @@ export async function getAnimeList(params: AnimeListParams = {}) {
 // Anime detail
 // ---------------------------------------------------------------------------
 
+const relatedAnimeSelect = { slug: true, title: true, year: true, format: true, coverUrl: true } as const;
+
 export async function getAnimeBySlug(slug: string) {
   if (!slug || typeof slug !== "string") return null;
   return cached(`anime:bySlug:${slug}`, CACHE_TTL_MS, () =>
@@ -151,10 +154,51 @@ export async function getAnimeBySlug(slug: string) {
         characters: { orderBy: { name: "asc" }, take: 8 },
         episodes: { orderBy: { number: "asc" } },
         staff: { include: { person: true }, orderBy: { role: "asc" } },
-        relatedFrom: { include: { related: { select: { slug: true, title: true, year: true, coverUrl: true } } } },
-        relatedTo: { include: { anime: { select: { slug: true, title: true, year: true, coverUrl: true } } } },
+        relatedFrom: { include: { related: { select: relatedAnimeSelect } } },
+        relatedTo: { include: { anime: { select: relatedAnimeSelect } } },
       },
     })
+  );
+}
+
+type AnimeRecommendation = Prisma.AnimeGetPayload<{ select: typeof relatedAnimeSelect }> & {
+  sharedGenres: string[];
+  sharedStudio: string | null;
+};
+
+export async function getAnimeRecommendations(animeId: string) {
+  return cached(`anime:recommendations:${animeId}`, CACHE_TTL_MS, () =>
+    prisma.$queryRaw<AnimeRecommendation[]>`
+      WITH shared_genres AS (
+        SELECT candidate_genre."A" AS "animeId",
+               ARRAY_AGG(genre.name ORDER BY genre.name) AS names,
+               COUNT(*) AS matches
+        FROM "_AnimeGenres" AS current_genre
+        JOIN "_AnimeGenres" AS candidate_genre ON candidate_genre."B" = current_genre."B"
+        JOIN "Genre" AS genre ON genre.id = current_genre."B"
+        WHERE current_genre."A" = ${animeId}
+        GROUP BY candidate_genre."A"
+      )
+      SELECT candidate.slug, candidate.title, candidate.year, candidate.format, candidate."coverUrl",
+             COALESCE(shared_genres.names, ARRAY[]::TEXT[]) AS "sharedGenres",
+             studio.name AS "sharedStudio"
+      FROM "Anime" AS current
+      JOIN "Anime" AS candidate ON candidate.id <> current.id
+      LEFT JOIN shared_genres ON shared_genres."animeId" = candidate.id
+      LEFT JOIN "Studio" AS studio ON studio.id = current."studioId" AND studio.id = candidate."studioId"
+      WHERE current.id = ${animeId}
+        AND (shared_genres.matches > 0 OR studio.id IS NOT NULL)
+        AND NOT EXISTS (
+          SELECT 1 FROM "AnimeRelation" AS relation
+          WHERE (relation."animeId" = current.id AND relation."relatedId" = candidate.id)
+             OR (relation."relatedId" = current.id AND relation."animeId" = candidate.id)
+        )
+      ORDER BY shared_genres.matches DESC NULLS LAST,
+               (studio.id IS NOT NULL) DESC,
+               ABS(candidate.year - current.year) ASC NULLS LAST,
+               candidate.slug ASC
+      LIMIT 6
+    `
   );
 }
 
@@ -587,17 +631,126 @@ export async function getStats(): Promise<ArchiveStatsDto> {
 // On this day
 // ---------------------------------------------------------------------------
 
-export async function getOnThisDay() {
-  const now = new Date();
-  const month = now.getUTCMonth() + 1;
-  const day = now.getUTCDate();
-  return cached(`event:onThisDay:${month}-${day}`, CACHE_TTL_MS, () =>
+const historyEventSelect = {
+  slug: true,
+  title: true,
+  kind: true,
+  description: true,
+  year: true,
+  month: true,
+  day: true,
+  animeId: true,
+  eraId: true,
+} as const;
+
+type HistoryEvent = Prisma.HistoricalEventGetPayload<{ select: typeof historyEventSelect }>;
+
+function historyEventToStory(event: HistoryEvent): AnimeHistoryStory | null {
+  const { year, month, day } = event;
+  if (year === null || month === null || day === null) return null;
+  const date = new Date(Date.UTC(year, month - 1, day));
+  if (date.getUTCMonth() + 1 !== month || date.getUTCDate() !== day) return null;
+  return {
+    id: event.slug,
+    date: date.toISOString().slice(0, 10),
+    title: event.title,
+    kind: event.kind,
+    description: event.description,
+    eraId: event.eraId,
+  };
+}
+
+export async function getOnThisDay(now = new Date()) {
+  const today = getArchiveHistoryDate(now);
+  const year = today.getUTCFullYear();
+  const month = today.getUTCMonth() + 1;
+  const day = today.getUTCDate();
+  const date = today.toISOString().slice(0, 10);
+  const limit = 12;
+
+  const archiveStories = SOURCED_ANIME_HISTORY.filter((story) => story.date < `${year}-01-01`);
+  const anniversaries = archiveStories.filter((story) => story.date.slice(5) === date.slice(5));
+  const [events, releases] = await Promise.all([
+    cached(`event:anniversaries:${date}`, CACHE_TTL_MS, () =>
+      prisma.historicalEvent.findMany({
+        where: { month, day, year: { lt: year } },
+        orderBy: [{ year: "asc" }, { slug: "asc" }],
+        select: historyEventSelect,
+        take: limit,
+      })
+    ),
+    cached(`anime:release-anniversaries:${date}`, CACHE_TTL_MS, () =>
+      prisma.$queryRaw<Array<{
+        id: string;
+        slug: string;
+        title: string;
+        releaseDate: Date;
+        description: string | null;
+      }>>`
+        SELECT id, slug, title, "releaseDate",
+               COALESCE(NULLIF(BTRIM("historicalSignificance"), ''),
+                        NULLIF(BTRIM("culturalImpact"), ''),
+                        NULLIF(BTRIM(synopsis), '')) AS description
+        FROM "Anime"
+        WHERE "releaseDate" < ${new Date(Date.UTC(year, 0, 1))}
+          AND EXTRACT(MONTH FROM "releaseDate") = ${month}
+          AND EXTRACT(DAY FROM "releaseDate") = ${day}
+          AND status <> 'UPCOMING'
+        ORDER BY "releaseDate", slug
+        LIMIT ${limit}
+      `
+    ),
+  ]);
+
+  const stories = new Map(anniversaries.map((story) => [story.id, story]));
+  const recordedReleases = new Set<string>();
+  for (const event of events) {
+    const story = historyEventToStory(event);
+    if (!story) continue;
+    if (!stories.has(story.id)) stories.set(story.id, story);
+    if (event.animeId && (event.kind === "RELEASE" || event.kind === "PREMIERE")) {
+      recordedReleases.add(event.animeId);
+    }
+  }
+  for (const release of releases) {
+    const href = `/anime/${release.slug}`;
+    if (recordedReleases.has(release.id) || anniversaries.some((story) => story.kind === "PREMIERE" && story.href === href)) continue;
+    stories.set(`release:${release.slug}`, {
+      id: `release:${release.slug}`,
+      date: release.releaseDate.toISOString().slice(0, 10),
+      title: release.title,
+      kind: "RELEASE",
+      description: release.description,
+      href,
+    });
+  }
+  if (stories.size > 0) {
+    return {
+      today,
+      isSpotlight: false,
+      stories: [...stories.values()].sort((a, b) => a.date.localeCompare(b.date)).slice(0, limit),
+    };
+  }
+
+  const spotlightEvents = await cached(`event:daily-spotlights:${year}`, CACHE_TTL_MS, () =>
     prisma.historicalEvent.findMany({
-      where: { month, day },
-      orderBy: [{ year: "asc" }],
-      take: 12,
+      where: { year: { lt: year }, month: { not: null }, day: { not: null }, description: { not: null } },
+      orderBy: [{ year: "asc" }, { slug: "asc" }],
+      select: historyEventSelect,
     })
   );
+  const spotlights = new Map(archiveStories.map((story) => [story.id, story]));
+  for (const event of spotlightEvents) {
+    const story = historyEventToStory(event);
+    if (story?.description?.trim() && !spotlights.has(story.id)) spotlights.set(story.id, story);
+  }
+  const pool = [...spotlights.values()];
+  const dayNumber = Math.floor(today.getTime() / 86_400_000);
+  return {
+    today,
+    isSpotlight: true,
+    stories: pool.length ? [pool[((dayNumber % pool.length) + pool.length) % pool.length]] : [],
+  };
 }
 
 export async function getRecentEvents(limit = 12) {
@@ -757,9 +910,8 @@ export async function searchAll(q: string, limit = 8): Promise<SearchResultDto[]
 
 export async function getHomepageData() {
   return cached("home:data", CACHE_TTL_MS, async () => {
-    const [stats, onThisDay, latest, landmark] = await Promise.all([
+    const [stats, latest, landmark] = await Promise.all([
       getStats(),
-      getOnThisDay(),
       prisma.anime.findMany({
         orderBy: { createdAt: "desc" },
         take: 8,
@@ -792,7 +944,7 @@ export async function getHomepageData() {
         },
       }),
     ]);
-    return { stats, onThisDay, latest, landmark };
+    return { stats, latest, landmark };
   });
 }
 

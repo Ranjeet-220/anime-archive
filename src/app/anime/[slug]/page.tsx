@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -5,7 +6,7 @@ import { ChevronRight, Bookmark, Plus } from "lucide-react";
 import { AnimeCard } from "@/components/ui/anime-card";
 import { HistoryTimeline } from "@/components/anime/history-timeline";
 import { DetailTabs } from "@/components/anime/detail-tabs";
-import { getAnimeBySlug, getAnimeSources } from "@/lib/data";
+import { getAnimeBySlug, getAnimeRecommendations, getAnimeSources } from "@/lib/data";
 import { FORMAT_LABELS, STATUS_LABELS } from "@/lib/format";
 import { formatDate, isValidUrl, truncate } from "@/lib/utils";
 import type { HistoryTimelineStep } from "@/lib/types";
@@ -41,7 +42,7 @@ export default async function AnimeDetailPage({ params }: { params: Promise<{ sl
   const related = [...anime.relatedFrom.map((r) => r.related), ...anime.relatedTo.map((r) => r.anime)];
   const relatedSeen = new Set<string>();
   const relatedList = related.filter((r) => {
-    if (relatedSeen.has(r.slug)) return false;
+    if (r.slug === anime.slug || relatedSeen.has(r.slug)) return false;
     relatedSeen.add(r.slug);
     return true;
   });
@@ -348,21 +349,44 @@ export default async function AnimeDetailPage({ params }: { params: Promise<{ sl
             </h2>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 sm:gap-4">
               {relatedList.map((r) => (
-                <AnimeCard
-                  key={r.slug}
-                  data={{
-                    slug: r.slug,
-                    title: r.title,
-                    year: r.year,
-                    format: "MOVIE",
-                    coverUrl: r.coverUrl,
-                  }}
-                />
+                <AnimeCard key={r.slug} data={r} />
               ))}
             </div>
           </section>
         )}
+        <Suspense fallback={null}>
+          <AnimeRecommendations animeId={anime.id} />
+        </Suspense>
       </div>
     </div>
+  );
+}
+
+async function AnimeRecommendations({ animeId }: { animeId: string }) {
+  const recommendations = await getAnimeRecommendations(animeId).catch((error: unknown) => {
+    console.error("[anime/recommendations]", error);
+    return [];
+  });
+  if (recommendations.length === 0) return null;
+
+  return (
+    <section className="mt-16" aria-labelledby="anime-recommendations">
+      <h2 id="anime-recommendations" className="mb-6 font-display text-sm font-bold uppercase tracking-[0.2em] text-paper">
+        Similar anime
+      </h2>
+      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-6">
+        {recommendations.map(({ sharedGenres, sharedStudio, ...anime }) => {
+          const reasons = sharedGenres.length > 0 ? [`Shared genres: ${sharedGenres.join(", ")}`] : [];
+          if (sharedStudio) reasons.push(`Same studio: ${sharedStudio}`);
+
+          return (
+            <li key={anime.slug} className="flex flex-col gap-2 [&>article]:flex-1">
+              <AnimeCard data={anime} />
+              <p className="text-xs text-muted">{reasons.join(" · ")}</p>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
   );
 }

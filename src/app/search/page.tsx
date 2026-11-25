@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { SearchPage } from "@/components/anime/search-page";
+import { isGlobalAnimeSearchEnabled } from "@/lib/global-anime-search";
 
 export const metadata: Metadata = {
   title: "Search",
@@ -8,5 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default function SearchPageRoute() {
-  return <SearchPage />;
+  return <SearchPage globalSearchEnabled={isGlobalAnimeSearchEnabled()} />;
 }
